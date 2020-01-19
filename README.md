@@ -18,3 +18,4 @@ Most of our discussion is concentrated in [the VVVVVV Discord server](https://di
 > [Terry Cavanagh has granted us an exception to VVVVVV's custom license](https://twitter.com/terrycavanagh/status/1216657316067663872), letting us distribute our fork with `data.zip` included, provided we do not distribute any of the original main game levels.
 
 But of course, this is not official build of VVVVVV-CE, so `data.zip` is NOT included!
+(well, actually this is like super bad testing so probably it won't even have proper release)
