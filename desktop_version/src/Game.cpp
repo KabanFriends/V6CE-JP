@@ -7101,7 +7101,7 @@ void Game::createmenu( std::string t )
         menuoptionsactive[3] = true;
         menuoptions[4] = "レベルをセーブする";
         menuoptionsactive[4] = true;
-        menuoptions[5] = "メインメニューへ戻る";
+        menuoptions[5] = "メインメニューへもどる";
         menuoptionsactive[5] = true;
 
         nummenuoptions = 6;
