@@ -610,9 +610,9 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         {
             dwgfx.bigprint( -1, 40, "ゲームのそくど", tr, tg, tb, true);
             dwgfx.Print( -1, 75, "ゲームのそくどをえらんでください。", tr, tg, tb, true);
-            if (game.gameframerate==34)
+            if (game.gameframerate == 34)
             {
-                dwgfx.Print( -1, 105, "ゲームのそくどは ふつう です。", tr/2, tg/2, tb/2, true);
+                dwgfx.Print(-1, 105, "ゲームのそくどは ふつう です。", tr / 2, tg / 2, tb / 2, true);
             }
             else if (game.gameframerate==41)
             {

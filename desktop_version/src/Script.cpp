@@ -2568,7 +2568,7 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 					call("talkred_7");
 					position--;
 				}
-				else if (obj.flags[50] == 0 && game.crewstats[2])
+				if (obj.flags[50] == 0 && game.crewstats[2])
 				{
 					//Vitellary's back
 					obj.flags[50] = 1;

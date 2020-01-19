@@ -169,8 +169,8 @@ void editorclass::reset()
     mapwidth=5;
     mapheight=5;
 
-    EditorData::GetInstance().title="‚Ó‚ß‚¢‚ÈƒŒƒxƒ‹";
-    EditorData::GetInstance().creator="‚Ó‚ß‚¢";
+    EditorData::GetInstance().title="ãµã‚ã„ãªãƒ¬ãƒ™ãƒ«";
+    EditorData::GetInstance().creator="ãµã‚ã„";
     Desc1="";
     Desc2="";
     Desc3="";
@@ -2898,7 +2898,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
 
         if(ed.dmtileeditor>0 && t2<=30)
         {
-            dwgfx.Print(2, 45-t2, "ƒ^ƒCƒ‹:", 196, 196, 255 - help.glow, false);
+            dwgfx.Print(2, 45-t2, "ã‚¿ã‚¤ãƒ«:", 196, 196, 255 - help.glow, false);
             dwgfx.Print(58, 45-t2, help.String(ed.dmtile), 196, 196, 255 - help.glow, false);
             FillRect(dwgfx.backBuffer, 44,44-t2,10,10, dwgfx.getRGB(196, 196, 255 - help.glow));
             FillRect(dwgfx.backBuffer, 45,45-t2,8,8, dwgfx.getRGB(0,0,0));
@@ -2914,7 +2914,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         }
         else
         {
-            dwgfx.Print(2, 12, "ƒ^ƒCƒ‹:", 196, 196, 255 - help.glow, false);
+            dwgfx.Print(2, 12, "ã‚¿ã‚¤ãƒ«:", 196, 196, 255 - help.glow, false);
             dwgfx.Print(58, 12, help.String(ed.dmtile), 196, 196, 255 - help.glow, false);
             FillRect(dwgfx.backBuffer, 44,11,10,10, dwgfx.getRGB(196, 196, 255 - help.glow));
             FillRect(dwgfx.backBuffer, 45,12,8,8, dwgfx.getRGB(0,0,0));
@@ -2943,19 +2943,19 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             switch(ed.boundarytype)
             {
             case 0:
-                dwgfx.Print(4, 232, "ƒXƒNƒŠƒvƒgƒ{ƒbƒNƒX: ‚Ğ‚¾‚è‚¤‚¦‚Ì‚Í‚ñ‚¢‚ğƒNƒŠƒbƒN", 255,255,255, false);
+                dwgfx.Print(4, 232, "ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒœãƒƒã‚¯ã‚¹: ã²ã ã‚Šã†ãˆã®ã¯ã‚“ã„ã‚’ã‚¯ãƒªãƒƒã‚¯", 255,255,255, false);
                 break;
             case 1:
-                dwgfx.Print(4, 232, "‚Ä‚«‚Ì‚©‚Ç‚¤‚Í‚ñ‚¢: ‚Ğ‚¾‚è‚¤‚¦‚Ì‚Í‚ñ‚¢‚ğƒNƒŠƒbƒN", 255,255,255, false);
+                dwgfx.Print(4, 232, "ã¦ãã®ã‹ã©ã†ã¯ã‚“ã„: ã²ã ã‚Šã†ãˆã®ã¯ã‚“ã„ã‚’ã‚¯ãƒªãƒƒã‚¯", 255,255,255, false);
                 break;
             case 2:
-                dwgfx.Print(4, 232, "‚ ‚µ‚Î‚Ì‚©‚Ç‚¤‚Í‚ñ‚¢: ‚Ğ‚¾‚è‚¤‚¦‚Ì‚Í‚ñ‚¢‚ğƒNƒŠƒbƒN", 255,255,255, false);
+                dwgfx.Print(4, 232, "ã‚ã—ã°ã®ã‹ã©ã†ã¯ã‚“ã„: ã²ã ã‚Šã†ãˆã®ã¯ã‚“ã„ã‚’ã‚¯ãƒªãƒƒã‚¯", 255,255,255, false);
                 break;
             case 3:
-                dwgfx.Print(4, 232, "ƒ^ƒCƒ‹‚ÌƒRƒs[: ‚Ğ‚¾‚è‚¤‚¦‚Ì‚Í‚ñ‚¢‚ğƒNƒŠƒbƒN", 255,255,255, false);
+                dwgfx.Print(4, 232, "ã‚¿ã‚¤ãƒ«ã®ã‚³ãƒ”ãƒ¼: ã²ã ã‚Šã†ãˆã®ã¯ã‚“ã„ã‚’ã‚¯ãƒªãƒƒã‚¯", 255,255,255, false);
                 break;
             default:
-                dwgfx.Print(4, 232, "‚Ğ‚¾‚è‚¤‚¦‚Ì‚Í‚ñ‚¢‚ğƒNƒŠƒbƒN", 255,255,255, false);
+                dwgfx.Print(4, 232, "ã²ã ã‚Šã†ãˆã®ã¯ã‚“ã„ã‚’ã‚¯ãƒªãƒƒã‚¯", 255,255,255, false);
                 break;
             }
         }
@@ -2966,19 +2966,19 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             switch(ed.boundarytype)
             {
             case 0:
-                dwgfx.Print(4, 232, "ƒXƒNƒŠƒvƒgƒ{ƒbƒNƒX: ‚İ‚¬‚µ‚½‚Ì‚Í‚ñ‚¢‚ğƒNƒŠƒbƒN", 255,255,255, false);
+                dwgfx.Print(4, 232, "ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒœãƒƒã‚¯ã‚¹: ã¿ãã—ãŸã®ã¯ã‚“ã„ã‚’ã‚¯ãƒªãƒƒã‚¯", 255,255,255, false);
                 break;
             case 1:
-                dwgfx.Print(4, 232, "‚Ä‚«‚Ì‚©‚Ç‚¤‚Í‚ñ‚¢: ‚İ‚¬‚µ‚½‚Ì‚Í‚ñ‚¢‚ğƒNƒŠƒbƒN", 255,255,255, false);
+                dwgfx.Print(4, 232, "ã¦ãã®ã‹ã©ã†ã¯ã‚“ã„: ã¿ãã—ãŸã®ã¯ã‚“ã„ã‚’ã‚¯ãƒªãƒƒã‚¯", 255,255,255, false);
                 break;
             case 2:
-                dwgfx.Print(4, 232, "‚ ‚µ‚Î‚Ì‚©‚Ç‚¤‚Í‚ñ‚¢: ‚İ‚¬‚µ‚½‚Ì‚Í‚ñ‚¢‚ğƒNƒŠƒbƒN", 255,255,255, false);
+                dwgfx.Print(4, 232, "ã‚ã—ã°ã®ã‹ã©ã†ã¯ã‚“ã„: ã¿ãã—ãŸã®ã¯ã‚“ã„ã‚’ã‚¯ãƒªãƒƒã‚¯", 255,255,255, false);
                 break;
             case 3:
-                dwgfx.Print(4, 232, "ƒ^ƒCƒ‹‚ÌƒRƒs[: ‚İ‚¬‚µ‚½‚Ì‚Í‚ñ‚¢‚ğƒNƒŠƒbƒN", 255,255,255, false);
+                dwgfx.Print(4, 232, "ã‚¿ã‚¤ãƒ«ã®ã‚³ãƒ”ãƒ¼: ã¿ãã—ãŸã®ã¯ã‚“ã„ã‚’ã‚¯ãƒªãƒƒã‚¯", 255,255,255, false);
                 break;
             default:
-                dwgfx.Print(4, 232, "‚İ‚¬‚µ‚½‚Ì‚Í‚ñ‚¢‚ğƒNƒŠƒbƒN", 255,255,255, false);
+                dwgfx.Print(4, 232, "ã¿ãã—ãŸã®ã¯ã‚“ã„ã‚’ã‚¯ãƒªãƒƒã‚¯", 255,255,255, false);
                 break;
             }
         }
@@ -2991,8 +2991,8 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         switch(ed.scripthelppage)
         {
         case 0:
-            dwgfx.Print(16,28,"**** VVVVVV ƒXƒNƒŠƒvƒgƒGƒfƒBƒ^[ ****", 123, 111, 218, true);
-            dwgfx.Print(16,44,"ESC ƒL[‚Åƒƒjƒ…[‚É‚à‚Ç‚é", 123, 111, 218, true);
+            dwgfx.Print(16,28,"**** VVVVVV ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‚¨ãƒ‡ã‚£ã‚¿ãƒ¼ ****", 123, 111, 218, true);
+            dwgfx.Print(16,44,"ESC ã‚­ãƒ¼ã§ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã«ã‚‚ã©ã‚‹", 123, 111, 218, true);
             //dwgfx.Print(16,60,"READY.", 123, 111, 218, false);
 
             if(ed.numhooks>0)
@@ -3016,15 +3016,15 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             }
             else
             {
-                dwgfx.Print(16,110,"ƒXƒNƒŠƒvƒg‚Í‚ ‚è‚Ü‚¹‚ñ", 123, 111, 218, true);
-                dwgfx.Print(16,130,"ƒ^[ƒ~ƒiƒ‹‚Ü‚½‚ÍƒXƒNƒŠƒvƒgƒ{ƒbƒNƒX‚Å", 123, 111, 218, true);
-                dwgfx.Print(16,140,"ƒXƒNƒŠƒvƒg‚ğ‚³‚­‚¹‚¢‚µ‚Ä‚­‚¾‚³‚¢", 123, 111, 218, true);
+                dwgfx.Print(16,110,"ã‚¹ã‚¯ãƒªãƒ—ãƒˆã¯ã‚ã‚Šã¾ã›ã‚“", 123, 111, 218, true);
+                dwgfx.Print(16,130,"ã‚¿ãƒ¼ãƒŸãƒŠãƒ«ã¾ãŸã¯ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒœãƒƒã‚¯ã‚¹ã§", 123, 111, 218, true);
+                dwgfx.Print(16,140,"ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‚’ã•ãã›ã„ã—ã¦ãã ã•ã„", 123, 111, 218, true);
             }
             break;
         case 1:
             //Current scriptname
             FillRect(dwgfx.backBuffer, 14,226,292,12, dwgfx.getRGB(162,48,61));
-            dwgfx.Print(16,228,"‚Ö‚ñ‚µ‚ã‚¤‚¿‚ã‚¤: " + ed.sbscript, 123, 111, 218, true);
+            dwgfx.Print(16,228,"ã¸ã‚“ã—ã‚…ã†ã¡ã‚…ã†: " + ed.sbscript, 123, 111, 218, true);
             //Draw text
             for(int i=0; i<25; i++)
             {
@@ -3056,7 +3056,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         if(tb>255) tb=255;
         if (game.currentmenuname == "ed_settings")
         {
-            dwgfx.bigprint( -1, 75, "ƒ}ƒbƒv‚Ì‚¹‚Á‚Ä‚¢", tr, tg, tb, true);
+            dwgfx.bigprint( -1, 75, "ãƒãƒƒãƒ—ã®ã›ã£ã¦ã„", tr, tg, tb, true);
         }
         else if (game.currentmenuname=="ed_desc")
         {
@@ -3079,16 +3079,16 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             {
                 if(ed.entframe<2)
                 {
-                    dwgfx.Print( -1, 60, key.keybuffer+ "_ ‚³‚­", tr, tg, tb, true);
+                    dwgfx.Print( -1, 60, key.keybuffer+ "_ ã•ã", tr, tg, tb, true);
                 }
                 else
                 {
-                    dwgfx.Print( -1, 60, key.keybuffer+ "  ‚³‚­", tr, tg, tb, true);
+                    dwgfx.Print( -1, 60, key.keybuffer+ "  ã•ã", tr, tg, tb, true);
                 }
             }
             else
             {
-                dwgfx.Print( -1, 60, EditorData::GetInstance().creator + " ‚³‚­", tr, tg, tb, true);
+                dwgfx.Print( -1, 60, EditorData::GetInstance().creator + " ã•ã", tr, tg, tb, true);
             }
             if(ed.websitemod)
             {
@@ -3153,13 +3153,13 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         }
         else if (game.currentmenuname == "ed_music")
         {
-            dwgfx.bigprint( -1, 65, "ƒ}ƒbƒv‚Ì‚¨‚ñ‚ª‚­", tr, tg, tb, true);
+            dwgfx.bigprint( -1, 65, "ãƒãƒƒãƒ—ã®ãŠã‚“ãŒã", tr, tg, tb, true);
 
-            dwgfx.Print( -1, 85, "‚°‚ñ‚´‚¢‚Ì‚¨‚ñ‚ª‚­:", tr, tg, tb, true);
+            dwgfx.Print( -1, 85, "ã’ã‚“ã–ã„ã®ãŠã‚“ãŒã:", tr, tg, tb, true);
             switch(ed.levmusic)
             {
             case 0:
-                dwgfx.Print( -1, 120, "‚¨‚ñ‚ª‚­ ‚È‚µ", tr, tg, tb, true);
+                dwgfx.Print( -1, 120, "ãŠã‚“ãŒã ãªã—", tr, tg, tb, true);
                 break;
             case 1:
                 dwgfx.Print( -1, 120, "1: Pushing Onwards", tr, tg, tb, true);
@@ -3195,14 +3195,14 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
                 dwgfx.Print( -1, 120, "11: Piercing the Sky", tr, tg, tb, true);
                 break;
             default:
-                dwgfx.Print( -1, 120, "?: ‚Ó‚ß‚¢‚È‚¨‚ñ‚ª‚­", tr, tg, tb, true);
+                dwgfx.Print( -1, 120, "?: ãµã‚ã„ãªãŠã‚“ãŒã", tr, tg, tb, true);
                 break;
             }
         }
         else if (game.currentmenuname == "ed_quit")
         {
-            dwgfx.bigprint( -1, 90, "‚â‚ß‚é‚Ü‚¦‚É", tr, tg, tb, true);
-            dwgfx.bigprint( -1, 110, "ƒZ[ƒu‚µ‚Ü‚·‚©?", tr, tg, tb, true);
+            dwgfx.bigprint( -1, 90, "ã‚„ã‚ã‚‹ã¾ãˆã«", tr, tg, tb, true);
+            dwgfx.bigprint( -1, 110, "ã‚»ãƒ¼ãƒ–ã—ã¾ã™ã‹?", tr, tg, tb, true);
         }
 
         dwgfx.drawmenu(game, tr, tg, tb, 15);
@@ -3220,7 +3220,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     {
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "ƒXƒNƒŠƒvƒg‚Ì‚È‚Ü‚¦‚ğ‚«‚É‚ã‚¤:", 255,255,255, false);
+        dwgfx.Print(4, 224, "ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®ãªã¾ãˆã‚’ãã«ã‚…ã†:", 255,255,255, false);
         if(ed.entframe<2)
         {
             dwgfx.Print(4, 232, edentity[ed.scripttextent].scriptname+"_", 196, 196, 255 - help.glow, true);
@@ -3234,7 +3234,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     {
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "ƒZ[ƒu‚·‚éƒtƒ@ƒCƒ‹‚ß‚¢‚ğ‚«‚É‚ã‚¤:", 255,255,255, false);
+        dwgfx.Print(4, 224, "ã‚»ãƒ¼ãƒ–ã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ã‚ã„ã‚’ãã«ã‚…ã†:", 255,255,255, false);
         if(ed.entframe<2)
         {
             dwgfx.Print(4, 232, ed.filename+"_", 196, 196, 255 - help.glow, true);
@@ -3248,7 +3248,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     {
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "ƒ[ƒh‚·‚éƒtƒ@ƒCƒ‹‚ß‚¢‚ğ‚«‚É‚ã‚¤:", 255,255,255, false);
+        dwgfx.Print(4, 224, "ãƒ­ãƒ¼ãƒ‰ã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ã‚ã„ã‚’ãã«ã‚…ã†:", 255,255,255, false);
         if(ed.entframe<2)
         {
             dwgfx.Print(4, 232, ed.filename+"_", 196, 196, 255 - help.glow, true);
@@ -3262,7 +3262,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     {
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "‚Ö‚â‚Ì‚È‚Ü‚¦‚ğ‚«‚É‚ã‚¤:", 255,255,255, false);
+        dwgfx.Print(4, 224, "ã¸ã‚„ã®ãªã¾ãˆã‚’ãã«ã‚…ã†:", 255,255,255, false);
         if(ed.entframe<2)
         {
             dwgfx.Print(4, 232, ed.level[ed.levx+(ed.levy*ed.maxwidth)].roomname+"_", 196, 196, 255 - help.glow, true);
@@ -3276,7 +3276,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     {
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "ƒeƒLƒXƒg‚ğ‚«‚É‚ã‚¤:", 255,255,255, false);
+        dwgfx.Print(4, 224, "ãƒ†ã‚­ã‚¹ãƒˆã‚’ãã«ã‚…ã†:", 255,255,255, false);
         if(ed.entframe<2)
         {
             dwgfx.Print(4, 232, edentity[ed.roomtextent].scriptname+"_", 196, 196, 255 - help.glow, true);
@@ -3291,8 +3291,8 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         //placing warp token
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "‚Ğ‚¾‚èƒNƒŠƒbƒN‚Åƒ[ƒv‚³‚«‚ğ‚¹‚Á‚Ä‚¢", 196, 196, 255 - help.glow, false);
-        dwgfx.Print(4, 232, "‚İ‚¬ƒNƒŠƒbƒN‚ÅƒLƒƒƒ“ƒZƒ‹", 196, 196, 255 - help.glow, false);
+        dwgfx.Print(4, 224, "ã²ã ã‚Šã‚¯ãƒªãƒƒã‚¯ã§ãƒ¯ãƒ¼ãƒ—ã•ãã‚’ã›ã£ã¦ã„", 196, 196, 255 - help.glow, false);
+        dwgfx.Print(4, 232, "ã¿ãã‚¯ãƒªãƒƒã‚¯ã§ã‚­ãƒ£ãƒ³ã‚»ãƒ«", 196, 196, 255 - help.glow, false);
     }
     else
     {
@@ -3426,62 +3426,62 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
                 dwgfx.Print(4, 232, "2/2", 196, 196, 255 - help.glow, false);
             }
 
-            dwgfx.Print(128, 232, "< ‚Æ > ƒL[‚Åƒc[ƒ‹‚ğ‚¦‚ç‚Ô", 196, 196, 255 - help.glow, false);
+            dwgfx.Print(128, 232, "< ã¨ > ã‚­ãƒ¼ã§ãƒ„ãƒ¼ãƒ«ã‚’ãˆã‚‰ã¶", 196, 196, 255 - help.glow, false);
 
             FillRect(dwgfx.backBuffer, 0,198,120,10, dwgfx.getRGB(32,32,32));
             FillRect(dwgfx.backBuffer, 0,199,119,9, dwgfx.getRGB(0,0,0));
             switch(ed.drawmode)
             {
             case 0:
-                dwgfx.Print(2,199, "1: ‚©‚×",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "1: ã‹ã¹",196, 196, 255 - help.glow);
                 break;
             case 1:
-                dwgfx.Print(2,199, "2: ‚Í‚¢‚¯‚¢",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "2: ã¯ã„ã‘ã„",196, 196, 255 - help.glow);
                 break;
             case 2:
-                dwgfx.Print(2,199, "3: ƒgƒQ",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "3: ãƒˆã‚²",196, 196, 255 - help.glow);
                 break;
             case 3:
-                dwgfx.Print(2,199, "4: ƒgƒŠƒ“ƒPƒbƒg",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "4: ãƒˆãƒªãƒ³ã‚±ãƒƒãƒˆ",196, 196, 255 - help.glow);
                 break;
             case 4:
-                dwgfx.Print(2,199, "5: ‚¿‚ã‚¤‚©‚ñ‚¿‚Ä‚ñ",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "5: ã¡ã‚…ã†ã‹ã‚“ã¡ã¦ã‚“",196, 196, 255 - help.glow);
                 break;
             case 5:
-                dwgfx.Print(2,199, "6: ‚«‚¦‚é‚ ‚µ‚Î",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "6: ããˆã‚‹ã‚ã—ã°",196, 196, 255 - help.glow);
                 break;
             case 6:
-                dwgfx.Print(2,199, "7: ƒRƒ“ƒxƒ„[",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "7: ã‚³ãƒ³ãƒ™ãƒ¤ãƒ¼",196, 196, 255 - help.glow);
                 break;
             case 7:
-                dwgfx.Print(2,199, "8: ‚¤‚²‚­‚ ‚µ‚Î",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "8: ã†ã”ãã‚ã—ã°",196, 196, 255 - help.glow);
                 break;
             case 8:
-                dwgfx.Print(2,199, "9: ‚Ä‚«",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "9: ã¦ã",196, 196, 255 - help.glow);
                 break;
             case 9:
-                dwgfx.Print(2,199, "0: ƒOƒ‰ƒrƒeƒB[ƒ‰ƒCƒ“",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "0: ã‚°ãƒ©ãƒ“ãƒ†ã‚£ãƒ¼ãƒ©ã‚¤ãƒ³",196, 196, 255 - help.glow);
                 break;
             case 10:
-                dwgfx.Print(2,199, "R: ƒ‹[ƒ€ƒeƒLƒXƒg",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "R: ãƒ«ãƒ¼ãƒ ãƒ†ã‚­ã‚¹ãƒˆ",196, 196, 255 - help.glow);
                 break;
             case 11:
-                dwgfx.Print(2,199, "T: ƒ^[ƒ~ƒiƒ‹",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "T: ã‚¿ãƒ¼ãƒŸãƒŠãƒ«",196, 196, 255 - help.glow);
                 break;
             case 12:
-                dwgfx.Print(2,199, "Y: ƒXƒNƒŠƒvƒgƒ{ƒbƒNƒX",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "Y: ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒœãƒƒã‚¯ã‚¹",196, 196, 255 - help.glow);
                 break;
             case 13:
-                dwgfx.Print(2,199, "U: ƒ[ƒvƒz[ƒ‹",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "U: ãƒ¯ãƒ¼ãƒ—ãƒ›ãƒ¼ãƒ«",196, 196, 255 - help.glow);
                 break;
             case 14:
-                dwgfx.Print(2,199, "I: ƒ[ƒvƒ‰ƒCƒ“",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "I: ãƒ¯ãƒ¼ãƒ—ãƒ©ã‚¤ãƒ³",196, 196, 255 - help.glow);
                 break;
             case 15:
-                dwgfx.Print(2,199, "O: ‚È‚©‚Ü",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "O: ãªã‹ã¾",196, 196, 255 - help.glow);
                 break;
             case 16:
-                dwgfx.Print(2,199, "P: ƒXƒ^[ƒg‚¿‚Ä‚ñ",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "P: ã‚¹ã‚¿ãƒ¼ãƒˆã¡ã¦ã‚“",196, 196, 255 - help.glow);
                 break;
             }
 
@@ -3522,21 +3522,21 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         {
             fillboxabs(dwgfx, 0, 127,161+8,140,dwgfx.getRGB(64,64,64));
             FillRect(dwgfx.backBuffer, 0,128,160+8,140, dwgfx.getRGB(0,0,0));
-            dwgfx.Print(4, 130, "F1: ƒ^ƒCƒ‹ƒZƒbƒg‚Ö‚ñ‚±‚¤",164,164,164,false);
-            dwgfx.Print(4, 140, "F2: ƒJƒ‰[‚Ö‚ñ‚±‚¤",164,164,164,false);
-            dwgfx.Print(4, 150, "F3: ‚Ä‚«‚Ì‚Ö‚ñ‚±‚¤",164,164,164,false);
-            dwgfx.Print(4, 160, "F4: ‚Ä‚«‚Ì‚©‚Ç‚¤‚Í‚ñ‚¢",164,164,164,false);
-            dwgfx.Print(4, 170, "F5: ‚ ‚µ‚Î‚Ì‚©‚Ç‚¤‚Í‚ñ‚¢",164,164,164,false);
+            dwgfx.Print(4, 130, "F1: ã‚¿ã‚¤ãƒ«ã‚»ãƒƒãƒˆã¸ã‚“ã“ã†",164,164,164,false);
+            dwgfx.Print(4, 140, "F2: ã‚«ãƒ©ãƒ¼ã¸ã‚“ã“ã†",164,164,164,false);
+            dwgfx.Print(4, 150, "F3: ã¦ãã®ã¸ã‚“ã“ã†",164,164,164,false);
+            dwgfx.Print(4, 160, "F4: ã¦ãã®ã‹ã©ã†ã¯ã‚“ã„",164,164,164,false);
+            dwgfx.Print(4, 170, "F5: ã‚ã—ã°ã®ã‹ã©ã†ã¯ã‚“ã„",164,164,164,false);
 
-            dwgfx.Print(4, 190, "F10: ƒ_ƒCƒŒƒNƒgƒ‚[ƒh",164,164,164,false);
+            dwgfx.Print(4, 190, "F10: ãƒ€ã‚¤ãƒ¬ã‚¯ãƒˆãƒ¢ãƒ¼ãƒ‰",164,164,164,false);
 
-            dwgfx.Print(4, 210, "W: ƒ[ƒv‚Ì‚µ‚ã‚é‚¢‚Ö‚ñ‚±‚¤",164,164,164,false);
-            dwgfx.Print(4, 220, "E: ‚Ö‚â‚Ì‚È‚Ü‚¦‚Ö‚ñ‚±‚¤",164,164,164,false);
+            dwgfx.Print(4, 210, "W: ãƒ¯ãƒ¼ãƒ—ã®ã—ã‚…ã‚‹ã„ã¸ã‚“ã“ã†",164,164,164,false);
+            dwgfx.Print(4, 220, "E: ã¸ã‚„ã®ãªã¾ãˆã¸ã‚“ã“ã†",164,164,164,false);
 
             fillboxabs(dwgfx, 220, 207,100,60,dwgfx.getRGB(64,64,64));
             FillRect(dwgfx.backBuffer, 221,208,160,60, dwgfx.getRGB(0,0,0));
-            dwgfx.Print(224, 210, "S: ƒŒƒxƒ‹‚ğƒZ[ƒu",164,164,164,false);
-            dwgfx.Print(224, 220, "L: ƒŒƒxƒ‹‚ğƒ[ƒh",164,164,164,false);
+            dwgfx.Print(224, 210, "S: ãƒ¬ãƒ™ãƒ«ã‚’ã‚»ãƒ¼ãƒ–",164,164,164,false);
+            dwgfx.Print(224, 220, "L: ãƒ¬ãƒ™ãƒ«ã‚’ãƒ­ãƒ¼ãƒ‰",164,164,164,false);
         }
     }
 
@@ -3547,55 +3547,55 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         switch(ed.drawmode)
         {
         case 0:
-            dwgfx.Print(2,2, "1: ‚©‚×",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "1: ã‹ã¹",196, 196, 255 - help.glow);
             break;
         case 1:
-            dwgfx.Print(2,2, "2: ‚Í‚¢‚¯‚¢",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "2: ã¯ã„ã‘ã„",196, 196, 255 - help.glow);
             break;
         case 2:
-            dwgfx.Print(2,2, "3: ƒgƒQ",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "3: ãƒˆã‚²",196, 196, 255 - help.glow);
             break;
         case 3:
-            dwgfx.Print(2,2, "4: ƒgƒŠƒ“ƒPƒbƒg",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "4: ãƒˆãƒªãƒ³ã‚±ãƒƒãƒˆ",196, 196, 255 - help.glow);
             break;
         case 4:
-            dwgfx.Print(2,2, "5: ‚¿‚ã‚¤‚©‚ñ‚¿‚Ä‚ñ",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "5: ã¡ã‚…ã†ã‹ã‚“ã¡ã¦ã‚“",196, 196, 255 - help.glow);
             break;
         case 5:
-            dwgfx.Print(2,2, "6: ‚«‚¦‚é‚ ‚µ‚Î",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "6: ããˆã‚‹ã‚ã—ã°",196, 196, 255 - help.glow);
             break;
         case 6:
-            dwgfx.Print(2,2, "7: ƒRƒ“ƒxƒ„[",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "7: ã‚³ãƒ³ãƒ™ãƒ¤ãƒ¼",196, 196, 255 - help.glow);
             break;
         case 7:
-            dwgfx.Print(2,2, "8: ‚¤‚²‚­‚ ‚µ‚Î",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "8: ã†ã”ãã‚ã—ã°",196, 196, 255 - help.glow);
             break;
         case 8:
-            dwgfx.Print(2,2, "9: ‚Ä‚«",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "9: ã¦ã",196, 196, 255 - help.glow);
             break;
         case 9:
-            dwgfx.Print(2,2, "0: ƒOƒ‰ƒrƒeƒB[ƒ‰ƒCƒ“",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "0: ã‚°ãƒ©ãƒ“ãƒ†ã‚£ãƒ¼ãƒ©ã‚¤ãƒ³",196, 196, 255 - help.glow);
             break;
         case 10:
-            dwgfx.Print(2,2, "R: ƒ‹[ƒ€ƒeƒLƒXƒg",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "R: ãƒ«ãƒ¼ãƒ ãƒ†ã‚­ã‚¹ãƒˆ",196, 196, 255 - help.glow);
             break;
         case 11:
-            dwgfx.Print(2,2, "T: ƒ^[ƒ~ƒiƒ‹",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "T: ã‚¿ãƒ¼ãƒŸãƒŠãƒ«",196, 196, 255 - help.glow);
             break;
         case 12:
-            dwgfx.Print(2,2, "Y: ƒXƒNƒŠƒvƒgƒ{ƒbƒNƒX",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "Y: ã‚¹ã‚¯ãƒªãƒ—ãƒˆãƒœãƒƒã‚¯ã‚¹",196, 196, 255 - help.glow);
             break;
         case 13:
-            dwgfx.Print(2,2, "U: ƒ[ƒvƒz[ƒ‹",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "U: ãƒ¯ãƒ¼ãƒ—ãƒ›ãƒ¼ãƒ«",196, 196, 255 - help.glow);
             break;
         case 14:
-            dwgfx.Print(2,2, "I: ƒ[ƒvƒ‰ƒCƒ“",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "I: ãƒ¯ãƒ¼ãƒ—ãƒ©ã‚¤ãƒ³",196, 196, 255 - help.glow);
             break;
         case 15:
-            dwgfx.Print(2,2, "O: ‚È‚©‚Ü",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "O: ãªã‹ã¾",196, 196, 255 - help.glow);
             break;
         case 16:
-            dwgfx.Print(2,2, "P: ƒXƒ^[ƒg‚¿‚Ä‚ñ",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "P: ã‚¹ã‚¿ãƒ¼ãƒˆã¡ã¦ã‚“",196, 196, 255 - help.glow);
             break;
         }
 
@@ -4334,25 +4334,25 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 switch(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset)
                 {
                 case 0:
-                    ed.note="ƒXƒy[ƒXƒXƒe[ƒVƒ‡ƒ“ ‚Ìƒ^ƒCƒ‹ƒZƒbƒg";
+                    ed.note="ã‚¹ãƒšãƒ¼ã‚¹ã‚¹ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³ ã®ã‚¿ã‚¤ãƒ«ã‚»ãƒƒãƒˆ";
                     break;
                 case 1:
-                    ed.note="ƒAƒEƒgƒTƒCƒh ‚Ìƒ^ƒCƒ‹ƒZƒbƒg";
+                    ed.note="ã‚¢ã‚¦ãƒˆã‚µã‚¤ãƒ‰ ã®ã‚¿ã‚¤ãƒ«ã‚»ãƒƒãƒˆ";
                     break;
                 case 2:
-                    ed.note="ƒ‰ƒ{ƒ‰ƒgƒŠ[ ‚Ìƒ^ƒCƒ‹ƒZƒbƒg";
+                    ed.note="ãƒ©ãƒœãƒ©ãƒˆãƒªãƒ¼ ã®ã‚¿ã‚¤ãƒ«ã‚»ãƒƒãƒˆ";
                     break;
                 case 3:
-                    ed.note="ƒ[ƒvƒ][ƒ“ ‚Ìƒ^ƒCƒ‹ƒZƒbƒg";
+                    ed.note="ãƒ¯ãƒ¼ãƒ—ã‚¾ãƒ¼ãƒ³ ã®ã‚¿ã‚¤ãƒ«ã‚»ãƒƒãƒˆ";
                     break;
                 case 4:
-                    ed.note="ƒXƒy[ƒXƒVƒbƒv ‚Ìƒ^ƒCƒ‹ƒZƒbƒg";
+                    ed.note="ã‚¹ãƒšãƒ¼ã‚¹ã‚·ãƒƒãƒ— ã®ã‚¿ã‚¤ãƒ«ã‚»ãƒƒãƒˆ";
                     break;
                 case 5:
-                    ed.note="ƒ^ƒ[ ‚Ìƒ^ƒCƒ‹ƒZƒbƒg";
+                    ed.note="ã‚¿ãƒ¯ãƒ¼ ã®ã‚¿ã‚¤ãƒ«ã‚»ãƒƒãƒˆ";
                     break;
                 default:
-                    ed.note="ƒ^ƒCƒ‹ƒZƒbƒg‚ğ‚Ö‚ñ‚±‚¤‚µ‚Ü‚µ‚½";
+                    ed.note="ã‚¿ã‚¤ãƒ«ã‚»ãƒƒãƒˆã‚’ã¸ã‚“ã“ã†ã—ã¾ã—ãŸ";
                     break;
                 }
                 ed.updatetiles=true;
@@ -4381,14 +4381,14 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 ed.updatetiles=true;
                 ed.keydelay=6;
                 ed.notedelay=45;
-                ed.note="ƒ^ƒCƒ‹ƒZƒbƒg‚Ì‚¢‚ë‚ğ‚Ö‚ñ‚±‚¤‚µ‚Ü‚µ‚½";
+                ed.note="ã‚¿ã‚¤ãƒ«ã‚»ãƒƒãƒˆã®ã„ã‚ã‚’ã¸ã‚“ã“ã†ã—ã¾ã—ãŸ";
             }
             if(key.keymap[SDLK_F3] && ed.keydelay==0)
             {
                 ed.level[ed.levx+(ed.levy*ed.maxwidth)].enemytype=(ed.level[ed.levx+(ed.levy*ed.maxwidth)].enemytype+1)%11;
                 ed.keydelay=6;
                 ed.notedelay=45;
-                ed.note="‚Ä‚«‚Ì‚µ‚ã‚é‚¢‚ğ‚Ö‚ñ‚±‚¤‚µ‚Ü‚µ‚½";
+                ed.note="ã¦ãã®ã—ã‚…ã‚‹ã„ã‚’ã¸ã‚“ã“ã†ã—ã¾ã—ãŸ";
             }
             if(key.keymap[SDLK_F4] && ed.keydelay==0)
             {
@@ -4407,12 +4407,12 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].directmode==1)
                 {
                     ed.level[ed.levx+(ed.levy*ed.maxwidth)].directmode=0;
-                    ed.note="ƒ_ƒCƒŒƒNƒgƒ‚[ƒh‚ğ‚Ş‚±‚¤‚É‚µ‚Ü‚µ‚½";
+                    ed.note="ãƒ€ã‚¤ãƒ¬ã‚¯ãƒˆãƒ¢ãƒ¼ãƒ‰ã‚’ã‚€ã“ã†ã«ã—ã¾ã—ãŸ";
                 }
                 else
                 {
                     ed.level[ed.levx+(ed.levy*ed.maxwidth)].directmode=1;
-                    ed.note="ƒ_ƒCƒŒƒNƒgƒ‚[ƒh‚ğ‚ä‚¤‚±‚¤‚É‚µ‚Ü‚µ‚½";
+                    ed.note="ãƒ€ã‚¤ãƒ¬ã‚¯ãƒˆãƒ¢ãƒ¼ãƒ‰ã‚’ã‚†ã†ã“ã†ã«ã—ã¾ã—ãŸ";
                 }
                 dwgfx.backgrounddrawn=false;
 
@@ -4455,7 +4455,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 }
                 if(j>0)
                 {
-                    ed.note="ƒGƒ‰[: 2‚µ‚ã‚é‚¢‚Ìƒ[ƒv‚Í‚Ç‚¤‚¶‚É‚Â‚©‚¦‚Ü‚¹‚ñ";
+                    ed.note="ã‚¨ãƒ©ãƒ¼: 2ã—ã‚…ã‚‹ã„ã®ãƒ¯ãƒ¼ãƒ—ã¯ã©ã†ã˜ã«ã¤ã‹ãˆã¾ã›ã‚“";
                     ed.notedelay=45;
                 }
                 else
@@ -4463,25 +4463,25 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                     ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir=(ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir+1)%4;
                     if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir==0)
                     {
-                        ed.note="ƒ‹[ƒ€ƒ[ƒv ‚È‚µ";
+                        ed.note="ãƒ«ãƒ¼ãƒ ãƒ¯ãƒ¼ãƒ— ãªã—";
                         ed.notedelay=45;
                         dwgfx.backgrounddrawn=false;
                     }
                     else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir==1)
                     {
-                        ed.note="ƒ‹[ƒ€ƒ[ƒv ‚½‚Ä";
+                        ed.note="ãƒ«ãƒ¼ãƒ ãƒ¯ãƒ¼ãƒ— ãŸã¦";
                         ed.notedelay=45;
                         dwgfx.backgrounddrawn=false;
                     }
                     else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir==2)
                     {
-                        ed.note="ƒ‹[ƒ€ƒ[ƒv ‚æ‚±";
+                        ed.note="ãƒ«ãƒ¼ãƒ ãƒ¯ãƒ¼ãƒ— ã‚ˆã“";
                         ed.notedelay=45;
                         dwgfx.backgrounddrawn=false;
                     }
                     else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir==3)
                     {
-                        ed.note="ƒ‹[ƒ€ƒ[ƒv ‚º‚ñ‚Ô";
+                        ed.note="ãƒ«ãƒ¼ãƒ ãƒ¯ãƒ¼ãƒ— ãœã‚“ã¶";
                         ed.notedelay=45;
                         dwgfx.backgrounddrawn=false;
                     }
@@ -4566,7 +4566,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
 
                     if(testeditor==-1)
                     {
-                        ed.note="ƒGƒ‰[: ƒXƒ|[ƒ“‚·‚é‚¿‚ã‚¤‚©‚ñ‚¿‚Ä‚ñ‚ª‚ ‚è‚Ü‚¹‚ñ";
+                        ed.note="ã‚¨ãƒ©ãƒ¼: ã‚¹ãƒãƒ¼ãƒ³ã™ã‚‹ã¡ã‚…ã†ã‹ã‚“ã¡ã¦ã‚“ãŒã‚ã‚Šã¾ã›ã‚“";
                         ed.notedelay=45;
                     }
                     else
@@ -4674,7 +4674,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                         if(ed.mapheight<1) ed.mapheight=1;
                         if(ed.mapwidth>=ed.maxwidth) ed.mapwidth=ed.maxwidth;
                         if(ed.mapheight>=ed.maxheight) ed.mapheight=ed.maxheight;
-                        ed.note = "ƒŒƒxƒ‹ƒTƒCƒY‚ª [" + help.String(ed.mapwidth) + "," + help.String(ed.mapheight) + "] ‚É‚È‚è‚Ü‚µ‚½";
+                        ed.note = "ãƒ¬ãƒ™ãƒ«ã‚µã‚¤ã‚ºãŒ [" + help.String(ed.mapwidth) + "," + help.String(ed.mapheight) + "] ã«ãªã‚Šã¾ã—ãŸ";
                         ed.notedelay=45;
                     }
                 }
@@ -5047,7 +5047,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                                 }
                                 else
                                 {
-                                    ed.note="ƒGƒ‰[: ƒgƒŠƒ“ƒPƒbƒg‚Ì‚©‚¸‚Í20‚±‚Ü‚Å‚Å‚·";
+                                    ed.note="ã‚¨ãƒ©ãƒ¼: ãƒˆãƒªãƒ³ã‚±ãƒƒãƒˆã®ã‹ãšã¯20ã“ã¾ã§ã§ã™";
                                     ed.notedelay=45;
                                 }
                             }
@@ -5121,13 +5121,13 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                                     }
                                     else
                                     {
-                                        ed.note="ƒGƒ‰[: ƒ[ƒvƒ‰ƒCƒ“‚Í‚Ö‚â‚Ì‚Í‚¶‚¢‚ª‚¢‚É‚Í‚¨‚¯‚Ü‚¹‚ñ";
+                                        ed.note="ã‚¨ãƒ©ãƒ¼: ãƒ¯ãƒ¼ãƒ—ãƒ©ã‚¤ãƒ³ã¯ã¸ã‚„ã®ã¯ã˜ã„ãŒã„ã«ã¯ãŠã‘ã¾ã›ã‚“";
                                         ed.notedelay=45;
                                     }
                                 }
                                 else
                                 {
-                                    ed.note="ƒGƒ‰[: 2‚µ‚ã‚é‚¢‚Ìƒ[ƒv‚Í‚Ç‚¤‚¶‚É‚Â‚©‚¦‚Ü‚¹‚ñ";
+                                    ed.note="ã‚¨ãƒ©ãƒ¼: 2ã—ã‚…ã‚‹ã„ã®ãƒ¯ãƒ¼ãƒ—ã¯ã©ã†ã˜ã«ã¤ã‹ãˆã¾ã›ã‚“";
                                     ed.notedelay=45;
                                 }
                                 ed.lclickdelay=1;
@@ -5142,7 +5142,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                                 }
                                 else
                                 {
-                                    ed.note="ƒGƒ‰[: ‚È‚©‚Ü‚Ì‚©‚¸‚Í20‚É‚ñ‚Ü‚Å‚Å‚·";
+                                    ed.note="ã‚¨ãƒ©ãƒ¼: ãªã‹ã¾ã®ã‹ãšã¯20ã«ã‚“ã¾ã§ã§ã™";
                                     ed.notedelay=45;
                                 }
                             }

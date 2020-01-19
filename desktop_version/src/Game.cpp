@@ -7010,7 +7010,7 @@ void Game::createmenu( std::string t )
                 menuoptionsactive[tcount] = true;
                 tcount++;
             }
-            menuoptions[tcount] = "メニューへ戻る";
+            menuoptions[tcount] = "メニューへもどる";
             menuoptionsactive[tcount] = true;
             tcount++;
 
