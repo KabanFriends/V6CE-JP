@@ -1968,7 +1968,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
                 if(map.custommode)
                 {
-                    dwgfx.createtextbox(" " + help.number(map.customtrinkets) + "こ ちゅうの " + help.number(map.trinkets)+ "こ ", 50, 65, 174, 174, 174);
+                    dwgfx.createtextbox(" " + help.number(map.customtrinkets) + "こ ちゅうの " + help.number(trinkets) + "こ ", 50, 65, 174, 174, 174);
                     dwgfx.textboxcenterx();
                 }
                 else
@@ -1986,7 +1986,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
                 if(map.custommode)
                 {
-                    dwgfx.createtextbox(" " + help.number(map.customtrinkets) + "こ ちゅうの " + help.number(map.trinkets) + "こ ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox(" " + help.number(map.customtrinkets) + "こ ちゅうの " + help.number(trinkets) + "こ ", 50, 135, 174, 174, 174);
                     dwgfx.textboxcenterx();
                 }
                 else
