@@ -228,8 +228,8 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         dwgfx.drawsprite((160 - 96) + 5 * 32, 50, 23, tr, tg, tb);
         dwgfx.Print(-1,95,"COMMUNITY EDITION",tr, tg, tb, true);
 
-        dwgfx.Print(5, 175, "[ Press ACTION to Start ]", tr, tg, tb, true);
-        dwgfx.Print(5, 195, "ACTION = Space, Z, or V", int(tr*0.5f), int(tg*0.5f), int(tb*0.5f), true);
+        dwgfx.Print(5, 175, "[ アクション をおしてスタート ]", tr, tg, tb, true);
+        dwgfx.Print(5, 195, "アクション = SPACE, Z, V", int(tr*0.5f), int(tg*0.5f), int(tb*0.5f), true);
 
     }
     else
@@ -255,14 +255,14 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
             dwgfx.Print(-1,95,"COMMUNITY EDITION",tr, tg, tb, true);
             dwgfx.Print( 310 - (4*8), 230, "c1.0", tr/2, tg/2, tb/2);
 			if (music.mmmmmm) {
-			    dwgfx.Print( 10, 230, "[MMMMMM Mod Installed]", tr/2, tg/2, tb/2);
+			    dwgfx.Print( 10, 230, "[MMMMMM Mod 導入済み]", tr/2, tg/2, tb/2);
 		    } else {
-                dwgfx.Print( 10, 230, "git.io/v6-ce", tr/2, tg/2, tb/2);
+                dwgfx.Print( 10, 230, "git.io/v6ce-jp", tr/2, tg/2, tb/2);
             }
         }
         else if (game.currentmenuname == "changelog")
         {
-            dwgfx.bigprint( -1, 20, "Changelog:", tr, tg, tb, true, 2);
+            dwgfx.bigprint( -1, 20, "こうしんりれき:", tr, tg, tb, true, 2);
 
 
             // Let's clamp the offset--we can't really
@@ -301,7 +301,7 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         else if (game.currentmenuname == "levellist")
         {
           if(ed.ListOfMetaData.size()==0){
-          dwgfx.Print( -1, 100, "ERROR: No levels found.", tr, tg, tb, true);
+          dwgfx.Print( -1, 100, "エラー: レベルがみつかりません。", tr, tg, tb, true);
           }
           int tmp=game.currentmenuoption+(game.levelpage*8);
           if(tmp>=0 && tmp < (int) ed.ListOfMetaData.size()){ // FIXME: size_t/int! -flibit
@@ -310,7 +310,7 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
 
             }else{
               dwgfx.bigprint( -1, 15, ed.ListOfMetaData[tmp].title, tr, tg, tb, true);
-              dwgfx.Print( -1, 40, "by " + ed.ListOfMetaData[tmp].creator, tr, tg, tb, true);
+              dwgfx.Print( -1, 40, ed.ListOfMetaData[tmp].creator + " さく", tr, tg, tb, true);
               dwgfx.Print( -1, 50, ed.ListOfMetaData[tmp].website, tr, tg, tb, true);
               dwgfx.Print( -1, 70, ed.ListOfMetaData[tmp].Desc1, tr, tg, tb, true);
               dwgfx.Print( -1, 80, ed.ListOfMetaData[tmp].Desc2, tr, tg, tb, true);
@@ -320,8 +320,8 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "errornostart")
         {
-          dwgfx.Print( -1, 65, "ERROR: This level has", tr, tg, tb, true);
-          dwgfx.Print( -1, 75, "no start point!", tr, tg, tb, true);
+          dwgfx.Print( -1, 65, "エラー: このレベルには", tr, tg, tb, true);
+          dwgfx.Print( -1, 75, "スタートちてんがありません!", tr, tg, tb, true);
         }
         else if (game.currentmenuname == "options")
         {
@@ -329,29 +329,29 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
 						#if defined(MAKEANDPLAY)
 							if (game.currentmenuoption == 0)
 							{
-									dwgfx.bigprint( -1, 30, "Accessibility", tr, tg, tb, true);
-									dwgfx.Print( -1, 65, "Disable screen effects, enable", tr, tg, tb, true);
-									dwgfx.Print( -1, 75, "slowdown modes or invincibility", tr, tg, tb, true);
+									dwgfx.bigprint( -1, 30, "アクセシビリティ", tr, tg, tb, true);
+									dwgfx.Print( -1, 65, "スクリーンエフェクトのきりかえや", tr, tg, tb, true);
+									dwgfx.Print( -1, 75, "ていそくモード、むてきモードのきりかえ", tr, tg, tb, true);
 							}
 							else if (game.currentmenuoption == 1)
 							{
-								dwgfx.bigprint( -1, 30, "Game Pad Options", tr, tg, tb, true);
-								dwgfx.Print( -1, 65, "Rebind your controllers buttons", tr, tg, tb, true);
-								dwgfx.Print( -1, 75, "and adjust sensitivity", tr, tg, tb, true);
+								dwgfx.bigprint( -1, 30, "ゲームパッドのせってい", tr, tg, tb, true);
+								dwgfx.Print( -1, 65, "コントローラーのわりあてのせっていや", tr, tg, tb, true);
+								dwgfx.Print( -1, 75, "かんどのちょうせつ", tr, tg, tb, true);
 							}
 							else if (game.currentmenuoption == 2)
 							{
-									dwgfx.bigprint( -1, 30, "Clear Data", tr, tg, tb, true);
-									dwgfx.Print( -1, 65, "Delete your save data", tr, tg, tb, true);
-									dwgfx.Print( -1, 75, "and unlocked play modes", tr, tg, tb, true);
+									dwgfx.bigprint( -1, 30, "データをけす", tr, tg, tb, true);
+									dwgfx.Print( -1, 65, "セーブデータと、かいほうした", tr, tg, tb, true);
+									dwgfx.Print( -1, 75, "すべてのプレイモードをけす", tr, tg, tb, true);
 							}else if (game.currentmenuoption == 3){
 								if(music.mmmmmm){
-									dwgfx.bigprint( -1, 30, "Soundtrack", tr, tg, tb, true);
-									dwgfx.Print( -1, 65, "Toggle between MMMMMM and PPPPPP", tr, tg, tb, true);
+									dwgfx.bigprint( -1, 30, "サウンドトラック", tr, tg, tb, true);
+									dwgfx.Print( -1, 65, "MMMMMM と PPPPPP のおんがくのきりかえ", tr, tg, tb, true);
 									if(music.usingmmmmmm){
-										dwgfx.Print( -1, 85, "Current soundtrack: MMMMMM", tr, tg, tb, true);
+										dwgfx.Print( -1, 85, "げんざいのサウンドトラック: MMMMMM", tr, tg, tb, true);
 									}else{
-										dwgfx.Print( -1, 85, "Current soundtrack: PPPPPP", tr, tg, tb, true);
+										dwgfx.Print( -1, 85, "げんざいのサウンドトラック: PPPPPP", tr, tg, tb, true);
 									}
 								}
 							}
@@ -397,55 +397,55 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         {
           if (game.currentmenuoption == 0)
           {
-              dwgfx.bigprint( -1, 30, "Toggle Fullscreen", tr, tg, tb, true);
-              dwgfx.Print( -1, 65, "Change to fullscreen/windowed mode.", tr, tg, tb, true);
+              dwgfx.bigprint( -1, 30, "フルスクリーンのきりかえ", tr, tg, tb, true);
+              dwgfx.Print( -1, 65, "フルスクリーン・ウィンドウモードをえらぶ", tr, tg, tb, true);
 
               if(game.fullscreen){
-                dwgfx.Print( -1, 85, "Current mode: FULLSCREEN", tr, tg, tb, true);
+                dwgfx.Print( -1, 85, "げんざいのモード: フルスクリーン", tr, tg, tb, true);
               }else{
-                dwgfx.Print( -1, 85, "Current mode: WINDOWED", tr, tg, tb, true);
+                dwgfx.Print( -1, 85, "げんざいのモード: ウィンドウ", tr, tg, tb, true);
               }
 
           }else if (game.currentmenuoption == 1)
                 {
-                    dwgfx.bigprint( -1, 30, "Toggle Letterbox", tr, tg, tb, true);
-                    dwgfx.Print( -1, 65, "Choose letterbox/stretch/integer mode.", tr, tg, tb, true);
+                    dwgfx.bigprint( -1, 30, "がめんのひきのばし", tr, tg, tb, true);
+                    dwgfx.Print( -1, 65, "レターボックス・ひきのばし・せいすうからえらぶ", tr, tg, tb, true);
 
               if(game.stretchMode == 2){
-                dwgfx.Print( -1, 85, "Current mode: INTEGER", tr, tg, tb, true);
+                dwgfx.Print( -1, 85, "げんんざいのモード: せいすう", tr, tg, tb, true);
               }else if (game.stretchMode == 1){
-                dwgfx.Print( -1, 85, "Current mode: STRETCH", tr, tg, tb, true);
+                dwgfx.Print( -1, 85, "げんざいのモード: ひきのばし", tr, tg, tb, true);
               }else{
-                dwgfx.Print( -1, 85, "Current mode: LETTERBOX", tr, tg, tb, true);
+                dwgfx.Print( -1, 85, "げんざいのモード: レターボックス", tr, tg, tb, true);
               }
           }else if (game.currentmenuoption == 2)
                 {
-                    dwgfx.bigprint( -1, 30, "Toggle Filter", tr, tg, tb, true);
-                    dwgfx.Print( -1, 65, "Change to nearest/linear filter.", tr, tg, tb, true);
+                    dwgfx.bigprint( -1, 30, "フィルターのきりかえ", tr, tg, tb, true);
+                    dwgfx.Print( -1, 65, "ニアレスト・バイリニアにへんこう", tr, tg, tb, true);
 
               if(game.useLinearFilter){
-                dwgfx.Print( -1, 85, "Current mode: LINEAR", tr, tg, tb, true);
+                dwgfx.Print( -1, 85, "げんざいのモード: バイリニア", tr, tg, tb, true);
               }else{
-                dwgfx.Print( -1, 85, "Current mode: NEAREST", tr, tg, tb, true);
+                dwgfx.Print( -1, 85, "げんざいのモード: ニアレスト", tr, tg, tb, true);
               }
 
                 } else if (game.currentmenuoption == 3)
                 {
-                    dwgfx.bigprint( -1, 30, "Analogue Mode", tr, tg, tb, true);
-                    dwgfx.Print( -1, 65, "There is nothing wrong with your", tr, tg, tb, true);
-                    dwgfx.Print( -1, 75, "television set. Do not attempt to", tr, tg, tb, true);
-                    dwgfx.Print( -1, 85, "adjust the picture.", tr, tg, tb, true);
+                    dwgfx.bigprint( -1, 30, "アナログモード", tr, tg, tb, true);
+                    dwgfx.Print( -1, 65, "あなたのテレビがめんはせいじょう", tr, tg, tb, true);
+                    dwgfx.Print( -1, 75, "です。がめんのちょうせつを", tr, tg, tb, true);
+                    dwgfx.Print( -1, 85, "しようとしないでください。", tr, tg, tb, true);
                 }
         }
         else if (game.currentmenuname == "credits")
         {
-            dwgfx.Print( -1, 50, "VVVVVV is a game by", tr, tg, tb, true);
+            dwgfx.Print( -1, 50, "VVVVVV せいさくしゃ", tr, tg, tb, true);
             dwgfx.bigprint( 40, 65, "Terry Cavanagh", tr, tg, tb, true, 2);
 
             dwgfx.drawimagecol(7, -1, 86, tr *0.75, tg *0.75, tb *0.75, true);
             //dwgfx.Print( 40, 85, "http://www.distractionware.com", tr, tg, tb, true);
 
-            dwgfx.Print( -1, 120, "and features music by", tr, tg, tb, true);
+            dwgfx.Print( -1, 120, "おんがくたんとう", tr, tg, tb, true);
             dwgfx.bigprint( 40, 135, "Magnus P~lsson", tr, tg, tb, true, 2);
             dwgfx.drawimagecol(8, -1, 156, tr *0.75, tg *0.75, tb *0.75, true);
             //dwgfx.Print( 40, 155, "http://souleye.madtracker.net", tr, tg, tb, true);
@@ -453,8 +453,8 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         else if (game.currentmenuname == "credits_ce")
         {
             auto base = 57; // x = 240 - 126 - x
-            dwgfx.Print( -1, base, "VVVVVV: Community Edition has", tr, tg, tb, true);
-            dwgfx.Print( -1, base + 15, "accepted contributions from:", tr, tg, tb, true);
+            dwgfx.Print( -1, base, "VVVVVV: Community Edition は", tr, tg, tb, true);
+            dwgfx.Print( -1, base + 15, "このかたたちによってつくられています:", tr, tg, tb, true);
             dwgfx.bigprint( -1, base + 30, "Info Teddy", tr, tg, tb, true, 2);
             dwgfx.bigprint( -1, base + 50, "AllyTally",  tr, tg, tb, true, 2);
             dwgfx.bigprint( -1, base + 70, "leo60228",  tr, tg, tb, true, 2);
@@ -463,18 +463,18 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "credits2")
         {
-            dwgfx.Print( -1, 50, "Roomnames are by", tr, tg, tb, true);
+            dwgfx.Print( -1, 50, "へやのなまえ", tr, tg, tb, true);
             dwgfx.bigprint( 40, 65, "Bennett Foddy", tr, tg, tb, true);
             dwgfx.drawimagecol(9, -1, 86, tr*0.75, tg *0.75, tb *0.75, true);
             //dwgfx.Print( 40, 80, "http://www.distractionware.com", tr, tg, tb);
-            dwgfx.Print( -1, 110, "C++ version by", tr, tg, tb, true);
+            dwgfx.Print( -1, 110, "C++バージョンせいさく", tr, tg, tb, true);
             dwgfx.bigprint( 40, 125, "Simon Roth", tr, tg, tb, true);
 						dwgfx.bigprint( 40, 145, "Ethan Lee", tr, tg, tb, true);
            //dwgfx.drawimagecol(11, -1, 156, tr*0.75, tg *0.75, tb *0.75, true);
         }
         else if (game.currentmenuname == "credits25")
         {
-            dwgfx.Print( -1, 40, "Beta Testing by", tr, tg, tb, true);
+            dwgfx.Print( -1, 40, "ベータテスター", tr, tg, tb, true);
             dwgfx.bigprint( 40, 55, "Sam Kaplan", tr, tg, tb, true);
             dwgfx.bigprint( 40, 75, "Pauli Kohberger", tr, tg, tb, true);
             dwgfx.Print( -1, 130, "Ending Picture by", tr, tg, tb, true);
@@ -482,8 +482,8 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "credits3")
         {
-            dwgfx.Print( -1, 20, "VVVVVV is supported by", tr, tg, tb, true);
-            dwgfx.Print( 40, 30, "the following patrons", tr, tg, tb, true);
+            dwgfx.Print( -1, 20, "VVVVVV はこのかたたちに", tr, tg, tb, true);
+            dwgfx.Print( 40, 30, "よってしえんされています", tr, tg, tb, true);
 
             dwgfx.Print( 80-16, 40+20, "Anders Ekermo", tr, tg, tb);
             dwgfx.Print( 80-12, 54+20, "Andreas K|mper", tr, tg, tb);
@@ -497,8 +497,8 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "credits4")
         {
-            dwgfx.Print( -1, 20, "VVVVVV is supported by", tr, tg, tb, true);
-            dwgfx.Print( 40, 30, "the following patrons", tr, tg, tb, true);
+            dwgfx.Print( -1, 20, "VVVVVV はこのかたたちに", tr, tg, tb, true);
+            dwgfx.Print( 40, 30, "よってしえんされています", tr, tg, tb, true);
             dwgfx.Print( 80-16, 20+40, "Ian Poma", tr, tg, tb);
             dwgfx.Print( 80-12, 34+40, "Jaz McDougall", tr, tg, tb);
             dwgfx.Print( 80-8, 48+40, "John Faulkenbury", tr, tg, tb);
@@ -511,7 +511,7 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "credits5")
         {
-            dwgfx.Print( -1, 20, "and also by", tr, tg, tb, true);
+            dwgfx.Print( -1, 20, "そのほか", tr, tg, tb, true);
 
             dwgfx.Print( 80, 40,"Adam Wendt", tr, tg, tb);
             dwgfx.Print( 80, 50,"Andreas J{rgensen", tr, tg, tb);
@@ -530,7 +530,7 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "credits6")
         {
-            dwgfx.Print( -1, 20, "and also by", tr, tg, tb, true);
+            dwgfx.Print( -1, 20, "そのほか", tr, tg, tb, true);
 
             dwgfx.Print( 80, 40,"Hayden Scott-Baron", tr, tg, tb);
             dwgfx.Print( 80, 50,"Hermit Games", tr, tg, tb);
@@ -549,7 +549,7 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "credits7")
         {
-            dwgfx.Print( -1, 20, "and also by", tr, tg, tb, true);
+            dwgfx.Print( -1, 20, "そのほか", tr, tg, tb, true);
 
             dwgfx.Print( 80, 40,"John Nesky", tr, tg, tb);
             dwgfx.Print( 80, 50,"Jos Yule", tr, tg, tb);
@@ -568,7 +568,7 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "credits8")
         {
-            dwgfx.Print( -1, 20, "and also by", tr, tg, tb, true);
+            dwgfx.Print( -1, 20, "そのほか", tr, tg, tb, true);
 
             dwgfx.Print( 80, 70,"Mitchel Stein", tr, tg, tb);
             dwgfx.Print( 80, 80,"Sean Murray", tr, tg, tb);
@@ -596,35 +596,35 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "setinvincibility")
         {
-            dwgfx.Print( -1, 100, "Are you sure you want to ", tr, tg, tb, true);
-            dwgfx.Print( -1, 110, "enable invincibility?", tr, tg, tb, true);
+            dwgfx.Print( -1, 100, "むてきモードを", tr, tg, tb, true);
+            dwgfx.Print( -1, 110, "アリにしますか?", tr, tg, tb, true);
         }
         else if (game.currentmenuname == "setslowdown1")
         {
-            dwgfx.Print( -1, 90, "Warning! Changing the game speed", tr, tg, tb, true);
-            dwgfx.Print( -1, 100, "requires a game restart, and will", tr, tg, tb, true);
-            dwgfx.Print( -1, 110, "delete your current saves.", tr, tg, tb, true);
-            dwgfx.Print( -1, 120, "Is this ok?", tr, tg, tb, true);
+            dwgfx.Print( -1, 90, "ちゅうい! ゲームのそくどをかえるには", tr, tg, tb, true);
+            dwgfx.Print( -1, 100, "さいきどうがひつようです。 また、", tr, tg, tb, true);
+            dwgfx.Print( -1, 110, "げんざいのセーブデータはきえます。", tr, tg, tb, true);
+            dwgfx.Print( -1, 120, "よろしいですか?", tr, tg, tb, true);
         }
         else if (game.currentmenuname == "setslowdown2")
         {
-            dwgfx.bigprint( -1, 40, "Game Speed", tr, tg, tb, true);
-            dwgfx.Print( -1, 75, "Select a new game speed below.", tr, tg, tb, true);
+            dwgfx.bigprint( -1, 40, "ゲームのそくど", tr, tg, tb, true);
+            dwgfx.Print( -1, 75, "ゲームのそくどをえらんでください。", tr, tg, tb, true);
             if (game.gameframerate==34)
             {
-                dwgfx.Print( -1, 105, "Game speed is normal.", tr/2, tg/2, tb/2, true);
+                dwgfx.Print( -1, 105, "ゲームのそくどは ふつう です。", tr/2, tg/2, tb/2, true);
             }
             else if (game.gameframerate==41)
             {
-                dwgfx.Print( -1, 105, "Game speed is at 80%", tr, tg, tb, true);
+                dwgfx.Print( -1, 105, "ゲームのそくどは 80% です。", tr, tg, tb, true);
             }
             else if (game.gameframerate==55)
             {
-                dwgfx.Print( -1, 105, "Game speed is at 60%", tr, tg, tb, true);
+                dwgfx.Print( -1, 105, "ゲームのそくどは 60% です。", tr, tg, tb, true);
             }
             else if (game.gameframerate==83)
             {
-                dwgfx.Print( -1, 105, "Game speed is at 40%", tr, tg, tb, true);
+                dwgfx.Print( -1, 105, "ゲームのそくどは 40% です。", tr, tg, tb, true);
             }
         }
         else if (game.currentmenuname == "newgamewarning")
@@ -634,8 +634,8 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "cleardatamenu")
         {
-            dwgfx.Print( -1, 100, "Are you sure you want to", tr, tg, tb, true);
-            dwgfx.Print( -1, 110, "delete all your saved data?", tr, tg, tb, true);
+            dwgfx.Print( -1, 100, "げんざいのセーブデータを", tr, tg, tb, true);
+            dwgfx.Print( -1, 110, "すべてけしてもよろしいですか?", tr, tg, tb, true);
         }
         else if (game.currentmenuname == "startnodeathmode")
         {
@@ -646,30 +646,30 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
 		else if (game.currentmenuname == "controller")
 		{
-			dwgfx.bigprint( -1, 30, "Game Pad", tr, tg, tb, true);
-			dwgfx.Print( -1, 55, "Change controller options.", tr, tg, tb, true);
+			dwgfx.bigprint( -1, 30, "ゲームパッド", tr, tg, tb, true);
+			dwgfx.Print( -1, 55, "コントローラーのせっていをへんこうできます。", tr, tg, tb, true);
 			if (game.currentmenuoption == 0)
 			{
 				switch(game.controllerSensitivity)
 				{
 				case 0:
-					dwgfx.Print( -1, 85, " Low     Medium     High", tr, tg, tb, true);
+					dwgfx.Print( -1, 85, " ひくい     ふつう     たかい", tr, tg, tb, true);
 					dwgfx.Print( -1, 95, "[]..................", tr, tg, tb, true);
 					break;
 				case 1:
-					dwgfx.Print( -1, 85, " Low     Medium     High", tr, tg, tb, true);
+					dwgfx.Print( -1, 85, " ひくい     ふつう     たかい", tr, tg, tb, true);
 					dwgfx.Print( -1, 95, ".....[].............", tr, tg, tb, true);
 					break;
 				case 2:
-					dwgfx.Print( -1, 85, " Low     Medium     High", tr, tg, tb, true);
+					dwgfx.Print( -1, 85, " ひくい     ふつう     たかい", tr, tg, tb, true);
 					dwgfx.Print( -1, 95, ".........[].........", tr, tg, tb, true);
 					break;
 				case 3:
-					dwgfx.Print( -1, 85, " Low     Medium     High", tr, tg, tb, true);
+					dwgfx.Print( -1, 85, " ひくい     ふつう     たかい", tr, tg, tb, true);
 					dwgfx.Print( -1, 95, ".............[].....", tr, tg, tb, true);
 					break;
 				case 4:
-					dwgfx.Print( -1, 85, " Low     Medium     High", tr, tg, tb, true);
+					dwgfx.Print( -1, 85, " ひくい     ふつう     たかい", tr, tg, tb, true);
 					dwgfx.Print( -1, 95, "..................[]", tr, tg, tb, true);
 					break;
 				}
@@ -678,9 +678,9 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
                                 game.currentmenuoption == 2 ||
                                 game.currentmenuoption == 3     )
 			{
-				dwgfx.Print( -1, 85, "Flip is bound to: " + std::string(UtilityClass::GCString(game.controllerButton_flip)) , tr, tg, tb, true);
-				dwgfx.Print( -1, 95, "Enter is bound to: "  + std::string(UtilityClass::GCString(game.controllerButton_map)), tr, tg, tb, true);
-				dwgfx.Print( -1, 105, "Menu is bound to: " + std::string(UtilityClass::GCString(game.controllerButton_esc)) , tr, tg, tb, true);
+				dwgfx.Print( -1, 85, "はんてんのボタン: " + std::string(UtilityClass::GCString(game.controllerButton_flip)) , tr, tg, tb, true);
+				dwgfx.Print( -1, 95, "ENTERのボタン: "  + std::string(UtilityClass::GCString(game.controllerButton_map)), tr, tg, tb, true);
+				dwgfx.Print( -1, 105, "メニューのボタン: " + std::string(UtilityClass::GCString(game.controllerButton_esc)) , tr, tg, tb, true);
 			}
 
 
@@ -689,90 +689,90 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         {
             if (game.currentmenuoption == 0)
             {
-                dwgfx.bigprint( -1, 40, "Backgrounds", tr, tg, tb, true);
+                dwgfx.bigprint( -1, 40, "はいけい", tr, tg, tb, true);
                 if (!game.colourblindmode)
                 {
-                    dwgfx.Print( -1, 75, "Backgrounds are ON.", tr, tg, tb, true);
+                    dwgfx.Print( -1, 75, "はいけい: アリ", tr, tg, tb, true);
                 }
                 else
                 {
-                    dwgfx.Print( -1, 75, "Backgrounds are OFF.", tr/2, tg/2, tb/2, true);
+                    dwgfx.Print( -1, 75, "はいけい: ナシ", tr/2, tg/2, tb/2, true);
                 }
             }
             else if (game.currentmenuoption == 1)
             {
-                dwgfx.bigprint( -1, 40, "Screen Effects", tr, tg, tb, true);
-                dwgfx.Print( -1, 75, "Disables screen shakes and flashes.", tr, tg, tb, true);
+                dwgfx.bigprint( -1, 40, "スクリーンエフェクト", tr, tg, tb, true);
+                dwgfx.Print( -1, 75, "がめんのゆれとてんめつをきりかえる", tr, tg, tb, true);
                 if (!game.noflashingmode)
                 {
-                    dwgfx.Print( -1, 85, "Screen Effects are ON.", tr, tg, tb, true);
+                    dwgfx.Print( -1, 85, "スクリーンエフェクト: アリ", tr, tg, tb, true);
                 }
                 else
                 {
-                    dwgfx.Print( -1, 85, "Screen Effects are OFF.", tr/2, tg/2, tb/2, true);
+                    dwgfx.Print( -1, 85, "スクリーンエフェクト: ナシ", tr/2, tg/2, tb/2, true);
                 }
             }
             else if (game.currentmenuoption == 2)
             {
-                dwgfx.bigprint( -1, 40, "Text Outline", tr, tg, tb, true);
-                dwgfx.Print( -1, 75, "Disables outline on game text", tr, tg, tb, true);
+                dwgfx.bigprint( -1, 40, "もじのふちどり", tr, tg, tb, true);
+                dwgfx.Print( -1, 75, "ゲームないのもじのふちどりをきりかえる", tr, tg, tb, true);
                 // FIXME: Maybe do an outlined print instead? -flibit
                 if (!dwgfx.notextoutline)
                 {
-                    dwgfx.Print( -1, 85, "Text outlines are ON.", tr, tg, tb, true);
+                    dwgfx.Print( -1, 85, "もじのふちどり: アリ", tr, tg, tb, true);
                 }
                 else
                 {
-                    dwgfx.Print( -1, 85, "Text outlines are OFF.", tr/2, tg/2, tb/2, true);
+                    dwgfx.Print( -1, 85, "もじのふちどり: ナシ", tr/2, tg/2, tb/2, true);
                 }
             }
             else if (game.currentmenuoption == 3)
             {
-                dwgfx.bigprint( -1, 40, "Invincibility", tr, tg, tb, true);
-                dwgfx.Print( -1, 75, "Provided to help disabled gamers", tr, tg, tb, true);
-                dwgfx.Print( -1, 85, "explore the game. Can cause glitches.", tr, tg, tb, true);
+                dwgfx.bigprint( -1, 40, "むてきモード", tr, tg, tb, true);
+                dwgfx.Print( -1, 75, "ゲームしょしんしゃのてだすけようです。", tr, tg, tb, true);
+                dwgfx.Print( -1, 85, "バグをひきおこすかのうせいがります。", tr, tg, tb, true);
                 if (map.invincibility)
                 {
-                    dwgfx.Print( -1, 105, "Invincibility is ON.", tr, tg, tb, true);
+                    dwgfx.Print( -1, 105, "むてきモード: アリ", tr, tg, tb, true);
                 }
                 else
                 {
-                    dwgfx.Print( -1, 105, "Invincibility is off.", tr/2, tg/2, tb/2, true);
+                    dwgfx.Print( -1, 105, "むてきモード: ナシ", tr/2, tg/2, tb/2, true);
                 }
             }
             else if (game.currentmenuoption == 4)
             {
-                dwgfx.bigprint( -1, 40, "Game Speed", tr, tg, tb, true);
-                dwgfx.Print( -1, 75, "May be useful for disabled gamers", tr, tg, tb, true);
-                dwgfx.Print( -1, 85, "using one switch devices.", tr, tg, tb, true);
+                dwgfx.bigprint( -1, 40, "ゲームのそくど", tr, tg, tb, true);
+                dwgfx.Print( -1, 75, "そうさのやりにくいきしゅをしよう", tr, tg, tb, true);
+                dwgfx.Print( -1, 85, "しているばあいにやくにたちます。", tr, tg, tb, true);
                 if (game.gameframerate==34)
                 {
-                    dwgfx.Print( -1, 105, "Game speed is normal.", tr/2, tg/2, tb/2, true);
+                    dwgfx.Print( -1, 105, "ゲームのそくどは ふつう です。", tr/2, tg/2, tb/2, true);
                 }
                 else if (game.gameframerate==41)
                 {
-                    dwgfx.Print( -1, 105, "Game speed is at 80%", tr, tg, tb, true);
+                    dwgfx.Print( -1, 105, "ゲームのそくどは 80% です。", tr, tg, tb, true);
                 }
                 else if (game.gameframerate==55)
                 {
-                    dwgfx.Print( -1, 105, "Game speed is at 60%", tr, tg, tb, true);
+                    dwgfx.Print( -1, 105, "ゲームのそくどは 60% です。", tr, tg, tb, true);
                 }
                 else if (game.gameframerate==83)
                 {
-                    dwgfx.Print( -1, 105, "Game speed is at 40%", tr, tg, tb, true);
+                    dwgfx.Print( -1, 105, "ゲームのそくどは 40% です。", tr, tg, tb, true);
                 }
             }
             else if (game.currentmenuoption == 5)
             {
-                dwgfx.bigprint( -1, 40, "Music", tr, tg, tb, true);
-                dwgfx.Print( -1, 75, "Disables music.", tr, tg, tb, true);
+                dwgfx.bigprint( -1, 40, "おんがく", tr, tg, tb, true);
+                dwgfx.Print( -1, 75, "おんがくをきりかえます。", tr, tg, tb, true);
                 if (!music.muted)
                 {
-                    dwgfx.Print( -1, 85, "Music is ON.", tr, tg, tb, true);
+                    dwgfx.Print( -1, 85, "おんがく: アリ", tr, tg, tb, true);
                 }
                 else
                 {
-                    dwgfx.Print( -1, 85, "Music is OFF.", tr/2, tg/2, tb/2, true);
+                    dwgfx.Print( -1, 85, "おんがく: ナシ", tr/2, tg/2, tb/2, true);
                 }
             }
         }
@@ -848,7 +848,7 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         }
         else if (game.currentmenuname == "youwannaquit")
         {
-            dwgfx.Print( -1, 75, "Are you sure you want to quit?", tr, tg, tb, true);
+            dwgfx.Print( -1, 75, "ゲームをしゅうりょうしてもよろしいですか?", tr, tg, tb, true);
         }
         else if (game.currentmenuname == "continue")
         {
@@ -1372,19 +1372,19 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         {   
 						dwgfx.tempstring = FILESYSTEM_getUserLevelDirectory();
 						if(dwgfx.tempstring.length()>80){
-							dwgfx.Print( -1, 160, "To install new player levels, copy", tr, tg, tb, true);
-							dwgfx.Print( -1, 170, "the .vvvvvv files to this folder:", tr, tg, tb, true);
+							dwgfx.Print( -1, 160, "プレイヤーレベルをどうにゅうするにはこの", tr, tg, tb, true);
+							dwgfx.Print( -1, 170, "フォルダに.vvvvvvファイルをいれてください:", tr, tg, tb, true);
 							dwgfx.Print( 320-((dwgfx.tempstring.length()-80)*8), 190, dwgfx.tempstring.substr(0,dwgfx.tempstring.length()-80), tr, tg, tb);
 							dwgfx.Print( 0, 200, dwgfx.tempstring.substr(dwgfx.tempstring.length()-80,40), tr, tg, tb);
 							dwgfx.Print( 0, 210, dwgfx.tempstring.substr(dwgfx.tempstring.length()-40,40), tr, tg, tb);
 						}else if(dwgfx.tempstring.length()>40){
-							dwgfx.Print( -1, 170, "To install new player levels, copy", tr, tg, tb, true);
-							dwgfx.Print( -1, 180, "the .vvvvvv files to this folder:", tr, tg, tb, true);
+							dwgfx.Print( -1, 170, "プレイヤーレベルをどうにゅうするにはこの", tr, tg, tb, true);
+							dwgfx.Print( -1, 180, "フォルダに.vvvvvvファイルをいれてください:", tr, tg, tb, true);
 							dwgfx.Print( 320-((dwgfx.tempstring.length()-40)*8), 200, dwgfx.tempstring.substr(0,dwgfx.tempstring.length()-40), tr, tg, tb);
 							dwgfx.Print( 0, 210, dwgfx.tempstring.substr(dwgfx.tempstring.length()-40,40), tr, tg, tb);
 						}else{
-							dwgfx.Print( -1, 180, "To install new player levels, copy", tr, tg, tb, true);
-							dwgfx.Print( -1, 190, "the .vvvvvv files to this folder:", tr, tg, tb, true);
+							dwgfx.Print( -1, 180, "プレイヤーレベルをどうにゅうするにはこの", tr, tg, tb, true);
+							dwgfx.Print( -1, 190, "フォルダに.vvvvvvファイルをいれてください:", tr, tg, tb, true);
 							dwgfx.Print( 320-(dwgfx.tempstring.length()*8), 210, dwgfx.tempstring, tr, tg, tb);
 						}
         }
@@ -1806,7 +1806,7 @@ void gamerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, Ut
 
     if(map.custommode && !map.custommodeforreal && !game.advancetext){
         //Return to level editor
-        dwgfx.bprint(5, 5, "[Press ENTER to return to editor]", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
+        dwgfx.bprint(5, 5, "[ENTERをおしてエディターへ戻る]", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
     }
 
 
@@ -1817,22 +1817,22 @@ void gamerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, Ut
     dwgfx.drawgui(help);
     if (dwgfx.flipmode)
     {
-        if (game.advancetext) dwgfx.bprint(5, 228, "- Press ACTION to advance text -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+        if (game.advancetext) dwgfx.bprint(5, 228, "- ACTION をおしてつぎへすすむ -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
     }
     else
     {
-        if (game.advancetext) dwgfx.bprint(5, 5, "- Press ACTION to advance text -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+        if (game.advancetext) dwgfx.bprint(5, 5, "- ACTION をおしてつぎへすすむ -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
     }
 
     if (game.readytotele > 100 && !game.advancetext && game.hascontrol && (!script.running || (script.running && script.passive)) && !game.intimetrial)
     {
         if(dwgfx.flipmode)
         {
-            dwgfx.bprint(5, 20, "- Press ENTER to Teleport -", game.readytotele - 20 - (help.glow / 2), game.readytotele - 20 - (help.glow / 2), game.readytotele, true);
+            dwgfx.bprint(5, 20, "- ENTER をおしてテレポート -", game.readytotele - 20 - (help.glow / 2), game.readytotele - 20 - (help.glow / 2), game.readytotele, true);
         }
         else
         {
-            dwgfx.bprint(5, 210, "- Press ENTER to Teleport -", game.readytotele - 20 - (help.glow / 2), game.readytotele - 20 - (help.glow / 2), game.readytotele, true);
+            dwgfx.bprint(5, 210, "- ENTER をおしてテレポート -", game.readytotele - 20 - (help.glow / 2), game.readytotele - 20 - (help.glow / 2), game.readytotele, true);
         }
     }
 
@@ -1848,49 +1848,49 @@ void gamerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, Ut
             if (game.swnmessage == 0)
             {
                 tempstring = help.timestring(game.swntimer);
-                dwgfx.Print( 10, 10, "Current Time", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
+                dwgfx.Print( 10, 10, "げんざいのタイム", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
                 dwgfx.bigprint( 25, 24, tempstring, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false, 2);
                 tempstring = help.timestring(game.swnrecord);
-                dwgfx.Print( 240, 10, "Best Time", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
+                dwgfx.Print( 240, 10, "じこベストタイム", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
                 dwgfx.bigrprint( 300, 24, tempstring, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false, 2);
 
                 switch(game.swnbestrank)
                 {
                 case 0:
-                    dwgfx.Print( -1, 204, "Next Trophy at 5 seconds", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+                    dwgfx.Print( -1, 204, "5びょうでつぎのトロフィー", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
                     break;
                 case 1:
-                    dwgfx.Print( -1, 204, "Next Trophy at 10 seconds", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+                    dwgfx.Print( -1, 204, "10びょうでつぎのトロフィー", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
                     break;
                 case 2:
-                    dwgfx.Print( -1, 204, "Next Trophy at 15 seconds", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+                    dwgfx.Print( -1, 204, "15びょうでつぎのトロフィー", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
                     break;
                 case 3:
-                    dwgfx.Print( -1, 204, "Next Trophy at 20 seconds", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+                    dwgfx.Print( -1, 204, "20びょうでつぎのトロフィー", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
                     break;
                 case 4:
-                    dwgfx.Print( -1, 204, "Next Trophy at 30 seconds", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+                    dwgfx.Print( -1, 204, "30びょうでつぎのトロフィー", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
                     break;
                 case 5:
-                    dwgfx.Print( -1, 204, "Next Trophy at 1 minute", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+                    dwgfx.Print( -1, 204, "1ふんでつぎのトロフィー", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
                     break;
                 case 6:
-                    dwgfx.Print( -1, 204, "All Trophies collected!", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+                    dwgfx.Print( -1, 204, "トロフィーをすべてかくとく!", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
                     break;
                 }
             }
             else if (game.swnmessage == 1)
             {
                 tempstring = help.timestring(game.swntimer);
-                dwgfx.Print( 10, 10, "Current Time", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
+                dwgfx.Print( 10, 10, "げんざいのタイム", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
                 dwgfx.bigprint( 25, 24, tempstring, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false, 2);
                 tempstring = help.timestring(game.swnrecord);
                 if (int(game.deathseq / 5) % 2 == 1)
                 {
-                    dwgfx.Print( 240, 10, "Best Time", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
+                    dwgfx.Print( 240, 10, "じこベストタイム", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
                     dwgfx.bigrprint( 300, 24, tempstring, 128 - (help.glow), 220 - (help.glow), 128 - (help.glow / 2), false, 2);
 
-                    dwgfx.bigprint( -1, 200, "New Record!", 128 - (help.glow), 220 - (help.glow), 128 - (help.glow / 2), true, 2);
+                    dwgfx.bigprint( -1, 200, "きろくこうしん!", 128 - (help.glow), 220 - (help.glow), 128 - (help.glow / 2), true, 2);
                 }
             }
             else if (game.swnmessage >= 2)
@@ -1898,19 +1898,19 @@ void gamerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, Ut
                 game.swnmessage--;
                 if (game.swnmessage == 2) game.swnmessage = 0;
                 tempstring = help.timestring(game.swntimer);
-                dwgfx.Print( 10, 10, "Current Time", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
+                dwgfx.Print( 10, 10, "げんざいのじかん", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
                 dwgfx.bigprint( 25, 24, tempstring, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false, 2);
                 tempstring = help.timestring(game.swnrecord);
-                dwgfx.Print( 240, 10, "Best Time", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
+                dwgfx.Print( 240, 10, "じこベストタイム", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false);
                 dwgfx.bigrprint( 300, 24, tempstring, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), false, 2);
 
                 if (int(game.swnmessage / 5) % 2 == 1)
                 {
-                    dwgfx.bigprint( -1, 200, "New Trophy!", 220 - (help.glow), 128 - (help.glow), 128 - (help.glow / 2), true, 2);
+                    dwgfx.bigprint( -1, 200, "きろくこうしん!", 220 - (help.glow), 128 - (help.glow), 128 - (help.glow / 2), true, 2);
                 }
             }
 
-            dwgfx.Print( 20, 228, "[Press ENTER to stop]", 160 - (help.glow/2), 160 - (help.glow/2), 160 - (help.glow/2), true);
+            dwgfx.Print( 20, 228, "[ENTER をおしてしゅうりょう]", 160 - (help.glow/2), 160 - (help.glow/2), 160 - (help.glow/2), true);
         }
         else if(game.swngame==2)
         {
@@ -1918,13 +1918,13 @@ void gamerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, Ut
             {
                 if (dwgfx.flipmode)
                 {
-                    dwgfx.bigprint( -1, 30, "Survive for", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
-                    dwgfx.bigprint( -1, 10, "60 seconds!", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
+                    dwgfx.bigprint( -1, 30, "60びょうかん", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
+                    dwgfx.bigprint( -1, 10, "いきのびろ！", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
                 }
                 else
                 {
-                    dwgfx.bigprint( -1, 10, "Survive for", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
-                    dwgfx.bigprint( -1, 30, "60 seconds!", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
+                    dwgfx.bigprint( -1, 10, "60びょうかん", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
+                    dwgfx.bigprint( -1, 30, "いきのびろ！", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
                 }
             }
         }
@@ -1932,16 +1932,16 @@ void gamerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, Ut
         {
             if (game.swndelay >= 60)
             {
-                dwgfx.bigprint( -1, 20, "SUPER GRAVITRON", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
+                dwgfx.bigprint( -1, 20, "スーパーグラビトロン", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
 
                 tempstring = help.timestring(game.swnrecord);
-                dwgfx.Print( 240, 190, "Best Time", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+                dwgfx.Print( 240, 190, "じこベストタイム", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
                 dwgfx.bigrprint( 300, 205, tempstring, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
             }
             else	if (int(game.swndelay / 10) % 2 == 1)
             {
-                dwgfx.bigprint( -1, 20, "SUPER GRAVITRON", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
-                dwgfx.bigprint( -1, 200, "GO!", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 3);
+                dwgfx.bigprint( -1, 20, "スーパーグラビトロン", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 2);
+                dwgfx.bigprint( -1, 200, "スタート!", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true, 3);
             }
         }
     }
@@ -2191,7 +2191,7 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
                     dwgfx.drawimage(2, 40 + (i * 12), 21 + (j * 9), false);
                 }
             }
-            dwgfx.Print(-1, 105, "NO SIGNAL", 245, 245, 245, true);
+            dwgfx.Print(-1, 105, "しんごうなし", 245, 245, 245, true);
         }
         else if(map.custommode)
         {
@@ -2523,9 +2523,9 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
               dwgfx.Print( -1, 220-120, ed.ListOfMetaData[game.playcustomlevel].Desc3, 196, 196, 255 - help.glow, true);
 
               if(map.customcrewmates-game.crewmates==1){
-                dwgfx.Print(1,220-165, help.number(int(map.customcrewmates-game.crewmates))+ " crewmate remains", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(1,220-165, help.number(int(map.customcrewmates-game.crewmates))+ " にんのなかまがのこっている", 196, 196, 255 - help.glow, true);
               }else if(map.customcrewmates-game.crewmates>0){
-                dwgfx.Print(1,220-165, help.number(int(map.customcrewmates-game.crewmates))+ " crewmates remain", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(1,220-165, help.number(int(map.customcrewmates-game.crewmates))+ " にんのなかまがのこっている", 196, 196, 255 - help.glow, true);
               }
             }
             else
@@ -2538,9 +2538,9 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
               dwgfx.Print( -1, 120, ed.ListOfMetaData[game.playcustomlevel].Desc3, 196, 196, 255 - help.glow, true);
 
               if(map.customcrewmates-game.crewmates==1){
-                dwgfx.Print(1,165, help.number(int(map.customcrewmates-game.crewmates))+ " crewmate remains", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(1,165, help.number(int(map.customcrewmates-game.crewmates))+ " にんのなかまがのこっている", 196, 196, 255 - help.glow, true);
               }else if(map.customcrewmates-game.crewmates>0){
-                dwgfx.Print(1,165, help.number(int(map.customcrewmates-game.crewmates))+ " crewmates remain", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(1,165, help.number(int(map.customcrewmates-game.crewmates))+ " にんのなかまがのこっている", 196, 196, 255 - help.glow, true);
               }
             }
         }
@@ -2564,7 +2564,7 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
                     else
                     {
                         dwgfx.printcrewnamedark(44, 32 + (i * 64)+4+10, 2-i);
-                        dwgfx.Print(44, 32 + (i * 64) + 4, "Missing...", 64,64,64);
+                        dwgfx.Print(44, 32 + (i * 64) + 4, "ふめい...", 64,64,64);
                     }
 
                     dwgfx.drawcrewman(16+160, 32 + (i * 64), (2-i)+3, game.crewstats[(2-i)+3], help);
@@ -2576,7 +2576,7 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
                     else
                     {
                         dwgfx.printcrewnamedark(44+160, 32 + (i * 64)+4+10, (2-i)+3);
-                        dwgfx.Print(44+160, 32 + (i * 64) + 4, "Missing...", 64,64,64);
+                        dwgfx.Print(44+160, 32 + (i * 64) + 4, "ふめい...", 64,64,64);
                     }
                 }
             }
@@ -2593,7 +2593,7 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
                     else
                     {
                         dwgfx.printcrewnamedark(44, 32 + (i * 64)+4, i);
-                        dwgfx.Print(44, 32 + (i * 64) + 4 + 10, "Missing...", 64,64,64);
+                        dwgfx.Print(44, 32 + (i * 64) + 4 + 10, "ふめい...", 64,64,64);
                     }
 
                     dwgfx.drawcrewman(16+160, 32 + (i * 64), i+3, game.crewstats[i+3], help);
@@ -2605,7 +2605,7 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
                     else
                     {
                         dwgfx.printcrewnamedark(44+160, 32 + (i * 64)+4, i+3);
-                        dwgfx.Print(44+160, 32 + (i * 64) + 4 + 10, "Missing...", 64,64,64);
+                        dwgfx.Print(44+160, 32 + (i * 64) + 4 + 10, "ふめい...", 64,64,64);
                     }
                 }
             }
@@ -2631,24 +2631,24 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
         if(map.custommode){
           if (dwgfx.flipmode)
           {
-              dwgfx.Print(0, 164, "[Trinkets found]", 196, 196, 255 - help.glow, true);
+              dwgfx.Print(0, 164, "[あつめたトリンケット]", 196, 196, 255 - help.glow, true);
               dwgfx.Print(0, 152, help.number(game.trinkets) + " out of " + help.number(map.customtrinkets), 96,96,96, true);
 
-              dwgfx.Print(0, 114, "[Number of Deaths]", 196, 196, 255 - help.glow, true);
+              dwgfx.Print(0, 114, "[しんだかいすう]", 196, 196, 255 - help.glow, true);
               dwgfx.Print(0, 102,help.String(game.deathcounts),  96,96,96, true);
 
-              dwgfx.Print(0, 64, "[Time Taken]", 196, 196, 255 - help.glow, true);
+              dwgfx.Print(0, 64, "[かかったじかん]", 196, 196, 255 - help.glow, true);
               dwgfx.Print(0, 52, game.timestring(help),  96, 96, 96, true);
           }
           else
           {
-              dwgfx.Print(0, 52, "[Trinkets found]", 196, 196, 255 - help.glow, true);
+              dwgfx.Print(0, 52, "[あつめたトリンケット]", 196, 196, 255 - help.glow, true);
               dwgfx.Print(0, 64, help.number(game.trinkets) + " out of "+help.number(map.customtrinkets), 96,96,96, true);
 
-              dwgfx.Print(0, 102, "[Number of Deaths]", 196, 196, 255 - help.glow, true);
+              dwgfx.Print(0, 102, "[しんだかいすう]", 196, 196, 255 - help.glow, true);
               dwgfx.Print(0, 114,help.String(game.deathcounts),  96,96,96, true);
 
-              dwgfx.Print(0, 152, "[Time Taken]", 196, 196, 255 - help.glow, true);
+              dwgfx.Print(0, 152, "[かかったじかん]", 196, 196, 255 - help.glow, true);
               dwgfx.Print(0, 164, game.timestring(help),  96, 96, 96, true);
           }
         }else{
@@ -2713,7 +2713,7 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
         {
           if (game.gamesaved)
             {
-                dwgfx.Print(0, 36, "Game saved ok!", 255 - (help.glow / 2), 255 - (help.glow / 2), 255 - (help.glow / 2), true);
+                dwgfx.Print(0, 36, "ゲームをほぞんしました!", 255 - (help.glow / 2), 255 - (help.glow / 2), 255 - (help.glow / 2), true);
 
                 dwgfx.drawpixeltextbox(25, 65, 270, 90, 34,12, 65, 185, 207,0,4);
 
@@ -2738,7 +2738,7 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
             }
             else
             {
-                dwgfx.Print(0, 80, "[Press ACTION to save your game]", 255 - (help.glow * 2), 255 - (help.glow * 2), 255 - help.glow, true);
+                dwgfx.Print(0, 80, "[ACTION でゲームをほぞん]", 255 - (help.glow * 2), 255 - (help.glow * 2), 255 - help.glow, true);
             }
         }
         else
@@ -2814,16 +2814,16 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
         {
             if (game.intimetrial || game.insecretlab || game.nodeathmode || game.menukludge)
             {
-                dwgfx.Print(0, 135, "Return to main menu?", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(0, 135, "メインメニューへもどりますか?", 196, 196, 255 - help.glow, true);
             }
             else
             {
-                dwgfx.Print(0, 142, "Do you want to quit? You will", 196, 196, 255 - help.glow, true);
-                dwgfx.Print(0, 130, "lose any unsaved progress.", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(0, 142, "メインメニューへもどりますか? セーブして", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(0, 130, "いないないようはきえてしまいます。", 196, 196, 255 - help.glow, true);
             }
 
-            dwgfx.Print(80-16, 88, "[ NO, KEEP PLAYING ]", 196, 196, 255 - help.glow);
-            dwgfx.Print(80 + 32, 76, "yes, quit to menu",  96, 96, 96);
+            dwgfx.Print(80-16, 88, "[ まだあそぶ ]", 196, 196, 255 - help.glow);
+            dwgfx.Print(80 + 32, 76, "メニューへもどる",  96, 96, 96);
         }
         else
         {
@@ -2834,12 +2834,12 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
             }
             else
             {
-                dwgfx.Print(0, 76, "Do you want to quit? You will", 196, 196, 255 - help.glow, true);
-                dwgfx.Print(0, 88, "lose any unsaved progress.", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(0, 76, "メインメニューへもどりますか? セーブして", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(0, 88, "いないないようはきえてしまいます。", 196, 196, 255 - help.glow, true);
             }
 
-            dwgfx.Print(80-16, 130, "[ NO, KEEP PLAYING ]", 196, 196, 255 - help.glow);
-            dwgfx.Print(80 + 32, 142, "yes, quit to menu",  96, 96, 96);
+            dwgfx.Print(80-16, 130, "[ まだあそぶ ]", 196, 196, 255 - help.glow);
+            dwgfx.Print(80 + 32, 142, "メニューへもどる",  96, 96, 96);
 
         }
         break;
@@ -2854,12 +2854,12 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
             }
             else
             {
-                dwgfx.Print(0, 142, "Do you want to quit? You will", 196, 196, 255 - help.glow, true);
-                dwgfx.Print(0, 130, "lose any unsaved progress.", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(0, 142, "メインメニューへもどりますか? セーブして", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(0, 130, "いないないようはきえてしまいます。", 196, 196, 255 - help.glow, true);
             }
 
-            dwgfx.Print(80, 88, "no, keep playing", 96,96,96);
-            dwgfx.Print(80+32-16, 76, "[ YES, QUIT TO MENU ]",  196, 196, 255 - help.glow);
+            dwgfx.Print(80, 88, "まだあそぶ", 96,96,96);
+            dwgfx.Print(80+32-16, 76, "[ メニューへもどる ]",  196, 196, 255 - help.glow);
         }
         else
         {
@@ -2869,12 +2869,12 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
             }
             else
             {
-                dwgfx.Print(0, 76, "Do you want to quit? You will", 196, 196, 255 - help.glow, true);
-                dwgfx.Print(0, 88, "lose any unsaved progress.", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(0, 76, "メインメニューへもどりますか? セーブして", 196, 196, 255 - help.glow, true);
+                dwgfx.Print(0, 88, "いないないようはきえてしまいます。", 196, 196, 255 - help.glow, true);
             }
 
-            dwgfx.Print(80, 130, "no, keep playing", 96,96,96);
-            dwgfx.Print(80+32-16, 142, "[ YES, QUIT TO MENU ]", 196, 196, 255 - help.glow);
+            dwgfx.Print(80, 130, "まだあそぶ", 96,96,96);
+            dwgfx.Print(80+32-16, 142, "[ メニューへもどる ]", 196, 196, 255 - help.glow);
         }
         break;
     case 20:
@@ -3037,11 +3037,11 @@ void towerrender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, U
     dwgfx.drawgui(help);
     if (dwgfx.flipmode)
     {
-        if (game.advancetext) dwgfx.bprint(5, 228, "- Press ACTION to advance text -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+        if (game.advancetext) dwgfx.bprint(5, 228, "- ACTION をおしてつぎへすすむ -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
     }
     else
     {
-        if (game.advancetext) dwgfx.bprint(5, 5, "- Press ACTION to advance text -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+        if (game.advancetext) dwgfx.bprint(5, 5, "- ACTION をおしてつぎへすすむ -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
     }
 
 
@@ -3311,11 +3311,11 @@ void teleporterrender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& o
 
     if (dwgfx.flipmode)
     {
-        if (game.advancetext) dwgfx.bprint(5, 228, "- Press ACTION to advance text -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+        if (game.advancetext) dwgfx.bprint(5, 228, "- ACTION をおしてつぎへすすむ -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
     }
     else
     {
-        if (game.advancetext) dwgfx.bprint(5, 5, "- Press ACTION to advance text -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
+        if (game.advancetext) dwgfx.bprint(5, 5, "- ACTION をおしてつぎへすすむ -", 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2), true);
     }
 
 
