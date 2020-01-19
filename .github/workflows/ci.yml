@@ -44,7 +44,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v1
       with:
-        name: ${{ format('VVVVVV-CE-{0}', runner.os) }}
+        name: ${{ format('V6CE-JP-{0}', runner.os) }}
         path: desktop_version/build/VVVVVV
 
   build-mac:
@@ -84,17 +84,17 @@ jobs:
 
     - name: Build .app
       run: |
-        mkdir -pv ${SRC_DIR_PATH}/build/VVVVVV-app/VVVVVV-CE.app/Contents/MacOS/
-        mkdir -pv ${SRC_DIR_PATH}/build/VVVVVV-app/VVVVVV-CE.app/Contents/Resources
-        mv -v ${SRC_DIR_PATH}/build/VVVVVV ${SRC_DIR_PATH}/build/VVVVVV-app/VVVVVV-CE.app/Contents/MacOS/VVVVVV-CE
-        cp -v .github/resources/v6cord.icns ${SRC_DIR_PATH}/build/VVVVVV-app/VVVVVV-CE.app/Contents/Resources/v6cord.icns
-        cp -v .github/resources/Info.plist ${SRC_DIR_PATH}/build/VVVVVV-app/VVVVVV-CE.app/Contents/Info.plist
-        dylibbundler -cd -b -f -a ${SRC_DIR_PATH}/build/VVVVVV-app/VVVVVV-CE.app
+        mkdir -pv ${SRC_DIR_PATH}/build/VVVVVV-app/V6CE-JP.app/Contents/MacOS/
+        mkdir -pv ${SRC_DIR_PATH}/build/VVVVVV-app/V6CE-JP.app/Contents/Resources
+        mv -v ${SRC_DIR_PATH}/build/VVVVVV ${SRC_DIR_PATH}/build/VVVVVV-app/V6CE-JP.app/Contents/MacOS/V6CE-JP
+        cp -v .github/resources/v6cord.icns ${SRC_DIR_PATH}/build/VVVVVV-app/V6CE-JP.app/Contents/Resources/v6cord.icns
+        cp -v .github/resources/Info.plist ${SRC_DIR_PATH}/build/VVVVVV-app/V6CE-JP.app/Contents/Info.plist
+        dylibbundler -cd -b -f -a ${SRC_DIR_PATH}/build/VVVVVV-app/V6CE-JP.app
 
     - name: Tar .app
       run: |
         cd ${SRC_DIR_PATH}/build/VVVVVV-app
-        tar -czvf VVVVVV-CE.tgz VVVVVV-CE.app/
+        tar -czvf V6CE-JP.tgz V6CE-JP.app/
 
     - name: Show build artifacts
       run: tree ${SRC_DIR_PATH}/build
@@ -102,8 +102,8 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v1
       with:
-        name: ${{ format('VVVVVV-CE-{0}', runner.os) }}
-        path: desktop_version/build/VVVVVV-app/VVVVVV-CE.tgz
+        name: ${{ format('V6CE-JP-{0}', runner.os) }}
+        path: desktop_version/build/VVVVVV-app/V6CE-JP.tgz
 
   build-win:
     name: Build (Ubuntu + MinGW64)
@@ -130,11 +130,11 @@ jobs:
 
     - name: Copy artifacts
       run: |
-        mkdir -p $SRC_DIR_PATH/build/VVVVVV-CE-Windows
-        cp -rv .github/libs/* $SRC_DIR_PATH/build/VVVVVV.exe $SRC_DIR_PATH/build/VVVVVV-CE-Windows/
+        mkdir -p $SRC_DIR_PATH/build/V6CE-JP-Windows
+        cp -rv .github/libs/* $SRC_DIR_PATH/build/VVVVVV.exe $SRC_DIR_PATH/build/V6CE-JP-Windows/
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v1
       with:
-        name: VVVVVV-CE-Windows
-        path: desktop_version/build/VVVVVV-CE-Windows
+        name: V6CE-JP-Windows
+        path: desktop_version/build/V6CE-JP-Windows
