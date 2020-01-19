@@ -169,8 +169,8 @@ void editorclass::reset()
     mapwidth=5;
     mapheight=5;
 
-    EditorData::GetInstance().title="Untitled Level";
-    EditorData::GetInstance().creator="Unknown";
+    EditorData::GetInstance().title="ふめいなレベル";
+    EditorData::GetInstance().creator="ふめい";
     Desc1="";
     Desc2="";
     Desc3="";
@@ -2898,7 +2898,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
 
         if(ed.dmtileeditor>0 && t2<=30)
         {
-            dwgfx.Print(2, 45-t2, "Tile:", 196, 196, 255 - help.glow, false);
+            dwgfx.Print(2, 45-t2, "タイル:", 196, 196, 255 - help.glow, false);
             dwgfx.Print(58, 45-t2, help.String(ed.dmtile), 196, 196, 255 - help.glow, false);
             FillRect(dwgfx.backBuffer, 44,44-t2,10,10, dwgfx.getRGB(196, 196, 255 - help.glow));
             FillRect(dwgfx.backBuffer, 45,45-t2,8,8, dwgfx.getRGB(0,0,0));
@@ -2914,7 +2914,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         }
         else
         {
-            dwgfx.Print(2, 12, "Tile:", 196, 196, 255 - help.glow, false);
+            dwgfx.Print(2, 12, "タイル:", 196, 196, 255 - help.glow, false);
             dwgfx.Print(58, 12, help.String(ed.dmtile), 196, 196, 255 - help.glow, false);
             FillRect(dwgfx.backBuffer, 44,11,10,10, dwgfx.getRGB(196, 196, 255 - help.glow));
             FillRect(dwgfx.backBuffer, 45,12,8,8, dwgfx.getRGB(0,0,0));
@@ -2943,19 +2943,19 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             switch(ed.boundarytype)
             {
             case 0:
-                dwgfx.Print(4, 232, "SCRIPT BOX: Click on top left", 255,255,255, false);
+                dwgfx.Print(4, 232, "スクリプトボックス: ひだりうえのはんいをクリック", 255,255,255, false);
                 break;
             case 1:
-                dwgfx.Print(4, 232, "ENEMY BOUNDS: Click on top left", 255,255,255, false);
+                dwgfx.Print(4, 232, "てきのかどうはんい: ひだりうえのはんいをクリック", 255,255,255, false);
                 break;
             case 2:
-                dwgfx.Print(4, 232, "PLATFORM BOUNDS: Click on top left", 255,255,255, false);
+                dwgfx.Print(4, 232, "あしばのかどうはんい: ひだりうえのはんいをクリック", 255,255,255, false);
                 break;
             case 3:
-                dwgfx.Print(4, 232, "COPY TILES: Click on top left", 255,255,255, false);
+                dwgfx.Print(4, 232, "タイルのコピー: ひだりうえのはんいをクリック", 255,255,255, false);
                 break;
             default:
-                dwgfx.Print(4, 232, "Click on top left", 255,255,255, false);
+                dwgfx.Print(4, 232, "ひだりうえのはんいをクリック", 255,255,255, false);
                 break;
             }
         }
@@ -2966,19 +2966,19 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             switch(ed.boundarytype)
             {
             case 0:
-                dwgfx.Print(4, 232, "SCRIPT BOX: Click on bottom right", 255,255,255, false);
+                dwgfx.Print(4, 232, "スクリプトボックス: みぎしたのはんいをクリック", 255,255,255, false);
                 break;
             case 1:
-                dwgfx.Print(4, 232, "ENEMY BOUNDS: Click on bottom right", 255,255,255, false);
+                dwgfx.Print(4, 232, "てきのかどうはんい: みぎしたのはんいをクリック", 255,255,255, false);
                 break;
             case 2:
-                dwgfx.Print(4, 232, "PLATFORM BOUNDS: Click on bottom right", 255,255,255, false);
+                dwgfx.Print(4, 232, "あしばのかどうはんい: みぎしたのはんいをクリック", 255,255,255, false);
                 break;
             case 3:
-                dwgfx.Print(4, 232, "COPY TILES: Click on bottom right", 255,255,255, false);
+                dwgfx.Print(4, 232, "タイルのコピー: みぎしたのはんいをクリック", 255,255,255, false);
                 break;
             default:
-                dwgfx.Print(4, 232, "Click on bottom right", 255,255,255, false);
+                dwgfx.Print(4, 232, "みぎしたのはんいをクリック", 255,255,255, false);
                 break;
             }
         }
@@ -2991,8 +2991,8 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         switch(ed.scripthelppage)
         {
         case 0:
-            dwgfx.Print(16,28,"**** VVVVVV SCRIPT EDITOR ****", 123, 111, 218, true);
-            dwgfx.Print(16,44,"PRESS ESC TO RETURN TO MENU", 123, 111, 218, true);
+            dwgfx.Print(16,28,"**** VVVVVV スクリプトエディター ****", 123, 111, 218, true);
+            dwgfx.Print(16,44,"ESC キーでメニューにもどる", 123, 111, 218, true);
             //dwgfx.Print(16,60,"READY.", 123, 111, 218, false);
 
             if(ed.numhooks>0)
@@ -3016,15 +3016,15 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             }
             else
             {
-                dwgfx.Print(16,110,"NO SCRIPT IDS FOUND", 123, 111, 218, true);
-                dwgfx.Print(16,130,"CREATE A SCRIPT WITH EITHER", 123, 111, 218, true);
-                dwgfx.Print(16,140,"THE TERMINAL OR SCRIPT BOX TOOLS", 123, 111, 218, true);
+                dwgfx.Print(16,110,"スクリプトはありません", 123, 111, 218, true);
+                dwgfx.Print(16,130,"ターミナルまたはスクリプトボックスで", 123, 111, 218, true);
+                dwgfx.Print(16,140,"スクリプトをさくせいしてください", 123, 111, 218, true);
             }
             break;
         case 1:
             //Current scriptname
             FillRect(dwgfx.backBuffer, 14,226,292,12, dwgfx.getRGB(162,48,61));
-            dwgfx.Print(16,228,"CURRENT SCRIPT: " + ed.sbscript, 123, 111, 218, true);
+            dwgfx.Print(16,228,"へんしゅうちゅう: " + ed.sbscript, 123, 111, 218, true);
             //Draw text
             for(int i=0; i<25; i++)
             {
@@ -3056,7 +3056,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         if(tb>255) tb=255;
         if (game.currentmenuname == "ed_settings")
         {
-            dwgfx.bigprint( -1, 75, "Map Settings", tr, tg, tb, true);
+            dwgfx.bigprint( -1, 75, "マップのせってい", tr, tg, tb, true);
         }
         else if (game.currentmenuname=="ed_desc")
         {
@@ -3079,16 +3079,16 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             {
                 if(ed.entframe<2)
                 {
-                    dwgfx.Print( -1, 60, "by " + key.keybuffer+ "_", tr, tg, tb, true);
+                    dwgfx.Print( -1, 60, key.keybuffer+ "_ さく", tr, tg, tb, true);
                 }
                 else
                 {
-                    dwgfx.Print( -1, 60, "by " + key.keybuffer+ " ", tr, tg, tb, true);
+                    dwgfx.Print( -1, 60, key.keybuffer+ "  さく", tr, tg, tb, true);
                 }
             }
             else
             {
-                dwgfx.Print( -1, 60, "by " + EditorData::GetInstance().creator, tr, tg, tb, true);
+                dwgfx.Print( -1, 60, EditorData::GetInstance().creator + " さく", tr, tg, tb, true);
             }
             if(ed.websitemod)
             {
@@ -3153,13 +3153,13 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         }
         else if (game.currentmenuname == "ed_music")
         {
-            dwgfx.bigprint( -1, 65, "Map Music", tr, tg, tb, true);
+            dwgfx.bigprint( -1, 65, "マップのおんがく", tr, tg, tb, true);
 
-            dwgfx.Print( -1, 85, "Current map music:", tr, tg, tb, true);
+            dwgfx.Print( -1, 85, "げんざいのおんがく:", tr, tg, tb, true);
             switch(ed.levmusic)
             {
             case 0:
-                dwgfx.Print( -1, 120, "No background music", tr, tg, tb, true);
+                dwgfx.Print( -1, 120, "おんがく なし", tr, tg, tb, true);
                 break;
             case 1:
                 dwgfx.Print( -1, 120, "1: Pushing Onwards", tr, tg, tb, true);
@@ -3195,14 +3195,14 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
                 dwgfx.Print( -1, 120, "11: Piercing the Sky", tr, tg, tb, true);
                 break;
             default:
-                dwgfx.Print( -1, 120, "?: something else", tr, tg, tb, true);
+                dwgfx.Print( -1, 120, "?: ふめいなおんがく", tr, tg, tb, true);
                 break;
             }
         }
         else if (game.currentmenuname == "ed_quit")
         {
-            dwgfx.bigprint( -1, 90, "Save before", tr, tg, tb, true);
-            dwgfx.bigprint( -1, 110, "quiting?", tr, tg, tb, true);
+            dwgfx.bigprint( -1, 90, "やめるまえに", tr, tg, tb, true);
+            dwgfx.bigprint( -1, 110, "セーブしますか?", tr, tg, tb, true);
         }
 
         dwgfx.drawmenu(game, tr, tg, tb, 15);
@@ -3220,7 +3220,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     {
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "Enter script id name:", 255,255,255, false);
+        dwgfx.Print(4, 224, "スクリプトのなまえをきにゅう:", 255,255,255, false);
         if(ed.entframe<2)
         {
             dwgfx.Print(4, 232, edentity[ed.scripttextent].scriptname+"_", 196, 196, 255 - help.glow, true);
@@ -3234,7 +3234,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     {
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "Enter filename to save map as:", 255,255,255, false);
+        dwgfx.Print(4, 224, "セーブするファイルめいをきにゅう:", 255,255,255, false);
         if(ed.entframe<2)
         {
             dwgfx.Print(4, 232, ed.filename+"_", 196, 196, 255 - help.glow, true);
@@ -3248,7 +3248,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     {
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "Enter map filename to load:", 255,255,255, false);
+        dwgfx.Print(4, 224, "ロードするファイルめいをきにゅう:", 255,255,255, false);
         if(ed.entframe<2)
         {
             dwgfx.Print(4, 232, ed.filename+"_", 196, 196, 255 - help.glow, true);
@@ -3262,7 +3262,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     {
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "Enter new room name:", 255,255,255, false);
+        dwgfx.Print(4, 224, "へやのなまえをきにゅう:", 255,255,255, false);
         if(ed.entframe<2)
         {
             dwgfx.Print(4, 232, ed.level[ed.levx+(ed.levy*ed.maxwidth)].roomname+"_", 196, 196, 255 - help.glow, true);
@@ -3276,7 +3276,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     {
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "Enter text string:", 255,255,255, false);
+        dwgfx.Print(4, 224, "テキストをきにゅう:", 255,255,255, false);
         if(ed.entframe<2)
         {
             dwgfx.Print(4, 232, edentity[ed.roomtextent].scriptname+"_", 196, 196, 255 - help.glow, true);
@@ -3291,8 +3291,8 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         //placing warp token
         FillRect(dwgfx.backBuffer, 0,221,320,240, dwgfx.getRGB(32,32,32));
         FillRect(dwgfx.backBuffer, 0,222,320,240, dwgfx.getRGB(0,0,0));
-        dwgfx.Print(4, 224, "Left click to place warp destination", 196, 196, 255 - help.glow, false);
-        dwgfx.Print(4, 232, "Right click to cancel", 196, 196, 255 - help.glow, false);
+        dwgfx.Print(4, 224, "ひだりクリックでワープさきをせってい", 196, 196, 255 - help.glow, false);
+        dwgfx.Print(4, 232, "みぎクリックでキャンセル", 196, 196, 255 - help.glow, false);
     }
     else
     {
@@ -3426,62 +3426,62 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
                 dwgfx.Print(4, 232, "2/2", 196, 196, 255 - help.glow, false);
             }
 
-            dwgfx.Print(128, 232, "< and > keys change tool", 196, 196, 255 - help.glow, false);
+            dwgfx.Print(128, 232, "< と > キーでツールをえらぶ", 196, 196, 255 - help.glow, false);
 
             FillRect(dwgfx.backBuffer, 0,198,120,10, dwgfx.getRGB(32,32,32));
             FillRect(dwgfx.backBuffer, 0,199,119,9, dwgfx.getRGB(0,0,0));
             switch(ed.drawmode)
             {
             case 0:
-                dwgfx.Print(2,199, "1: Walls",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "1: かべ",196, 196, 255 - help.glow);
                 break;
             case 1:
-                dwgfx.Print(2,199, "2: Backing",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "2: はいけい",196, 196, 255 - help.glow);
                 break;
             case 2:
-                dwgfx.Print(2,199, "3: Spikes",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "3: トゲ",196, 196, 255 - help.glow);
                 break;
             case 3:
-                dwgfx.Print(2,199, "4: Trinkets",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "4: トリンケット",196, 196, 255 - help.glow);
                 break;
             case 4:
-                dwgfx.Print(2,199, "5: Checkpoint",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "5: ちゅうかんちてん",196, 196, 255 - help.glow);
                 break;
             case 5:
-                dwgfx.Print(2,199, "6: Disappear",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "6: きえるあしば",196, 196, 255 - help.glow);
                 break;
             case 6:
-                dwgfx.Print(2,199, "7: Conveyors",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "7: コンベヤー",196, 196, 255 - help.glow);
                 break;
             case 7:
-                dwgfx.Print(2,199, "8: Moving",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "8: うごくあしば",196, 196, 255 - help.glow);
                 break;
             case 8:
-                dwgfx.Print(2,199, "9: Enemies",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "9: てき",196, 196, 255 - help.glow);
                 break;
             case 9:
-                dwgfx.Print(2,199, "0: Grav Line",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "0: グラビティーライン",196, 196, 255 - help.glow);
                 break;
             case 10:
-                dwgfx.Print(2,199, "R: Roomtext",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "R: ルームテキスト",196, 196, 255 - help.glow);
                 break;
             case 11:
-                dwgfx.Print(2,199, "T: Terminal",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "T: ターミナル",196, 196, 255 - help.glow);
                 break;
             case 12:
-                dwgfx.Print(2,199, "Y: Script Box",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "Y: スクリプトボックス",196, 196, 255 - help.glow);
                 break;
             case 13:
-                dwgfx.Print(2,199, "U: Warp Token",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "U: ワープホール",196, 196, 255 - help.glow);
                 break;
             case 14:
-                dwgfx.Print(2,199, "I: Warp Lines",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "I: ワープライン",196, 196, 255 - help.glow);
                 break;
             case 15:
-                dwgfx.Print(2,199, "O: Crewmate",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "O: なかま",196, 196, 255 - help.glow);
                 break;
             case 16:
-                dwgfx.Print(2,199, "P: Start Point",196, 196, 255 - help.glow);
+                dwgfx.Print(2,199, "P: スタートちてん",196, 196, 255 - help.glow);
                 break;
             }
 
@@ -3522,21 +3522,21 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         {
             fillboxabs(dwgfx, 0, 127,161+8,140,dwgfx.getRGB(64,64,64));
             FillRect(dwgfx.backBuffer, 0,128,160+8,140, dwgfx.getRGB(0,0,0));
-            dwgfx.Print(4, 130, "F1: Change Tileset",164,164,164,false);
-            dwgfx.Print(4, 140, "F2: Change Colour",164,164,164,false);
-            dwgfx.Print(4, 150, "F3: Change Enemies",164,164,164,false);
-            dwgfx.Print(4, 160, "F4: Enemy Bounds",164,164,164,false);
-            dwgfx.Print(4, 170, "F5: Platform Bounds",164,164,164,false);
+            dwgfx.Print(4, 130, "F1: タイルセットへんこう",164,164,164,false);
+            dwgfx.Print(4, 140, "F2: カラーへんこう",164,164,164,false);
+            dwgfx.Print(4, 150, "F3: てきのへんこう",164,164,164,false);
+            dwgfx.Print(4, 160, "F4: てきのかどうはんい",164,164,164,false);
+            dwgfx.Print(4, 170, "F5: あしばのかどうはんい",164,164,164,false);
 
-            dwgfx.Print(4, 190, "F10: Direct Mode",164,164,164,false);
+            dwgfx.Print(4, 190, "F10: ダイレクトモード",164,164,164,false);
 
-            dwgfx.Print(4, 210, "W: Change Warp Dir",164,164,164,false);
-            dwgfx.Print(4, 220, "E: Change Roomname",164,164,164,false);
+            dwgfx.Print(4, 210, "W: ワープのしゅるいへんこう",164,164,164,false);
+            dwgfx.Print(4, 220, "E: へやのなまえへんこう",164,164,164,false);
 
             fillboxabs(dwgfx, 220, 207,100,60,dwgfx.getRGB(64,64,64));
             FillRect(dwgfx.backBuffer, 221,208,160,60, dwgfx.getRGB(0,0,0));
-            dwgfx.Print(224, 210, "S: Save Map",164,164,164,false);
-            dwgfx.Print(224, 220, "L: Load Map",164,164,164,false);
+            dwgfx.Print(224, 210, "S: レベルをセーブ",164,164,164,false);
+            dwgfx.Print(224, 220, "L: レベルをロード",164,164,164,false);
         }
     }
 
@@ -3547,55 +3547,55 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         switch(ed.drawmode)
         {
         case 0:
-            dwgfx.Print(2,2, "1: Walls",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "1: かべ",196, 196, 255 - help.glow);
             break;
         case 1:
-            dwgfx.Print(2,2, "2: Backing",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "2: はいけい",196, 196, 255 - help.glow);
             break;
         case 2:
-            dwgfx.Print(2,2, "3: Spikes",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "3: トゲ",196, 196, 255 - help.glow);
             break;
         case 3:
-            dwgfx.Print(2,2, "4: Trinkets",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "4: トリンケット",196, 196, 255 - help.glow);
             break;
         case 4:
-            dwgfx.Print(2,2, "5: Checkpoint",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "5: ちゅうかんちてん",196, 196, 255 - help.glow);
             break;
         case 5:
-            dwgfx.Print(2,2, "6: Disappear",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "6: きえるあしば",196, 196, 255 - help.glow);
             break;
         case 6:
-            dwgfx.Print(2,2, "7: Conveyors",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "7: コンベヤー",196, 196, 255 - help.glow);
             break;
         case 7:
-            dwgfx.Print(2,2, "8: Moving",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "8: うごくあしば",196, 196, 255 - help.glow);
             break;
         case 8:
-            dwgfx.Print(2,2, "9: Enemies",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "9: てき",196, 196, 255 - help.glow);
             break;
         case 9:
-            dwgfx.Print(2,2, "0: Grav Line",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "0: グラビティーライン",196, 196, 255 - help.glow);
             break;
         case 10:
-            dwgfx.Print(2,2, "R: Roomtext",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "R: ルームテキスト",196, 196, 255 - help.glow);
             break;
         case 11:
-            dwgfx.Print(2,2, "T: Terminal",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "T: ターミナル",196, 196, 255 - help.glow);
             break;
         case 12:
-            dwgfx.Print(2,2, "Y: Script Box",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "Y: スクリプトボックス",196, 196, 255 - help.glow);
             break;
         case 13:
-            dwgfx.Print(2,2, "U: Warp Token",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "U: ワープホール",196, 196, 255 - help.glow);
             break;
         case 14:
-            dwgfx.Print(2,2, "I: Warp Lines",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "I: ワープライン",196, 196, 255 - help.glow);
             break;
         case 15:
-            dwgfx.Print(2,2, "O: Crewmate",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "O: なかま",196, 196, 255 - help.glow);
             break;
         case 16:
-            dwgfx.Print(2,2, "P: Start Point",196, 196, 255 - help.glow);
+            dwgfx.Print(2,2, "P: スタートちてん",196, 196, 255 - help.glow);
             break;
         }
 
@@ -4334,25 +4334,25 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 switch(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset)
                 {
                 case 0:
-                    ed.note="Now using Space Station Tileset";
+                    ed.note="スペースステーション のタイルセット";
                     break;
                 case 1:
-                    ed.note="Now using Outside Tileset";
+                    ed.note="アウトサイド のタイルセット";
                     break;
                 case 2:
-                    ed.note="Now using Lab Tileset";
+                    ed.note="ラボラトリー のタイルセット";
                     break;
                 case 3:
-                    ed.note="Now using Warp Zone Tileset";
+                    ed.note="ワープゾーン のタイルセット";
                     break;
                 case 4:
-                    ed.note="Now using Ship Tileset";
+                    ed.note="スペースシップ のタイルセット";
                     break;
                 case 5:
-                    ed.note="Now using Tower Tileset";
+                    ed.note="タワー のタイルセット";
                     break;
                 default:
-                    ed.note="Tileset Changed";
+                    ed.note="タイルセットをへんこうしました";
                     break;
                 }
                 ed.updatetiles=true;
@@ -4381,14 +4381,14 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 ed.updatetiles=true;
                 ed.keydelay=6;
                 ed.notedelay=45;
-                ed.note="Tileset Colour Changed";
+                ed.note="タイルセットのいろをへんこうしました";
             }
             if(key.keymap[SDLK_F3] && ed.keydelay==0)
             {
                 ed.level[ed.levx+(ed.levy*ed.maxwidth)].enemytype=(ed.level[ed.levx+(ed.levy*ed.maxwidth)].enemytype+1)%11;
                 ed.keydelay=6;
                 ed.notedelay=45;
-                ed.note="Enemy Type Changed";
+                ed.note="てきのしゅるいをへんこうしました";
             }
             if(key.keymap[SDLK_F4] && ed.keydelay==0)
             {
@@ -4407,12 +4407,12 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].directmode==1)
                 {
                     ed.level[ed.levx+(ed.levy*ed.maxwidth)].directmode=0;
-                    ed.note="Direct Mode Disabled";
+                    ed.note="ダイレクトモードをむこうにしました";
                 }
                 else
                 {
                     ed.level[ed.levx+(ed.levy*ed.maxwidth)].directmode=1;
-                    ed.note="Direct Mode Enabled";
+                    ed.note="ダイレクトモードをゆうこうにしました";
                 }
                 dwgfx.backgrounddrawn=false;
 
@@ -4455,7 +4455,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 }
                 if(j>0)
                 {
-                    ed.note="ERROR: Cannot have both warp types";
+                    ed.note="エラー: 2しゅるいのワープはどうじにつかえません";
                     ed.notedelay=45;
                 }
                 else
@@ -4463,25 +4463,25 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                     ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir=(ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir+1)%4;
                     if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir==0)
                     {
-                        ed.note="Room warping disabled";
+                        ed.note="ルームワープ なし";
                         ed.notedelay=45;
                         dwgfx.backgrounddrawn=false;
                     }
                     else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir==1)
                     {
-                        ed.note="Room warps horizontally";
+                        ed.note="ルームワープ たて";
                         ed.notedelay=45;
                         dwgfx.backgrounddrawn=false;
                     }
                     else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir==2)
                     {
-                        ed.note="Room warps vertically";
+                        ed.note="ルームワープ よこ";
                         ed.notedelay=45;
                         dwgfx.backgrounddrawn=false;
                     }
                     else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].warpdir==3)
                     {
-                        ed.note="Room warps in all directions";
+                        ed.note="ルームワープ ぜんぶ";
                         ed.notedelay=45;
                         dwgfx.backgrounddrawn=false;
                     }
@@ -4566,7 +4566,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
 
                     if(testeditor==-1)
                     {
-                        ed.note="ERROR: No checkpoint to spawn at";
+                        ed.note="エラー: スポーンするちゅうかんちてんがありません";
                         ed.notedelay=45;
                     }
                     else
@@ -4674,7 +4674,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                         if(ed.mapheight<1) ed.mapheight=1;
                         if(ed.mapwidth>=ed.maxwidth) ed.mapwidth=ed.maxwidth;
                         if(ed.mapheight>=ed.maxheight) ed.mapheight=ed.maxheight;
-                        ed.note = "Mapsize is now [" + help.String(ed.mapwidth) + "," + help.String(ed.mapheight) + "]";
+                        ed.note = "レベルサイズが [" + help.String(ed.mapwidth) + "," + help.String(ed.mapheight) + "] になりました";
                         ed.notedelay=45;
                     }
                 }
@@ -5047,7 +5047,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                                 }
                                 else
                                 {
-                                    ed.note="ERROR: Max number of trinkets is 20";
+                                    ed.note="エラー: トリンケットのかずは20こまでです";
                                     ed.notedelay=45;
                                 }
                             }
@@ -5121,13 +5121,13 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                                     }
                                     else
                                     {
-                                        ed.note="ERROR: Warp lines must be on edges";
+                                        ed.note="エラー: ワープラインはへやのはじいがいにはおけません";
                                         ed.notedelay=45;
                                     }
                                 }
                                 else
                                 {
-                                    ed.note="ERROR: Cannot have both warp types";
+                                    ed.note="エラー: 2しゅるいのワープはどうじにつかえません";
                                     ed.notedelay=45;
                                 }
                                 ed.lclickdelay=1;
@@ -5142,7 +5142,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                                 }
                                 else
                                 {
-                                    ed.note="ERROR: Max number of crewmates is 20";
+                                    ed.note="エラー: なかまのかずは20にんまでです";
                                     ed.notedelay=45;
                                 }
                             }

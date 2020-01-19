@@ -728,7 +728,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             break;
         case 4:
             //End of opening cutscene for now
-            dwgfx.createtextbox("  Press arrow keys or WASD to move  ", -1, 195, 174, 174, 174);
+            dwgfx.createtextbox("  やじるしか WASD キーでいどう  ", -1, 195, 174, 174, 174);
             dwgfx.textboxtimer(60);
             state = 0;
             break;
@@ -759,8 +759,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             if (obj.flags[13] == 0)
             {
                 obj.changeflag(13, 1);
-                dwgfx.createtextbox("  Press ENTER to view map  ", -1, 155, 174, 174, 174);
-                dwgfx.addline("      and quicksave");
+                dwgfx.createtextbox("  ENTER をおしてマップをみたり  ", -1, 155, 174, 174, 174);
+                dwgfx.addline("      クイックセーブしたりする");
                 dwgfx.textboxtimer(60);
             }
             state = 0;
@@ -930,8 +930,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
         case 17:
             //Arrow key tutorial
             obj.removetrigger(17);
-            dwgfx.createtextbox(" If you prefer, you can press UP or ", -1, 195, 174, 174, 174);
-            dwgfx.addline("   DOWN instead of ACTION to flip.");
+            dwgfx.createtextbox(" ACTION のかわりに うえ または ", -1, 195, 174, 174, 174);
+            dwgfx.addline("   した をおしてもはんてんできます。");
             dwgfx.textboxtimer(100);
             state = 0;
             break;
@@ -960,7 +960,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
                 dwgfx.textboxremovefast();
                 obj.changeflag(3, 1);
                 state = 0;
-                dwgfx.createtextbox("  Press ACTION to flip  ", -1, 25, 174, 174, 174);
+                dwgfx.createtextbox("  ACTION をおしてはんてん  ", -1, 25, 174, 174, 174);
                 dwgfx.textboxtimer(60);
             }
             obj.removetrigger(22);
@@ -1961,14 +1961,14 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             state++;
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("        Congratulations!       ", 50, 105, 174, 174, 174);
+                dwgfx.createtextbox("        おめでとうございます!       ", 50, 105, 174, 174, 174);
                 dwgfx.addline("");
-                dwgfx.addline("You have found a shiny trinket!");
+                dwgfx.addline("ぴかぴかのトリンケットをみつけた!");
                 dwgfx.textboxcenterx();
 
                 if(map.custommode)
                 {
-                    dwgfx.createtextbox(" " + help.number(trinkets) + " out of " + help.number(map.customtrinkets)+ " ", 50, 65, 174, 174, 174);
+                    dwgfx.createtextbox(" " + help.number(map.customtrinkets) + "こ ちゅうの " + help.number(map.trinkets)+ "こ ", 50, 65, 174, 174, 174);
                     dwgfx.textboxcenterx();
                 }
                 else
@@ -1979,14 +1979,14 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else
             {
-                dwgfx.createtextbox("        Congratulations!       ", 50, 85, 174, 174, 174);
+                dwgfx.createtextbox("        おめでとうございます!       ", 50, 85, 174, 174, 174);
                 dwgfx.addline("");
-                dwgfx.addline("You have found a shiny trinket!");
+                dwgfx.addline("ぴかぴかのトリンケットをみつけた!");
                 dwgfx.textboxcenterx();
 
                 if(map.custommode)
                 {
-                    dwgfx.createtextbox(" " + help.number(trinkets) + " out of " + help.number(map.customtrinkets)+ " ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox(" " + help.number(map.customtrinkets) + "こ ちゅうの " + help.number(map.trinkets) + "こ ", 50, 135, 174, 174, 174);
                     dwgfx.textboxcenterx();
                 }
                 else
@@ -2020,44 +2020,44 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             state++;
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("        Congratulations!       ", 50, 105, 174, 174, 174);
+                dwgfx.createtextbox("        おめでとうございます!       ", 50, 105, 174, 174, 174);
                 dwgfx.addline("");
-                dwgfx.addline("You have found a lost crewmate!");
+                dwgfx.addline("ゆくえふめいのなかまをみつけた!");
                 dwgfx.textboxcenterx();
 
                 if(int(map.customcrewmates-crewmates)==0)
                 {
-                    dwgfx.createtextbox("     All crewmates rescued!    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("     なかまをみんなたすけた!    ", 50, 135, 174, 174, 174);
                 }
                 else if(map.customcrewmates-crewmates==1)
                 {
-                    dwgfx.createtextbox("    " + help.number(int(map.customcrewmates-crewmates))+ " remains    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("    のこり " + help.number(int(map.customcrewmates-crewmates))+ "にん    ", 50, 135, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("     " + help.number(int(map.customcrewmates-crewmates))+ " remain    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("     のこり " + help.number(int(map.customcrewmates-crewmates))+ "にん    ", 50, 135, 174, 174, 174);
                 }
                 dwgfx.textboxcenterx();
 
             }
             else
             {
-                dwgfx.createtextbox("        Congratulations!       ", 50, 85, 174, 174, 174);
+                dwgfx.createtextbox("        おめでとうございます!       ", 50, 85, 174, 174, 174);
                 dwgfx.addline("");
-                dwgfx.addline("You have found a lost crewmate!");
+                dwgfx.addline("ゆくえふめいのなかまをみつけた!");
                 dwgfx.textboxcenterx();
 
                 if(int(map.customcrewmates-crewmates)==0)
                 {
-                    dwgfx.createtextbox("     All crewmates rescued!    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("     なかまをみんなたすけた!    ", 50, 135, 174, 174, 174);
                 }
                 else if(map.customcrewmates-crewmates==1)
                 {
-                    dwgfx.createtextbox("    " + help.number(int(map.customcrewmates-crewmates))+ " remains    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("    のこり " + help.number(int(map.customcrewmates-crewmates))+ "にん    ", 50, 135, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("     " + help.number(int(map.customcrewmates-crewmates))+ " remain    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("     のこり " + help.number(int(map.customcrewmates-crewmates))+ "にん    ", 50, 135, 174, 174, 174);
                 }
                 dwgfx.textboxcenterx();
             }
@@ -2368,8 +2368,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 dwgfx.createtextbox("", -1, 64+8+16, 175,174,174);
             }
-            dwgfx.addline("     You have rescued  ");
-            dwgfx.addline("      a crew member!   ");
+            dwgfx.addline("      なかまを     ");
+            dwgfx.addline("     たすけた!     ");
             dwgfx.addline("");
             dwgfx.textboxcenterx();
             break;
@@ -2380,7 +2380,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             temp = 6 - crewrescued();
             if (temp == 1)
             {
-                tempstring = "  One remains  ";
+                tempstring = "  のこり 1にん  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2392,7 +2392,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else if (temp > 0)
             {
-                tempstring = "  " + help.number(temp) + " remain  ";
+                tempstring = "  のこり " + help.number(temp) + "にん  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2421,11 +2421,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -2483,8 +2483,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 dwgfx.createtextbox("", -1, 64+8+16, 174,175,174);
             }
-            dwgfx.addline("     You have rescued  ");
-            dwgfx.addline("      a crew member!   ");
+            dwgfx.addline("      なかまを     ");
+            dwgfx.addline("     たすけた!     ");
             dwgfx.addline("");
             dwgfx.textboxcenterx();
             break;
@@ -2495,7 +2495,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             temp = 6 - crewrescued();
             if (temp == 1)
             {
-                tempstring = "  One remains  ";
+                tempstring = "  のこり 1にん  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2507,7 +2507,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else if (temp > 0)
             {
-                tempstring = "  " + help.number(temp) + " remain  ";
+                tempstring = "  のこり " + help.number(temp) + "にん  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2521,11 +2521,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 if (dwgfx.flipmode)
                 {
-                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 72, 174, 174, 174);
+                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 72, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 128+16, 174, 174, 174);
+                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 128+16, 174, 174, 174);
                 }
             }
             dwgfx.textboxcenterx();
@@ -2536,11 +2536,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -2597,8 +2597,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 dwgfx.createtextbox("", -1, 64+8+16, 174,174,175);
             }
-            dwgfx.addline("     You have rescued  ");
-            dwgfx.addline("      a crew member!   ");
+            dwgfx.addline("      なかまを     ");
+            dwgfx.addline("     たすけた!     ");
             dwgfx.addline("");
             dwgfx.textboxcenterx();
             break;
@@ -2609,7 +2609,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             temp = 6 - crewrescued();
             if (temp == 1)
             {
-                tempstring = "  One remains  ";
+                tempstring = "  のこり 1にん  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2621,7 +2621,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else if (temp > 0)
             {
-                tempstring = "  " + help.number(temp) + " remain  ";
+                tempstring = "  のこり " + help.number(temp) + "にん  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2635,11 +2635,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 if (dwgfx.flipmode)
                 {
-                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 72, 174, 174, 174);
+                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 72, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 128+16, 174, 174, 174);
+                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 128+16, 174, 174, 174);
                 }
             }
             dwgfx.textboxcenterx();
@@ -2650,11 +2650,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -2712,8 +2712,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 dwgfx.createtextbox("", -1, 64+8+16, 175,175,174);
             }
-            dwgfx.addline("     You have rescued  ");
-            dwgfx.addline("      a crew member!   ");
+            dwgfx.addline("      なかまを     ");
+            dwgfx.addline("     たすけた!     ");
             dwgfx.addline("");
             dwgfx.textboxcenterx();
             break;
@@ -2724,7 +2724,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             temp = 6 - crewrescued();
             if (temp == 1)
             {
-                tempstring = "  One remains  ";
+                tempstring = "  のこり 1にん  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2736,7 +2736,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else if (temp > 0)
             {
-                tempstring = "  " + help.number(temp) + " remain  ";
+                tempstring = "  のこり " + help.number(temp) + "にん";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2750,11 +2750,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 if (dwgfx.flipmode)
                 {
-                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 72, 174, 174, 174);
+                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 72, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 128+16, 174, 174, 174);
+                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 128+16, 174, 174, 174);
                 }
             }
             dwgfx.textboxcenterx();
@@ -2765,11 +2765,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -2845,8 +2845,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 dwgfx.createtextbox("", -1, 64+8+16, 175,174,175);
             }
-            dwgfx.addline("     You have rescued  ");
-            dwgfx.addline("      a crew member!   ");
+            dwgfx.addline("      なかまを     ");
+            dwgfx.addline("     たすけた!     ");
             dwgfx.addline("");
             dwgfx.textboxcenterx();
             break;
@@ -2857,7 +2857,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             temp = 6 - crewrescued();
             if (temp == 1)
             {
-                tempstring = "  One remains  ";
+                tempstring = "  のこり 1にん  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2869,7 +2869,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else if (temp > 0)
             {
-                tempstring = "  " + help.number(temp) + " remain  ";
+                tempstring = "  のこり " + help.number(temp) + "にん ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2883,11 +2883,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 if (dwgfx.flipmode)
                 {
-                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 72, 174, 174, 174);
+                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 72, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 128+16, 174, 174, 174);
+                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 128+16, 174, 174, 174);
                 }
             }
             dwgfx.textboxcenterx();
@@ -2898,11 +2898,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -3125,11 +3125,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 175-24, 0, 0, 0);
+                dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 175-24, 0, 0, 0);
             }
             else
             {
-                dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 64, 0, 0, 0);
+                dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 64, 0, 0, 0);
             }
             savetime = timestring(help);
             break;
@@ -3140,12 +3140,12 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             tempstring = help.number(trinkets);
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("Trinkets Found:", 48, 155-24, 0,0,0);
+                dwgfx.createtextbox("みつけたトリンケット:", 48, 155-24, 0,0,0);
                 dwgfx.createtextbox(tempstring, 180, 155-24, 0, 0, 0);
             }
             else
             {
-                dwgfx.createtextbox("Trinkets Found:", 48, 84, 0,0,0);
+                dwgfx.createtextbox("みつけたトリンケット:", 48, 84, 0,0,0);
                 dwgfx.createtextbox(tempstring, 180, 84, 0, 0, 0);
             }
             break;
@@ -3156,12 +3156,12 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             tempstring = savetime;
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("   Game Time:", 64, 143-24, 0,0,0);
+                dwgfx.createtextbox("   ゲームじかん:", 64, 143-24, 0,0,0);
                 dwgfx.createtextbox(tempstring, 180, 143-24, 0, 0, 0);
             }
             else
             {
-                dwgfx.createtextbox("   Game Time:", 64, 96, 0,0,0);
+                dwgfx.createtextbox("   ゲームじかん:", 64, 96, 0,0,0);
                 dwgfx.createtextbox(tempstring, 180, 96, 0, 0, 0);
             }
             break;
@@ -3171,12 +3171,12 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" Total Flips:", 64, 116-24, 0,0,0);
+                dwgfx.createtextbox(" はんてんかいすう:", 64, 116-24, 0,0,0);
                 dwgfx.createtextbox(help.String(totalflips), 180, 116-24, 0, 0, 0);
             }
             else
             {
-                dwgfx.createtextbox(" Total Flips:", 64, 123, 0,0,0);
+                dwgfx.createtextbox(" はんてんかいすう:", 64, 123, 0,0,0);
                 dwgfx.createtextbox(help.String(totalflips), 180, 123, 0, 0, 0);
             }
             break;
@@ -3186,12 +3186,12 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("Total Deaths:", 64, 104-24, 0,0,0);
+                dwgfx.createtextbox("しんだかいすう:", 64, 104-24, 0,0,0);
                 dwgfx.createtextbox(help.String(deathcounts), 180, 104-24, 0, 0, 0);
             }
             else
             {
-                dwgfx.createtextbox("Total Deaths:", 64, 135, 0,0,0);
+                dwgfx.createtextbox("しんだかいすう:", 64, 135, 0,0,0);
                 dwgfx.createtextbox(help.String(deathcounts), 180, 135, 0, 0, 0);
             }
             break;
@@ -3201,13 +3201,13 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                tempstring = "Hardest Room (with " + help.String(hardestroomdeaths) + " deaths)";
+                tempstring = "さいなんかんのへや ( " + help.String(hardestroomdeaths) + " かいしんだ)";
                 dwgfx.createtextbox(tempstring, -1, 81-24, 0,0,0);
                 dwgfx.createtextbox(hardestroom, -1, 69-24, 0, 0, 0);
             }
             else
             {
-                tempstring = "Hardest Room (with " + help.String(hardestroomdeaths) + " deaths)";
+                tempstring = "さいなんかんのへや ( " + help.String(hardestroomdeaths) + " かいしんだ)";
                 dwgfx.createtextbox(tempstring, -1, 158, 0,0,0);
                 dwgfx.createtextbox(hardestroom, -1, 170, 0, 0, 0);
             }
@@ -3218,11 +3218,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -6736,29 +6736,29 @@ std::string Game::unrescued()
     //Randomly return the name of an unrescued crewmate
     if (fRandom() * 100 > 50)
     {
-        if (!crewstats[5]) return "Victoria";
-        if (!crewstats[2]) return "Vitellary";
-        if (!crewstats[4]) return "Verdigris";
-        if (!crewstats[3]) return "Vermilion";
+        if (!crewstats[5]) return "ビクトリア";
+        if (!crewstats[2]) return "ビテラリー";
+        if (!crewstats[4]) return "バーディグリス";
+        if (!crewstats[3]) return "バーミリオン";
     }
     else
     {
         if (fRandom() * 100 > 50)
         {
-            if (!crewstats[2]) return "Vitellary";
-            if (!crewstats[4]) return "Verdigris";
-            if (!crewstats[3]) return "Vermilion";
-            if (!crewstats[5]) return "Victoria";
+            if (!crewstats[2]) return "ビテラリー";
+            if (!crewstats[4]) return "バーディグリス";
+            if (!crewstats[3]) return "バーミリオン";
+            if (!crewstats[5]) return "ビクトリア";
         }
         else
         {
-            if (!crewstats[4]) return "Verdigris";
-            if (!crewstats[3]) return "Vermilion";
-            if (!crewstats[5]) return "Victoria";
-            if (!crewstats[2]) return "Vitellary";
+            if (!crewstats[4]) return "バーディグリス";
+            if (!crewstats[3]) return "バーミリオン";
+            if (!crewstats[5]) return "ビクトリア";
+            if (!crewstats[2]) return "ビテラリー";
         }
     }
-    return "you";
+    return "じぶん";
 }
 
 void Game::gameclock()
@@ -6868,17 +6868,17 @@ void Game::createmenu( std::string t )
     if (t == "mainmenu")
     {
 				#if defined(MAKEANDPLAY)
-					menuoptions[0] = "player levels";
+					menuoptions[0] = "プレイヤーレベル";
 					menuoptionsactive[0] = true;
-					menuoptions[1] = "graphic options";
+					menuoptions[1] = "グラフィックせってい";
 					menuoptionsactive[1] = true;
-					menuoptions[2] = "game options";
+					menuoptions[2] = "ゲームせってい";
 					menuoptionsactive[2] = true;
-					menuoptions[3] = "view credits";
+					menuoptions[3] = "クレジットをみる";
 					menuoptionsactive[3] = true;
-                    menuoptions[4] = "changelog";
+                    menuoptions[4] = "こうしんりれき";
 					menuoptionsactive[4] = true;
-					menuoptions[5] = "quit game";
+					menuoptions[5] = "ゲームしゅうりょう";
 					menuoptionsactive[5] = true;
 					nummenuoptions = 6;
 					menuxoff = -16;
@@ -6905,13 +6905,13 @@ void Game::createmenu( std::string t )
     }
     else if (t == "playerworlds")
     {
-        menuoptions[0] = "play a level";
+        menuoptions[0] = "レベルをあそぶ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "level editor";
+        menuoptions[1] = "レベルをつくる";
         menuoptionsactive[1] = true;
         //menuoptions[2] = "open level folder";
         //menuoptionsactive[2] = true;
-        menuoptions[2] = "back to menu";
+        menuoptions[2] = "メニューにもどる";
         menuoptionsactive[2] = true;
         nummenuoptions = 3;
         menuxoff = -30;
@@ -6919,11 +6919,11 @@ void Game::createmenu( std::string t )
     }
     else if (t == "quickloadlevel")
     {
-        menuoptions[0] = "continue from save";
+        menuoptions[0] = "つづきからあそぶ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "start from beginning";
+        menuoptions[1] = "さいしょからあそぶ";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "back to levels";
+        menuoptions[2] = "レベルせんたくへもどる";
         menuoptionsactive[2] = true;
         nummenuoptions = 3;
         menuxoff = -40;
@@ -6931,9 +6931,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "youwannaquit")
     {
-        menuoptions[0] = "yes, quit";
+        menuoptions[0] = "しゅうりょうする";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "no, return";
+        menuoptions[1] = "メニューへもどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 0;
@@ -7000,17 +7000,17 @@ void Game::createmenu( std::string t )
             }
             if((size_t) ((levelpage*8)+8) <ed.ListOfMetaData.size())
             {
-                menuoptions[tcount] = "next page";
+                menuoptions[tcount] = "つぎのページ";
                 menuoptionsactive[tcount] = true;
                 tcount++;
             }
             else
             {
-                menuoptions[tcount] = "first page";
+                menuoptions[tcount] = "さいしょのページ";
                 menuoptionsactive[tcount] = true;
                 tcount++;
             }
-            menuoptions[tcount] = "return to menu";
+            menuoptions[tcount] = "メニューへ戻る";
             menuoptionsactive[tcount] = true;
             tcount++;
 
@@ -7021,15 +7021,15 @@ void Game::createmenu( std::string t )
     }
     else if (t == "graphicoptions")
     {
-        menuoptions[0] = "toggle fullscreen";
+        menuoptions[0] = "フルスクリーンのきりかえ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "toggle letterbox";
+        menuoptions[1] = "レターボックスのきりかえ";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "toggle filter";
+        menuoptions[2] = "フィルターのきりかえ";
         menuoptionsactive[2] = true;
-        menuoptions[3] = "toggle analogue";
+        menuoptions[3] = "アナログひょうじのきりかえ";
         menuoptionsactive[3] = true;
-        menuoptions[4] = "return";
+        menuoptions[4] = "もどる";
         menuoptionsactive[4] = true;
         nummenuoptions = 5;
         menuxoff = -50;
@@ -7091,17 +7091,17 @@ void Game::createmenu( std::string t )
     }
     else if (t == "ed_settings")
     {
-        menuoptions[0] = "change description";
+        menuoptions[0] = "せつめいぶんをかえる";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "edit scripts";
+        menuoptions[1] = "スクリプトをへんしゅう";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "change music";
+        menuoptions[2] = "おんがくをかえる";
         menuoptionsactive[2] = true;
-        menuoptions[3] = "load level";
+        menuoptions[3] = "レベルをロードする";
         menuoptionsactive[3] = true;
-        menuoptions[4] = "save level";
+        menuoptions[4] = "レベルをセーブする";
         menuoptionsactive[4] = true;
-        menuoptions[5] = "quit to main menu";
+        menuoptions[5] = "メインメニューへ戻る";
         menuoptionsactive[5] = true;
 
         nummenuoptions = 6;
@@ -7110,15 +7110,15 @@ void Game::createmenu( std::string t )
     }
     else if (t == "ed_desc")
     {
-        menuoptions[0] = "change name";
+        menuoptions[0] = "なまえをかえる";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "change author";
+        menuoptions[1] = "さくしゃをかえる";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "change description";
+        menuoptions[2] = "せつめいぶんをかえる";
         menuoptionsactive[2] = true;
-        menuoptions[3] = "change website";
+        menuoptions[3] = "ウェブサイトをかえる";
         menuoptionsactive[3] = true;
-        menuoptions[4] = "back to settings";
+        menuoptions[4] = "せっていへもどる";
         menuoptionsactive[4] = true;
 
         nummenuoptions = 5;
@@ -7127,9 +7127,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "ed_music")
     {
-        menuoptions[0] = "next song";
+        menuoptions[0] = "つぎのきょく";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "back";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = -10;
@@ -7137,11 +7137,11 @@ void Game::createmenu( std::string t )
     }
     else if (t == "ed_quit")
     {
-        menuoptions[0] = "yes, save and quit";
+        menuoptions[0] = "セーブしてメニューへもどる";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "no, quit without saving";
+        menuoptions[1] = "セーブしないでメニューへもどる";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "return to editor";
+        menuoptions[2] = "エディターへもどる";
         menuoptionsactive[2] = true;
         nummenuoptions = 3;
         menuxoff = -50;
@@ -7150,13 +7150,13 @@ void Game::createmenu( std::string t )
     else if (t == "options")
     {
 				#if defined(MAKEANDPLAY)
-					menuoptions[0] = "accessibility options";
+					menuoptions[0] = "アクセシビリティのせってい";
 					menuoptionsactive[0] = true;
-					menuoptions[1] = "game pad options";
+					menuoptions[1] = "ゲームパッドのせってい";
 					menuoptionsactive[1] = true;
-					menuoptions[2] = "clear data";
+					menuoptions[2] = "データをけす";
 					menuoptionsactive[2] = true;
-					menuoptions[3] = "return";
+					menuoptions[3] = "もどる";
 					menuoptionsactive[3] = true;
 					nummenuoptions = 4;
 					menuxoff = -40;
@@ -7180,19 +7180,19 @@ void Game::createmenu( std::string t )
     }
     else if (t == "accessibility")
     {
-        menuoptions[0] = "animated backgrounds";
+        menuoptions[0] = "うごくはいけい";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "screen effects";
+        menuoptions[1] = "スクリーンエフェクト";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "text outline";
+        menuoptions[2] = "もじのふちどり";
         menuoptionsactive[2] = true;
-        menuoptions[3] = "invincibility";
+        menuoptions[3] = "むてきモード";
         menuoptionsactive[3] = true;
-        menuoptions[4] = "slowdown";
+        menuoptions[4] = "ゲームのそくど";
         menuoptionsactive[4] = true;
-        menuoptions[5] = "music";
+        menuoptions[5] = "おんがく";
         menuoptionsactive[5] = true;
-        menuoptions[6] = "return";
+        menuoptions[6] = "もどる";
         menuoptionsactive[6] = true;
         nummenuoptions = 7;
         menuxoff = -60;
@@ -7200,15 +7200,15 @@ void Game::createmenu( std::string t )
     }
 	else if(t == "controller")
 	{
-		menuoptions[0] = "analog stick sensitivity";
+		menuoptions[0] = "アナログスティックのかんど";
 		menuoptionsactive[0] = true;
-		menuoptions[1] = "bind flip";
+		menuoptions[1] = "はんてんのボタンをわりあてる";
 		menuoptionsactive[1] = true;
-		menuoptions[2] = "bind enter";
+		menuoptions[2] = "ENTERのボタンをわりあてる";
 		menuoptionsactive[2] = true;
-		menuoptions[3] = "bind menu";
+		menuoptions[3] = "メニューのボタンをわりあてる";
 		menuoptionsactive[3] = true;
-		menuoptions[4] = "return";
+		menuoptions[4] = "もどる";
 		menuoptionsactive[4] = true;
 		nummenuoptions = 5;
 		menuxoff = -40;
@@ -7216,9 +7216,9 @@ void Game::createmenu( std::string t )
 	}
     else if (t == "cleardatamenu")
     {
-        menuoptions[0] = "no! don't delete";
+        menuoptions[0] = "ぜったいにけさない!";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "yes, delete everything";
+        menuoptions[1] = "すべてをけす";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = -30;
@@ -7226,9 +7226,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "setinvincibility")
     {
-        menuoptions[0] = "no, return to options";
+        menuoptions[0] = "せっていへもどる";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "yes, enable";
+        menuoptions[1] = "アリにする";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = -30;
@@ -7236,9 +7236,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "setslowdown1")
     {
-        menuoptions[0] = "no, return to options";
+        menuoptions[0] = "せっていへもどる";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "yes, delete saves";
+        menuoptions[1] = "セーブデータをけす";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = -30;
@@ -7246,13 +7246,13 @@ void Game::createmenu( std::string t )
     }
     else if (t == "setslowdown2")
     {
-        menuoptions[0] = "normal speed";
+        menuoptions[0] = "ふつう";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "80% speed";
+        menuoptions[1] = "80%";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "60% speed";
+        menuoptions[2] = "60%";
         menuoptionsactive[2] = true;
-        menuoptions[3] = "40% speed";
+        menuoptions[3] = "40%";
         menuoptionsactive[3] = true;
         nummenuoptions = 4;
         menuxoff = -40;
@@ -7280,7 +7280,7 @@ void Game::createmenu( std::string t )
     }
     else if (t == "changelog")
     {
-        menuoptions[0] = "return";
+        menuoptions[0] = "もどる";
         menuoptionsactive[0] = true;
         nummenuoptions = 1;
         menuxoff = 26;
@@ -7288,9 +7288,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits")
     {
-        menuoptions[0] = "next page";
+        menuoptions[0] = "つぎのページ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7299,12 +7299,12 @@ void Game::createmenu( std::string t )
     else if (t == "credits2")
     {
 #if defined(MAKEANDPLAY)
-        menuoptions[0] = "first page";
+        menuoptions[0] = "さいしょのページ";
 #elif !defined(MAKEANDPLAY)
         menuoptions[0] = "next page";
 #endif
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7312,9 +7312,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits_ce")
     {
-        menuoptions[0] = "next page";
+        menuoptions[0] = "つぎのページ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7322,9 +7322,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits25")
     {
-        menuoptions[0] = "next page";
+        menuoptions[0] = "つぎのページ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7332,9 +7332,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits3")
     {
-        menuoptions[0] = "next page";
+        menuoptions[0] = "つぎのページ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7342,9 +7342,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits4")
     {
-        menuoptions[0] = "next page";
+        menuoptions[0] = "つぎのページ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7352,9 +7352,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits5")
     {
-        menuoptions[0] = "next page";
+        menuoptions[0] = "つぎのページ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7362,9 +7362,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits6")
     {
-        menuoptions[0] = "next page";
+        menuoptions[0] = "つぎのページ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7372,9 +7372,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits7")
     {
-        menuoptions[0] = "next page";
+        menuoptions[0] = "つぎのページ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7382,9 +7382,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits8")
     {
-        menuoptions[0] = "next page";
+        menuoptions[0] = "つぎのページ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7392,9 +7392,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits9")
     {
-        menuoptions[0] = "first page";
+        menuoptions[0] = "さいしょのページ";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "return";
+        menuoptions[1] = "もどる";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;

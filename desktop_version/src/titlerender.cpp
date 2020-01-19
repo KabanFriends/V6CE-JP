@@ -228,8 +228,8 @@ void titlerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, U
         dwgfx.drawsprite((160 - 96) + 5 * 32, 50, 23, tr, tg, tb);
         dwgfx.Print(-1,95,"COMMUNITY EDITION",tr, tg, tb, true);
 
-        dwgfx.Print(5, 175, "[ アクション をおしてスタート ]", tr, tg, tb, true);
-        dwgfx.Print(5, 195, "アクション = SPACE, Z, V", int(tr*0.5f), int(tg*0.5f), int(tb*0.5f), true);
+        dwgfx.Print(5, 175, "[ ACTION をおしてスタート ]", tr, tg, tb, true);
+        dwgfx.Print(5, 195, "ACTION = SPACE, Z, V", int(tr*0.5f), int(tg*0.5f), int(tb*0.5f), true);
 
     }
     else
@@ -2632,7 +2632,7 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
           if (dwgfx.flipmode)
           {
               dwgfx.Print(0, 164, "[あつめたトリンケット]", 196, 196, 255 - help.glow, true);
-              dwgfx.Print(0, 152, help.number(game.trinkets) + " out of " + help.number(map.customtrinkets), 96,96,96, true);
+              dwgfx.Print(0, 152, help.number(map.customtrinkets) + "こ ちゅうの " + help.number(game.trinkets) + "こ", 96,96,96, true);
 
               dwgfx.Print(0, 114, "[しんだかいすう]", 196, 196, 255 - help.glow, true);
               dwgfx.Print(0, 102,help.String(game.deathcounts),  96,96,96, true);
@@ -2643,7 +2643,7 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
           else
           {
               dwgfx.Print(0, 52, "[あつめたトリンケット]", 196, 196, 255 - help.glow, true);
-              dwgfx.Print(0, 64, help.number(game.trinkets) + " out of "+help.number(map.customtrinkets), 96,96,96, true);
+              dwgfx.Print(0, 64, help.number(map.customtrinkets) + "こ ちゅうの " + help.number(game.trinkets) + "こ", 96,96,96, true);
 
               dwgfx.Print(0, 102, "[しんだかいすう]", 196, 196, 255 - help.glow, true);
               dwgfx.Print(0, 114,help.String(game.deathcounts),  96,96,96, true);
