@@ -85,33 +85,50 @@ int FILESYSTEM_init(char *argvZero)
 	/* Mount the stock content last */
 #ifdef __APPLE__
         CFURLRef appUrlRef = CFBundleCopyResourceURL(CFBundleGetMainBundle(), CFSTR("data.zip"), NULL, NULL);
-        CFStringRef filePathRef = CFURLCopyPath(appUrlRef);
-        const char* data_zip = CFStringGetCStringPtr(filePathRef, kCFStringEncodingUTF8);
+        if (!appUrlRef) {
+            SDL_ShowSimpleMessageBox(
+                    SDL_MESSAGEBOX_ERROR,
+                    "Couldn't find data.zip in .app!",
+                    "Please place data.zip in Contents/Resources\n"
+                    "inside VVVVVV-CE.app.",
+                    NULL
+                    );
+            return 0;
+        }
+        if (!CFURLGetFileSystemRepresentation(appUrlRef, true, (uint8_t*) output, MAX_PATH)) {
+            SDL_ShowSimpleMessageBox(
+                    SDL_MESSAGEBOX_ERROR,
+                    "Couldn't get data.zip path!",
+                    "Please report this error.",
+                    NULL
+                    );
+            return 0;
+        }
 #else
 	strcpy(output, PHYSFS_getBaseDir());
 	strcat(output, "data.zip");
-        const char* data_zip = output;
 #endif
-	if (!PHYSFS_mount(data_zip, NULL, 1))
+	if (!PHYSFS_mount(output, NULL, 1))
 	{
 		puts("Error: data.zip missing!");
 		puts("You do not have data.zip!");
 		puts("Grab it from your purchased copy of the game,");
 		puts("or get it from the free Make and Play Edition.");
 
+                std::string message = "You do not have data.zip at ";
+                message += output;
+                message += "!\n\nGrab it from your purchased copy of the game,"
+                            "\nor get it from the free Make and Play Edition.";
 		SDL_ShowSimpleMessageBox(
 			SDL_MESSAGEBOX_ERROR,
 			"data.zip missing!",
-			"You do not have data.zip!"
-			"\n\nGrab it from your purchased copy of the game,"
-			"\nor get it from the free Make and Play Edition.",
+                        message.c_str(),
 			NULL
 		);
 		return 0;
 	}
 #ifdef __APPLE__
-CFRelease(filePathRef);
-CFRelease(appUrlRef);
+        CFRelease(appUrlRef);
 #endif
 
 	strcpy(output, PHYSFS_getBaseDir());

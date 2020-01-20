@@ -9,6 +9,13 @@
 
 class KeyPoll; class Graphics; class Game; class mapclass; class entityclass; class UtilityClass;
 
+enum tiletyp {
+    TILE_NONE,
+    TILE_BACKGROUND,
+    TILE_SPIKE,
+    TILE_FOREGROUND,
+};
+
 std::string find_title(std::string_view buf);
 std::string find_desc1(std::string_view buf);
 std::string find_desc2(std::string_view buf);
@@ -126,11 +133,19 @@ class editorclass{
 
   void placetilelocal(int x, int y, int t);
 
+  int gettilelocal(int x, int y);
+  void settilelocal(int x, int y, int tile);
+
   int getenemyframe(int t);
   int base(int x, int y);
 
   int backbase(int x, int y);
 
+  enum tiletyp gettiletyp(int room, int tile);
+  enum tiletyp gettiletyplocal(int x, int y);
+  enum tiletyp getabstiletyp(int x, int y);
+
+  int absat(int x, int y);
   int at(int x, int y);
 
   int freewrap(int x, int y);
@@ -141,6 +156,7 @@ class editorclass{
 
   int spikefree(int x, int y);
   int free(int x, int y);
+  int getfree(enum tiletyp tile);
   int absfree(int x, int y);
 
   int match(int x, int y);
@@ -152,6 +168,7 @@ class editorclass{
   void load(std::string& _path, Graphics& dwgfx);
   void save(std::string& _path);
   void generatecustomminimap(Graphics& dwgfx, mapclass& map);
+  int toweredgetile(int x, int y);
   int edgetile(int x, int y);
   int warpzoneedgetile(int x, int y);
   int outsideedgetile(int x, int y);
@@ -159,7 +176,9 @@ class editorclass{
   int backedgetile(int x, int y);
 
   int labspikedir(int x, int y, int t);
+  int spikebase(int x, int y);
   int spikedir(int x, int y);
+  int towerspikedir(int x, int y);
   int findtrinket(int t);
   int findcrewmate(int t);
   int findwarptoken(int t);
@@ -192,6 +211,7 @@ class editorclass{
   int keydelay, lclickdelay = 0;
   bool savekey, loadkey = false;
   int levx, levy = 0;
+  int levaltstate = 0;
   int entframe, entframedelay = 0;
 
   bool roomtextmod = false;
@@ -261,24 +281,30 @@ class editorclass{
   growing_vector<edaltstate> altstates;
 
   int getedaltstatenum(int rxi, int ryi, int state);
+  void addaltstate(int rxi, int ryi, int state);
+  void removealtstate(int rxi, int ryi, int state);
+  int getnumaltstates(int rxi, int ryi);
 };
 
-void addedentity(int xp, int yp, int tp, int p1=0, int p2=0, int p3=0, int p4=0, int p5=320, int p6=240, int state=0);
+void addedentity(int xp, int yp, int tp, int p1=0, int p2=0, int p3=0, int p4=0, int p5=320, int p6=240);
 
-void naddedentity(int xp, int yp, int tp, int p1=0, int p2=0, int p3=0, int p4=0, int p5=320, int p6=240, int state=0);
+void naddedentity(int xp, int yp, int tp, int p1=0, int p2=0, int p3=0, int p4=0, int p5=320, int p6=240);
 
 void copyedentity(int a, int b);
 
 void removeedentity(int t);
 
-int edentat(int xp, int yp);
+int edentat(int xp, int yp, int state = 0);
 
 
-bool edentclear(int xp, int yp);
+bool edentclear(int xp, int yp, int state = 0);
 
 void fillbox(Graphics& dwgfx, int x, int y, int x2, int y2, int c);
 
 void fillboxabs(Graphics& dwgfx, int x, int y, int x2, int y2, int c);
+
+int dmcap(void);
+int dmwidth(void);
 
 void editorrender(KeyPoll& key, Graphics& dwgfx, Game& game,  mapclass& map, entityclass& obj, UtilityClass& help);
 

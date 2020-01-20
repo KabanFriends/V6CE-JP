@@ -21,6 +21,7 @@
 #include <stdexcept>
 #include <utf8/checked.h>
 #include <physfs.h>
+#include <iterator>
 
 edlevelclass::edlevelclass()
 {
@@ -80,6 +81,8 @@ editorclass::editorclass()
     {
         vmult.push_back(int(i * 40 * maxwidth));
     }
+
+    altstates.resize(500);
 
     reset();
 }
@@ -222,6 +225,7 @@ void editorclass::reset()
     tiley=0;
     levx=0;
     levy=0;
+    levaltstate=0;
     keydelay=0;
     lclickdelay=0;
     savekey=false;
@@ -543,14 +547,13 @@ void editorclass::loadlevel( int rxi, int ryi, int altstate )
     } else {
         for (int j = 0; j < 30; j++)
             for (int i = 0; i < 40; i++)
-                // Not bothering with whatever that `vmult` shit is
                 swapmap[i + j*40] = altstates[thisstate].tiles[i + j*40];
     }
 }
 
 int editorclass::getlevelcol(int t)
 {
-    if(level[t].tileset==0)  //Space Station
+    if(level[t].tileset==0 || level[t].tileset==2)  //Station or Tower
     {
         return level[t].tilecol;
     }
@@ -898,7 +901,31 @@ int editorclass::getwarpbackground(int rx, int ry)
         }
         break;
     case 5: //Tower
-        return 6;
+        temp = (level[tmp].tilecol) / 5;
+        switch(temp)
+        {
+        case 0:
+            return 1;
+            break;
+        case 1:
+            return 4;
+            break;
+        case 2:
+            return 5;
+            break;
+        case 3:
+            return 0;
+            break;
+        case 4:
+            return 3;
+            break;
+        case 5:
+            return 2;
+            break;
+        default:
+            return 6;
+            break;
+        }
         break;
     default:
         return 6;
@@ -953,6 +980,7 @@ int editorclass::getenemyframe(int t)
 
 void editorclass::placetile( int x, int y, int t )
 {
+    // Unused, no need to add altstates support to this function
     if(x>=0 && y>=0 && x<mapwidth*40 && y<mapheight*30)
     {
         contents[x+(levx*40)+vmult[y+(levy*30)]]=t;
@@ -962,10 +990,24 @@ void editorclass::placetile( int x, int y, int t )
 void editorclass::placetilelocal( int x, int y, int t )
 {
     if(x>=0 && y>=0 && x<40 && y<30)
-    {
-        contents[x+(levx*40)+vmult[y+(levy*30)]]=t;
-    }
+        settilelocal(x, y, t);
     updatetiles=true;
+}
+
+int editorclass::gettilelocal(int x, int y)
+{
+    if (levaltstate == 0)
+        return contents[x + levx*40 + vmult[y + levy*30]];
+    else
+        return altstates[getedaltstatenum(levx, levy, levaltstate)].tiles[x + y*40];
+}
+
+void editorclass::settilelocal(int x, int y, int tile)
+{
+    if (levaltstate == 0)
+        contents[x + levx*40 + vmult[y + levy*30]] = tile;
+    else
+        altstates[getedaltstatenum(levx, levy, levaltstate)].tiles[x + y*40] = tile;
 }
 
 int editorclass::base( int x, int y )
@@ -1002,6 +1044,10 @@ int editorclass::base( int x, int y )
     else if(level[temp].tileset==4)   //SHIP
     {
         return 101 + (level[temp].tilecol*3);
+    }
+    else if(level[temp].tileset==5)   //Tower
+    {
+        return 12 + (level[temp].tilecol*30);
     }
     return 0;
 }
@@ -1087,7 +1133,48 @@ int editorclass::backbase( int x, int y )
     {
         return 741 + (level[temp].tilecol*3);
     }
+    else if(level[temp].tileset==5)   //Tower
+    {
+        return 28 + (level[temp].tilecol*30);
+    }
     return 0;
+}
+
+enum tiletyp
+editorclass::gettiletyplocal(int x, int y)
+{
+    return gettiletyp(level[levx + levy*20].tileset, at(x, y));
+}
+
+enum tiletyp
+editorclass::getabstiletyp(int x, int y)
+{
+    int tile = absat(x, y);
+    int room = x / 40 + ((y / 30)*ed.maxwidth);
+
+    return gettiletyp(level[room].tileset, tile);
+}
+
+enum tiletyp
+editorclass::gettiletyp(int tileset, int tile)
+{
+    if (tile == 0)
+        return TILE_NONE;
+
+    if (tileset == 5) {
+        tile = tile % 30;
+        if (tile >= 6 && tile <= 11)
+            return TILE_SPIKE;
+        if (tile >= 12 && tile <= 27)
+            return TILE_FOREGROUND;
+        return TILE_BACKGROUND;
+    }
+
+    if ((tile >= 6 && tile <= 9) || tile == 49 || tile == 50)
+        return TILE_SPIKE;
+    if (tile == 1 || (tile >= 80 && tile <= 679))
+        return TILE_FOREGROUND;
+    return TILE_BACKGROUND;
 }
 
 int editorclass::at( int x, int y )
@@ -1096,107 +1183,64 @@ int editorclass::at( int x, int y )
     if(y<0) return at(x,0);
     if(x>=40) return at(39,y);
     if(y>=30) return at(x,29);
-
-    if(x>=0 && y>=0 && x<40 && y<30)
-    {
+    if (levaltstate == 0)
         return contents[x+(levx*40)+vmult[y+(levy*30)]];
-    }
-    return 0;
+    else
+        return altstates[getedaltstatenum(levx, levy, levaltstate)].tiles[x + y*40];
 }
 
-
+int
+editorclass::absat(int x, int y)
+{
+    if (x < 0) x = x +mapwidth*40;
+    if (y < 0) y = y +mapheight*30;
+    if (x >= (mapwidth*40)) x = x - mapwidth*40;
+    if (y >= (mapheight*30)) y = y - mapheight*30;
+    return contents[x + vmult[y]];
+}
 int editorclass::freewrap( int x, int y )
 {
-    if(x<0) return freewrap(x+(mapwidth*40),y);
-    if(y<0) return freewrap(x,y+(mapheight*30));
-    if(x>=(mapwidth*40)) return freewrap(x-(mapwidth*40),y);
-    if(y>=(mapheight*30)) return freewrap(x,y-(mapheight*30));
-
-    if(x>=0 && y>=0 && x<(mapwidth*40) && y<(mapheight*30))
-    {
-        if(contents[x+vmult[y]]==0)
-        {
-            return 0;
-        }
-        else
-        {
-            if(contents[x+vmult[y]]>=2 && contents[x+vmult[y]]<80)
-            {
-                return 0;
-            }
-            if(contents[x+vmult[y]]>=680)
-            {
-                return 0;
-            }
-        }
-    }
+    temp = getabstiletyp(x, y);
+    if (temp != TILE_FOREGROUND) return 0;
     return 1;
 }
 
 int editorclass::backonlyfree( int x, int y )
 {
     //Returns 1 if tile is a background tile, 0 otherwise
-    if(x<0) return backonlyfree(0,y);
-    if(y<0) return backonlyfree(x,0);
-    if(x>=40) return backonlyfree(39,y);
-    if(y>=30) return backonlyfree(x,29);
-
-    if(x>=0 && y>=0 && x<40 && y<30)
-    {
-        if(contents[x+(levx*40)+vmult[y+(levy*30)]]>=680)
-        {
-            return 1;
-        }
-    }
+    temp = gettiletyplocal(x, y);
+    if (temp == TILE_BACKGROUND)
+        return 1;
     return 0;
 }
 
 int editorclass::backfree( int x, int y )
 {
-    //Returns 0 if tile is not a block or background tile, 1 otherwise
-    if(x<0) return backfree(0,y);
-    if(y<0) return backfree(x,0);
-    if(x>=40) return backfree(39,y);
-    if(y>=30) return backfree(x,29);
-
-    if(x>=0 && y>=0 && x<40 && y<30)
-    {
-        if(contents[x+(levx*40)+vmult[y+(levy*30)]]==0)
-        {
-            return 0;
-        }
-        else
-        {
-            //if(contents[x+(levx*40)+vmult[y+(levy*30)]]>=2 && contents[x+(levx*40)+vmult[y+(levy*30)]]<80){
-            //		return 0;
-            //}
-        }
-    }
+    //Returns 1 if tile is nonzero
+    if (gettiletyplocal(x, y) == TILE_NONE)
+        return 0;
     return 1;
 }
 
 int editorclass::spikefree( int x, int y )
 {
     //Returns 0 if tile is not a block or spike, 1 otherwise
-    if(x==-1) return free(0,y);
-    if(y==-1) return free(x,0);
-    if(x==40) return free(39,y);
-    if(y==30) return free(x,29);
+    if(x==-1) return 1;
+    if(y==-1) return 1;
+    if(x==40) return 1;
+    if(y==30) return 1;
 
-    if(x>=0 && y>=0 && x<40 && y<30)
-    {
-        if(contents[x+(levx*40)+vmult[y+(levy*30)]]==0)
-        {
-            return 0;
-        }
-        else
-        {
-            if(contents[x+(levx*40)+vmult[y+(levy*30)]]>=680)
-            {
-                return 0;
-            }
-        }
-    }
+    temp = gettiletyplocal(x, y);
+    if (temp == TILE_FOREGROUND || temp == TILE_SPIKE)
+        return 1;
+    return 0;
+}
+
+int editorclass::getfree(enum tiletyp thistiletyp)
+{
+    //Returns 0 if tile is not a block, 1 otherwise
+    if (thistiletyp != TILE_FOREGROUND)
+        return 0;
     return 1;
 }
 
@@ -1208,48 +1252,14 @@ int editorclass::free( int x, int y )
     if(x==40) return free(39,y);
     if(y==30) return free(x,29);
 
-    if(x>=0 && y>=0 && x<40 && y<30)
-    {
-        if(contents[x+(levx*40)+vmult[y+(levy*30)]]==0)
-        {
-            return 0;
-        }
-        else
-        {
-            if(contents[x+(levx*40)+vmult[y+(levy*30)]]>=2 && contents[x+(levx*40)+vmult[y+(levy*30)]]<80)
-            {
-                return 0;
-            }
-            if(contents[x+(levx*40)+vmult[y+(levy*30)]]>=680)
-            {
-                return 0;
-            }
-        }
-    }
-    return 1;
+    return getfree(gettiletyplocal(x, y));
 }
 
 int editorclass::absfree( int x, int y )
 {
     //Returns 0 if tile is not a block, 1 otherwise, abs on grid
     if(x>=0 && y>=0 && x<mapwidth*40 && y<mapheight*30)
-    {
-        if(contents[x+vmult[y]]==0)
-        {
-            return 0;
-        }
-        else
-        {
-            if(contents[x+vmult[y]]>=2 && contents[x+vmult[y]]<80)
-            {
-                return 0;
-            }
-            if(contents[x+vmult[y]]>=680)
-            {
-                return 0;
-            }
-        }
-    }
+        return getfree(getabstiletyp(x, y));
     return 1;
 }
 
@@ -1344,53 +1354,112 @@ int editorclass::backmatch( int x, int y )
     return 0;
 }
 
-int editorclass::edgetile( int x, int y )
+int editorclass::toweredgetile( int x, int y )
 {
     switch(match(x,y))
     {
-    case 14:
+    case 14: // true center
         return 0;
         break;
-    case 10:
-        return 80;
+    case 10: // top left
+        return 5;
         break;
-    case 11:
-        return 82;
+    case 11: // top right
+        return 7;
         break;
-    case 12:
-        return 160;
+    case 12: // bottom left
+        return 10;
         break;
-    case 13:
-        return 162;
+    case 13: // bottom right
+        return 12;
         break;
-    case 1:
-        return 81;
+    case 1: // top center
+        return 6;
         break;
-    case 2:
-        return 120;
+    case 2: // center left
+        return 8;
         break;
-    case 3:
-        return 161;
+    case 3: // bottom center
+        return 11;
         break;
-    case 4:
-        return 122;
+    case 4: // center right
+        return 9;
         break;
-    case 5:
-        return 42;
+    case 5: // reversed bottom right edge
+        return 4;
         break;
-    case 6:
-        return 41;
+    case 6: // reversed bottom left edge
+        return 3;
         break;
-    case 7:
+    case 7: // reversed top right edge
         return 2;
         break;
-    case 8:
+    case 8: // reversed top left edge
         return 1;
         break;
     case 0:
     default:
         return 0;
         break;
+    }
+    return 0;
+}
+int editorclass::edgetile( int x, int y )
+{
+    switch(match(x,y))
+    {
+    case 14: // true center
+        return 0;
+        break;
+    case 10: // top left
+        return 80;
+        break;
+    case 11: // top right
+        return 82;
+        break;
+    case 12: // bottom left
+        return 160;
+        break;
+    case 13: // bottom right
+        return 162;
+        break;
+    case 1: // top center
+        return 81;
+        break;
+    case 2: // center left
+        return 120;
+        break;
+    case 3: // bottom center
+        return 161;
+        break;
+    case 4: // center right
+        return 122;
+        break;
+    case 5: // reversed bottom right edge
+        return 42;
+        break;
+    case 6: // reversed bottom left edge
+        return 41;
+        break;
+    case 7: // reversed top right edge
+        return 2;
+        break;
+    case 8: // reversed top left edge
+        return 1;
+        break;
+    case 0:
+    default:
+        return 0;
+        break;
+    }
+    return 0;
+}
+
+int editorclass::spikebase(int x, int y)
+{
+    temp=x+(y*maxwidth);
+    if (level[temp].tileset==5) {
+        return level[temp].tilecol * 30;
     }
     return 0;
 }
@@ -1535,6 +1604,15 @@ int editorclass::spikedir( int x, int y )
     return 8;
 }
 
+int editorclass::towerspikedir( int x, int y )
+{
+    if(free(x,y+1)==1) return 8;
+    if(free(x,y-1)==1) return 9;
+    if(free(x-1,y)==1) return 10;
+    if(free(x+1,y)==1) return 11;
+    return 8;
+}
+
 void editorclass::findstartpoint(Game& game)
 {
     //Ok! Scan the room for the closest checkpoint
@@ -1577,6 +1655,8 @@ void editorclass::findstartpoint(Game& game)
 
 void editorclass::saveconvertor()
 {
+    // Unused, no need to add altstates support to this function
+
     //In the case of resizing breaking a level, this function can fix it
     maxwidth=20;
     maxheight=20;
@@ -2063,6 +2143,29 @@ void editorclass::save(std::string& _path)
     msg->LinkEndChild( new TiXmlText( contentsString.c_str() ));
     data->LinkEndChild( msg );
 
+    msg = new TiXmlElement("altstates");
+
+    // Iterate through all the altstates. Nonexistent altstates are ones at -1,-1
+    TiXmlElement* alt;
+    for (size_t a = 0; a < altstates.size(); a++) {
+        if (altstates[a].x == -1 or altstates[a].y == -1)
+            continue;
+
+        std::string tiles = "";
+        for (int y = 0; y < 30; y++)
+            for (int x = 0; x < 40; x++)
+                tiles += UtilityClass::String(altstates[a].tiles[x + y*40]) + ",";
+
+        alt = new TiXmlElement("altstate");
+        alt->SetAttribute("x", altstates[a].x);
+        alt->SetAttribute("y", altstates[a].y);
+        alt->SetAttribute("state", altstates[a].state);
+        alt->LinkEndChild(new TiXmlText(tiles.c_str()));
+        msg->LinkEndChild(alt);
+
+        a++;
+    }
+    data->LinkEndChild(msg);
 
     //Old save format
     /*
@@ -2089,6 +2192,8 @@ void editorclass::save(std::string& _path)
         edentityElement->SetAttribute( "p4", edentity[i].p4);
         edentityElement->SetAttribute( "p5", edentity[i].p5);
         edentityElement->SetAttribute(  "p6", edentity[i].p6);
+        if (edentity[i].state != 0)
+                edentityElement->SetAttribute("state", edentity[i].state);
         edentityElement->LinkEndChild( new TiXmlText( edentity[i].scriptname.c_str() )) ;
         edentityElement->LinkEndChild( new TiXmlText( "" )) ;
         msg->LinkEndChild( edentityElement );
@@ -2133,7 +2238,7 @@ void editorclass::save(std::string& _path)
 }
 
 
-void addedentity( int xp, int yp, int tp, int p1/*=0*/, int p2/*=0*/, int p3/*=0*/, int p4/*=0*/, int p5/*=320*/, int p6/*=240*/, int state)
+void addedentity( int xp, int yp, int tp, int p1/*=0*/, int p2/*=0*/, int p3/*=0*/, int p4/*=0*/, int p5/*=320*/, int p6/*=240*/)
 {
     edentity[EditorData::GetInstance().numedentities].x=xp;
     edentity[EditorData::GetInstance().numedentities].y=yp;
@@ -2144,13 +2249,13 @@ void addedentity( int xp, int yp, int tp, int p1/*=0*/, int p2/*=0*/, int p3/*=0
     edentity[EditorData::GetInstance().numedentities].p4=p4;
     edentity[EditorData::GetInstance().numedentities].p5=p5;
     edentity[EditorData::GetInstance().numedentities].p6=p6;
-    edentity[EditorData::GetInstance().numedentities].state=state;
+    edentity[EditorData::GetInstance().numedentities].state=ed.levaltstate;
     edentity[EditorData::GetInstance().numedentities].scriptname="";
 
     EditorData::GetInstance().numedentities++;
 }
 
-void naddedentity( int xp, int yp, int tp, int p1/*=0*/, int p2/*=0*/, int p3/*=0*/, int p4/*=0*/, int p5/*=320*/, int p6/*=240*/, int state)
+void naddedentity( int xp, int yp, int tp, int p1/*=0*/, int p2/*=0*/, int p3/*=0*/, int p4/*=0*/, int p5/*=320*/, int p6/*=240*/)
 {
     edentity[EditorData::GetInstance().numedentities].x=xp;
     edentity[EditorData::GetInstance().numedentities].y=yp;
@@ -2161,7 +2266,7 @@ void naddedentity( int xp, int yp, int tp, int p1/*=0*/, int p2/*=0*/, int p3/*=
     edentity[EditorData::GetInstance().numedentities].p4=p4;
     edentity[EditorData::GetInstance().numedentities].p5=p5;
     edentity[EditorData::GetInstance().numedentities].p6=p6;
-    edentity[EditorData::GetInstance().numedentities].state=state;
+    edentity[EditorData::GetInstance().numedentities].state=ed.levaltstate;
     edentity[EditorData::GetInstance().numedentities].scriptname="";
 }
 
@@ -2193,20 +2298,20 @@ void removeedentity( int t )
     }
 }
 
-int edentat( int xp, int yp )
+int edentat( int xp, int yp, int state )
 {
     for(int i=0; i<EditorData::GetInstance().numedentities; i++)
     {
-        if(edentity[i].x==xp && edentity[i].y==yp) return i;
+        if(edentity[i].x==xp && edentity[i].y==yp && edentity[i].state==state) return i;
     }
     return -1;
 }
 
-bool edentclear( int xp, int yp )
+bool edentclear( int xp, int yp, int state )
 {
     for(int i=0; i<EditorData::GetInstance().numedentities; i++)
     {
-        if(edentity[i].x==xp && edentity[i].y==yp) return false;
+        if(edentity[i].x==xp && edentity[i].y==yp && edentity[i].state==state) return false;
     }
     return true;
 }
@@ -2360,6 +2465,22 @@ void editorclass::generatecustomminimap(Graphics& dwgfx, mapclass& map)
     }
 }
 
+int
+dmcap(void)
+{
+    if (ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset == 5)
+        return 900;
+    return 1200;
+}
+
+int
+dmwidth(void)
+{
+    if (ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset == 5)
+        return 30;
+    return 40;
+}
+
 void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, UtilityClass& help )
 {
     //TODO
@@ -2419,8 +2540,19 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         {
             for (int i = 0; i < 40; i++)
             {
-                temp=ed.contents[i + (ed.levx*40) + ed.vmult[j+(ed.levy*30)]];
+                temp = ed.gettilelocal(i, j);
                 if(temp>0) dwgfx.drawtile(i*8,j*8,temp,0,0,0);
+            }
+        }
+    }
+    else if(ed.level[ed.levx+(ed.maxwidth*ed.levy)].tileset==5)
+    {
+        for (int j = 0; j < 30; j++)
+        {
+            for (int i = 0; i < 40; i++)
+            {
+                temp = ed.gettilelocal(i, j);
+                if(temp>0) dwgfx.drawtile3(i*8,j*8,temp,0,0,0);
             }
         }
     }
@@ -2430,7 +2562,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         {
             for (int i = 0; i < 40; i++)
             {
-                temp=ed.contents[i + (ed.levx*40) + ed.vmult[j+(ed.levy*30)]];
+                temp = ed.gettilelocal(i, j);
                 if(temp>0) dwgfx.drawtile2(i*8,j*8,temp,0,0,0);
             }
         }
@@ -2475,7 +2607,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
     }
     obj.customplatformtile=game.customcol*12;
 
-    ed.temp=edentat(ed.tilex+ (ed.levx*40),ed.tiley+ (ed.levy*30));
+    ed.temp=edentat(ed.tilex+ (ed.levx*40),ed.tiley+ (ed.levy*30), ed.levaltstate);
     for(int i=0; i< EditorData::GetInstance().numedentities; i++)
     {
         //if() on screen
@@ -2485,7 +2617,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
         point tpoint;
         SDL_Rect drawRect;
 
-        if(tx==ed.levx && ty==ed.levy)
+        if(tx==ed.levx && ty==ed.levy && edentity[i].state==ed.levaltstate)
         {
             switch(edentity[i].t)
             {
@@ -2742,8 +2874,10 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
                 fillboxabs(dwgfx, (edentity[i].p1*8)- (ed.levx*40*8),(edentity[i].p2*8)- (ed.levy*30*8),16,16,dwgfx.getRGB(64,64,96));
                 if(ed.tilex+(ed.levx*40)==edentity[i].p1 && ed.tiley+(ed.levy*30)==edentity[i].p2)
                 {
-                    dwgfx.Print((edentity[i].p1*8)- (ed.levx*40*8),(edentity[i].p2*8)- (ed.levy*30*8)-8,
-                                "("+help.String(((edentity[i].x-int(edentity[i].x%40))/40)+1)+","+help.String(((edentity[i].y-int(edentity[i].y%30))/30)+1)+")",190,190,225);
+                    std::string thestring = "("+help.String(((edentity[i].x-int(edentity[i].x%40))/40)+1)+","+help.String(((edentity[i].y-int(edentity[i].y%30))/30)+1)+")";
+                    if (edentity[i].state != 0)
+                        thestring += "@" + help.String(edentity[i].state);
+                    dwgfx.Print((edentity[i].p1*8)- (ed.levx*40*8),(edentity[i].p2*8)- (ed.levy*30*8)-8, thestring,190,190,225);
                 }
                 else
                 {
@@ -2865,35 +2999,46 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             }
 
             //Draw five lines of the editor
-            temp=ed.dmtile-(ed.dmtile%40);
-            temp-=80;
+            temp=ed.dmtile-(ed.dmtile%dmwidth());
+            temp-=dmwidth()*2;
             FillRect(dwgfx.backBuffer, 0,-t2,320,40, dwgfx.getRGB(0,0,0));
             FillRect(dwgfx.backBuffer, 0,-t2+40,320,2, dwgfx.getRGB(255,255,255));
             if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset==0)
             {
-                for(int i=0; i<40; i++)
+                for(int i=0; i<dmwidth(); i++)
                 {
-                    dwgfx.drawtile(i*8,0-t2,(temp+1200+i)%1200,0,0,0);
-                    dwgfx.drawtile(i*8,8-t2,(temp+1200+40+i)%1200,0,0,0);
-                    dwgfx.drawtile(i*8,16-t2,(temp+1200+80+i)%1200,0,0,0);
-                    dwgfx.drawtile(i*8,24-t2,(temp+1200+120+i)%1200,0,0,0);
-                    dwgfx.drawtile(i*8,32-t2,(temp+1200+160+i)%1200,0,0,0);
+                    dwgfx.drawtile(i*8,0-t2,(temp+dmcap()+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile(i*8,8-t2,(temp+dmcap()+dmwidth()*1+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile(i*8,16-t2,(temp+dmcap()+dmwidth()*2+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile(i*8,24-t2,(temp+dmcap()+dmwidth()*3+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile(i*8,32-t2,(temp+dmcap()+dmwidth()*4+i)%dmcap(),0,0,0);
+                }
+            }
+            else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset==5)
+            {
+                for(int i=0; i<dmwidth(); i++)
+                {
+                    dwgfx.drawtile3(i*8,0-t2,(temp+dmcap()+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile3(i*8,8-t2,(temp+dmcap()+dmwidth()*1+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile3(i*8,16-t2,(temp+dmcap()+dmwidth()*2+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile3(i*8,24-t2,(temp+dmcap()+dmwidth()*3+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile3(i*8,32-t2,(temp+dmcap()+dmwidth()*4+i)%dmcap(),0,0,0);
                 }
             }
             else
             {
-                for(int i=0; i<40; i++)
+                for(int i=0; i<dmwidth(); i++)
                 {
-                    dwgfx.drawtile2(i*8,0-t2,(temp+1200+i)%1200,0,0,0);
-                    dwgfx.drawtile2(i*8,8-t2,(temp+1200+40+i)%1200,0,0,0);
-                    dwgfx.drawtile2(i*8,16-t2,(temp+1200+80+i)%1200,0,0,0);
-                    dwgfx.drawtile2(i*8,24-t2,(temp+1200+120+i)%1200,0,0,0);
-                    dwgfx.drawtile2(i*8,32-t2,(temp+1200+160+i)%1200,0,0,0);
+                    dwgfx.drawtile2(i*8,0-t2,(temp+dmcap()+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile2(i*8,8-t2,(temp+dmcap()+dmwidth()*1+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile2(i*8,16-t2,(temp+dmcap()+dmwidth()*2+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile2(i*8,24-t2,(temp+dmcap()+dmwidth()*3+i)%dmcap(),0,0,0);
+                    dwgfx.drawtile2(i*8,32-t2,(temp+dmcap()+dmwidth()*4+i)%dmcap(),0,0,0);
                 }
             }
             //Highlight our little block
-            fillboxabs(dwgfx,((ed.dmtile%40)*8)-2,16-2,12,12,dwgfx.getRGB(196, 196, 255 - help.glow));
-            fillboxabs(dwgfx,((ed.dmtile%40)*8)-1,16-1,10,10,dwgfx.getRGB(0,0,0));
+            fillboxabs(dwgfx,((ed.dmtile%dmwidth())*8)-2,16-2,12,12,dwgfx.getRGB(196, 196, 255 - help.glow));
+            fillboxabs(dwgfx,((ed.dmtile%dmwidth())*8)-1,16-1,10,10,dwgfx.getRGB(0,0,0));
         }
 
         if(ed.dmtileeditor>0 && t2<=30)
@@ -2906,6 +3051,10 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset==0)
             {
                 dwgfx.drawtile(45,45-t2,ed.dmtile,0,0,0);
+            }
+            else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset==5)
+            {
+                dwgfx.drawtile3(45,45-t2,ed.dmtile,0,0,0);
             }
             else
             {
@@ -2922,6 +3071,10 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset==0)
             {
                 dwgfx.drawtile(45,12,ed.dmtile,0,0,0);
+            }
+            else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset==5)
+            {
+                dwgfx.drawtile3(45,12,ed.dmtile,0,0,0);
             }
             else
             {
@@ -3485,9 +3638,12 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
                 break;
             }
 
-            FillRect(dwgfx.backBuffer, 260,198,80,10, dwgfx.getRGB(32,32,32));
-            FillRect(dwgfx.backBuffer, 261,199,80,9, dwgfx.getRGB(0,0,0));
-            dwgfx.Print(268,199, "("+help.String(ed.levx+1)+","+help.String(ed.levy+1)+")",196, 196, 255 - help.glow, false);
+            FillRect(dwgfx.backBuffer, 260-24,198,80+24,10, dwgfx.getRGB(32,32,32));
+            FillRect(dwgfx.backBuffer, 261-24,199,80+24,9, dwgfx.getRGB(0,0,0));
+            std::string thestring = "("+help.String(ed.levx+1)+","+help.String(ed.levy+1)+")";
+            if (ed.levaltstate != 0)
+                thestring += "@" + help.String(ed.levaltstate);
+            dwgfx.Print(268-24,199, thestring,196, 196, 255 - help.glow, false);
 
         }
         else
@@ -3509,29 +3665,39 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
                     dwgfx.Print(5,231+ed.roomnamehide,ed.level[ed.levx+(ed.maxwidth*ed.levy)].roomname, 196, 196, 255 - help.glow, true);
                 }
                 dwgfx.Print(4, 222, "SPACE ^  SHIFT ^", 196, 196, 255 - help.glow, false);
-                dwgfx.Print(268,222, "("+help.String(ed.levx+1)+","+help.String(ed.levy+1)+")",196, 196, 255 - help.glow, false);
+                std::string thestring = "("+help.String(ed.levx+1)+","+help.String(ed.levy+1)+")";
+                if (ed.levaltstate != 0)
+                    thestring += "@" + help.String(ed.levaltstate);
+                dwgfx.Print(268-24,222, thestring,196, 196, 255 - help.glow, false);
             }
             else
             {
                 dwgfx.Print(4, 232, "SPACE ^  SHIFT ^", 196, 196, 255 - help.glow, false);
-                dwgfx.Print(268,232, "("+help.String(ed.levx+1)+","+help.String(ed.levy+1)+")",196, 196, 255 - help.glow, false);
+                std::string thestring = "("+help.String(ed.levx+1)+","+help.String(ed.levy+1)+")";
+                if (ed.levaltstate != 0)
+                    thestring += "@" + help.String(ed.levaltstate);
+                dwgfx.Print(268-24,232, thestring,196, 196, 255 - help.glow, false);
             }
         }
 
         if(ed.shiftmenu)
         {
-            fillboxabs(dwgfx, 0, 127,161+8,140,dwgfx.getRGB(64,64,64));
-            FillRect(dwgfx.backBuffer, 0,128,160+8,140, dwgfx.getRGB(0,0,0));
-            dwgfx.Print(4, 130, "F1: タイルセットへんこう",164,164,164,false);
-            dwgfx.Print(4, 140, "F2: カラーへんこう",164,164,164,false);
-            dwgfx.Print(4, 150, "F3: てきのへんこう",164,164,164,false);
-            dwgfx.Print(4, 160, "F4: てきのかどうはんい",164,164,164,false);
-            dwgfx.Print(4, 170, "F5: あしばのかどうはんい",164,164,164,false);
+            fillboxabs(dwgfx, 0, 127-40,161+8,140+40,dwgfx.getRGB(64,64,64));
+            FillRect(dwgfx.backBuffer, 0,128-40,160+8,140+40, dwgfx.getRGB(0,0,0));
+            dwgfx.Print(4,  90, "F1: タイルセットのへんこう",164,164,164,false);
+            dwgfx.Print(4, 100, "F2: カラーのへんこう",164,164,164,false);
+            dwgfx.Print(4, 110, "F3: てきのへんこう",164,164,164,false);
+            dwgfx.Print(4, 120, "F4: てきのかどうはんい",164,164,164,false);
+            dwgfx.Print(4, 130, "F5: あしばのかどうはんい",164,164,164,false);
 
-            dwgfx.Print(4, 190, "F10: ダイレクトモード",164,164,164,false);
+            dwgfx.Print(4, 150, "F6: Alt Stateをついか",164,164,164,false);
+            dwgfx.Print(4, 160, "F7: Alt Stateをさくじょ",164,164,164,false);
 
-            dwgfx.Print(4, 210, "W: ワープのしゅるいへんこう",164,164,164,false);
-            dwgfx.Print(4, 220, "E: へやのなまえへんこう",164,164,164,false);
+            dwgfx.Print(4, 180, "F10: ダイレクトモード",164,164,164,false);
+
+            dwgfx.Print(4, 200, "A: Alt Stateのきりかえ",164,164,164,false);
+            dwgfx.Print(4, 210, "W: ワープのむきをへんこう",164,164,164,false);
+            dwgfx.Print(4, 220, "E: へやのなまえをへんこう",164,164,164,false);
 
             fillboxabs(dwgfx, 220, 207,100,60,dwgfx.getRGB(64,64,64));
             FillRect(dwgfx.backBuffer, 221,208,160,60, dwgfx.getRGB(0,0,0));
@@ -3882,7 +4048,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
             if(key.keymap[SDLK_DOWN] && ed.keydelay<=0)
             {
                 ed.keydelay=6;
-                if(ed.sby+ed.pagey<ed.sblength)
+                if(ed.sby+ed.pagey<ed.sblength-1)
                 {
                     ed.sby++;
                     if(ed.sby>=20)
@@ -3894,7 +4060,13 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 key.keybuffer=ed.sb[ed.pagey+ed.sby];
             }
 
-            if(key.pressedbackspace && ed.sb[ed.pagey+ed.sby]=="")
+            if(key.linealreadyemptykludge)
+            {
+                ed.keydelay=6;
+                key.linealreadyemptykludge=false;
+            }
+
+            if(key.pressedbackspace && ed.sb[ed.pagey+ed.sby]=="" && ed.keydelay<=0)
             {
                 //Remove this line completely
                 ed.removeline(ed.pagey+ed.sby);
@@ -3912,6 +4084,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                     }
                 }
                 key.keybuffer=ed.sb[ed.pagey+ed.sby];
+                ed.keydelay=6;
             }
 
             ed.sb[ed.pagey+ed.sby]=key.keybuffer;
@@ -4317,7 +4490,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
             {
                 ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset++;
                 dwgfx.backgrounddrawn=false;
-                if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset>=5) ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset=0;
+                if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset>=6) ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset=0;
                 if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset==0)
                 {
                     if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tilecol>=32) ed.level[ed.levx+(ed.levy*ed.maxwidth)].tilecol=0;
@@ -4370,6 +4543,10 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 {
                     if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tilecol>=8) ed.level[ed.levx+(ed.levy*ed.maxwidth)].tilecol=0;
                 }
+                else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset==5)
+                {
+                    if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tilecol>=30) ed.level[ed.levx+(ed.levy*ed.maxwidth)].tilecol=0;
+                }
                 else if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tileset==3)
                 {
                     if(ed.level[ed.levx+(ed.levy*ed.maxwidth)].tilecol>=7) ed.level[ed.levx+(ed.levy*ed.maxwidth)].tilecol=0;
@@ -4401,6 +4578,31 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 ed.keydelay=6;
                 ed.boundarytype=2;
                 ed.boundarymod=1;
+            }
+            if (key.keymap[SDLK_F6] && ed.keydelay == 0) {
+                int newaltstate = ed.getnumaltstates(ed.levx, ed.levy) + 1;
+                ed.addaltstate(ed.levx, ed.levy, newaltstate);
+                ed.keydelay = 6;
+                ed.notedelay = 45;
+                // But did we get a new alt state?
+                if (ed.getedaltstatenum(ed.levx, ed.levy, newaltstate) == -1) {
+                    // Don't switch to the new alt state, or we'll segfault!
+                    ed.note = "ERROR: Couldn't add new alt state";
+                } else {
+                    ed.note = "Added new alt state " + help.String(newaltstate);
+                    ed.levaltstate = newaltstate;
+                }
+            }
+            if (key.keymap[SDLK_F7] && ed.keydelay == 0) {
+                if (ed.levaltstate == 0) {
+                    ed.note = "Cannot remove main state";
+                } else {
+                    ed.removealtstate(ed.levx, ed.levy, ed.levaltstate);
+                    ed.note = "Removed alt state " + help.String(ed.levaltstate);
+                    ed.levaltstate--;
+                }
+                ed.keydelay = 6;
+                ed.notedelay = 45;
             }
             if(key.keymap[SDLK_F10] && ed.keydelay==0)
             {
@@ -4447,7 +4649,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                     {
                         tx=(edentity[i].p1-(edentity[i].p1%40))/40;
                         ty=(edentity[i].p2-(edentity[i].p2%30))/30;
-                        if(tx==ed.levx && ty==ed.levy)
+                        if(tx==ed.levx && ty==ed.levy && edentity[i].state==ed.levaltstate)
                         {
                             j++;
                         }
@@ -4497,6 +4699,19 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 ed.keydelay=6;
                 game.mapheld=true;
             }
+            if (key.keymap[SDLK_a] && ed.keydelay == 0) {
+                if (ed.getedaltstatenum(ed.levx, ed.levy, ed.levaltstate + 1) != -1) {
+                    ed.levaltstate++;
+                    ed.note = "Switched to alt state " + help.String(ed.levaltstate);
+                } else if (ed.levaltstate == 0) {
+                    ed.note = "No alt states in this room";
+                } else {
+                    ed.levaltstate = 0;
+                    ed.note = "Switched to main state";
+                }
+                ed.notedelay = 45;
+                ed.keydelay = 6;
+            }
 
             //Save and load
             if(key.keymap[SDLK_s] && ed.keydelay==0)
@@ -4539,7 +4754,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                         {
                             int tx=(edentity[i].x-(edentity[i].x%40))/40;
                             int ty=(edentity[i].y-(edentity[i].y%30))/30;
-                            if(tx==ed.levx && ty==ed.levy)
+                            if(tx==ed.levx && ty==ed.levy && edentity[i].state==ed.levaltstate)
                             {
                                 testeditor=i;
                                 startpoint=1;
@@ -4556,7 +4771,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                             {
                                 int tx=(edentity[i].x-(edentity[i].x%40))/40;
                                 int ty=(edentity[i].y-(edentity[i].y%30))/30;
-                                if(tx==ed.levx && ty==ed.levy)
+                                if(tx==ed.levx && ty==ed.levy && edentity[i].state==ed.levaltstate)
                                 {
                                     testeditor=i;
                                 }
@@ -4713,27 +4928,27 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                         {
                             ed.dmtile--;
                             ed.keydelay=3;
-                            if(ed.dmtile<0) ed.dmtile+=1200;
+                            if(ed.dmtile<0) ed.dmtile+=dmcap();
                         }
                         else if(key.keymap[SDLK_RIGHT])
                         {
                             ed.dmtile++;
                             ed.keydelay=3;
 
-                            if(ed.dmtile>=1200) ed.dmtile-=1200;
+                            if(ed.dmtile>=dmcap()) ed.dmtile-=dmcap();
                         }
                         if(key.keymap[SDLK_UP])
                         {
-                            ed.dmtile-=40;
+                            ed.dmtile-=dmwidth();
                             ed.keydelay=3;
-                            if(ed.dmtile<0) ed.dmtile+=1200;
+                            if(ed.dmtile<0) ed.dmtile+=dmcap();
                         }
                         else if(key.keymap[SDLK_DOWN])
                         {
-                            ed.dmtile+=40;
+                            ed.dmtile+=dmwidth();
                             ed.keydelay=3;
 
-                            if(ed.dmtile>=1200) ed.dmtile-=1200;
+                            if(ed.dmtile>=dmcap()) ed.dmtile-=dmcap();
                         }
                     }
                     else
@@ -4745,6 +4960,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                             ed.levy--;
                             ed.updatetiles=true;
                             ed.changeroom=true;
+                            ed.levaltstate = 0;
                         }
                         else if(key.keymap[SDLK_DOWN])
                         {
@@ -4753,6 +4969,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                             ed.levy++;
                             ed.updatetiles=true;
                             ed.changeroom=true;
+                            ed.levaltstate = 0;
                         }
                         else if(key.keymap[SDLK_LEFT])
                         {
@@ -4761,6 +4978,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                             ed.levx--;
                             ed.updatetiles=true;
                             ed.changeroom=true;
+                            ed.levaltstate = 0;
                         }
                         else if(key.keymap[SDLK_RIGHT])
                         {
@@ -4769,6 +4987,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                             ed.levx++;
                             ed.updatetiles=true;
                             ed.changeroom=true;
+                            ed.levaltstate = 0;
                         }
                     }
 
@@ -5011,7 +5230,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                             ed.placetilelocal(ed.tilex, ed.tiley, 8);
                         }
 
-                        int tmp=edentat(ed.tilex+ (ed.levx*40),ed.tiley+ (ed.levy*30));
+                        int tmp=edentat(ed.tilex+ (ed.levx*40),ed.tiley+ (ed.levy*30), ed.levaltstate);
                         if(tmp==-1)
                         {
                             //Room text and script triggers can be placed in walls
@@ -5148,16 +5367,21 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                             }
                             else if(ed.drawmode==16)  //Start Point
                             {
-                                //If there is another start point, destroy it
-                                for(int i=0; i<EditorData::GetInstance().numedentities; i++)
-                                {
-                                    if(edentity[i].t==16)
+                                if (ed.levaltstate != 0) {
+                                    ed.note = "ERROR: Start point must be in main state";
+                                    ed.notedelay = 45;
+                                } else {
+                                    //If there is another start point, destroy it
+                                    for(int i=0; i<EditorData::GetInstance().numedentities; i++)
                                     {
-                                        removeedentity(i);
-                                        i--;
+                                        if(edentity[i].t==16)
+                                        {
+                                            removeedentity(i);
+                                            i--;
+                                        }
                                     }
+                                    addedentity(ed.tilex+ (ed.levx*40),ed.tiley+ (ed.levy*30),16,0);
                                 }
-                                addedentity(ed.tilex+ (ed.levx*40),ed.tiley+ (ed.levy*30),16,0);
                                 ed.lclickdelay=1;
                             }
                         }
@@ -5258,7 +5482,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                     }
                     for(int i=0; i<EditorData::GetInstance().numedentities; i++)
                     {
-                        if(edentity[i].x==ed.tilex + (ed.levx*40)&& edentity[i].y==ed.tiley+ (ed.levy*30))
+                        if(edentity[i].x==ed.tilex + (ed.levx*40)&& edentity[i].y==ed.tiley+ (ed.levy*30) && edentity[i].state==ed.levaltstate)
                         {
                             if(edentity[i].t==9) ed.numtrinkets--;
                             if(edentity[i].t==15) ed.numcrewmates--;
@@ -5269,7 +5493,7 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
 
                 if(key.middlebutton)
                 {
-                    ed.dmtile=ed.contents[ed.tilex + (ed.levx*40) + ed.vmult[ed.tiley + (ed.levy*30)]];
+                    ed.dmtile=ed.gettilelocal(ed.tilex, ed.tiley);
                 }
             }
         }
@@ -5286,21 +5510,20 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
             {
                 for(int i=0; i<40; i++)
                 {
-                    temp=i+(ed.levx*40) + ed.vmult[j+(ed.levy*30)];
-                    if(ed.contents[temp]>=3 && ed.contents[temp]<80)
+                    if(ed.gettilelocal(i, j)>=3 && ed.gettilelocal(i, j)<80)
                     {
                         //Fix spikes
-                        ed.contents[temp]=ed.spikedir(i,j);
+                        ed.settilelocal(i, j, ed.spikedir(i,j));
                     }
-                    else if(ed.contents[temp]==2 || ed.contents[temp]>=680)
+                    else if(ed.gettilelocal(i, j)==2 || ed.gettilelocal(i, j)>=680)
                     {
                         //Fix background
-                        ed.contents[temp]=ed.backedgetile(i,j)+ed.backbase(ed.levx,ed.levy);
+                        ed.settilelocal(i, j, ed.backedgetile(i,j)+ed.backbase(ed.levx,ed.levy));
                     }
-                    else if(ed.contents[temp]>0)
+                    else if(ed.gettilelocal(i, j)>0)
                     {
                         //Fix tiles
-                        ed.contents[temp]=ed.edgetile(i,j)+ed.base(ed.levx,ed.levy);
+                        ed.settilelocal(i, j, ed.edgetile(i,j)+ed.base(ed.levx,ed.levy));
                     }
                 }
             }
@@ -5310,21 +5533,20 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
             {
                 for(int i=0; i<40; i++)
                 {
-                    temp=i+(ed.levx*40) + ed.vmult[j+(ed.levy*30)];
-                    if(ed.contents[temp]>=3 && ed.contents[temp]<80)
+                    if(ed.gettilelocal(i, j)>=3 && ed.gettilelocal(i, j)<80)
                     {
                         //Fix spikes
-                        ed.contents[temp]=ed.spikedir(i,j);
+                        ed.settilelocal(i, j, ed.spikedir(i,j));
                     }
-                    else if(ed.contents[temp]==2 || ed.contents[temp]>=680)
+                    else if(ed.gettilelocal(i, j)==2 || ed.gettilelocal(i, j)>=680)
                     {
                         //Fix background
-                        ed.contents[temp]=ed.outsideedgetile(i,j)+ed.backbase(ed.levx,ed.levy);
+                        ed.settilelocal(i, j, ed.outsideedgetile(i,j)+ed.backbase(ed.levx,ed.levy));
                     }
-                    else if(ed.contents[temp]>0)
+                    else if(ed.gettilelocal(i, j)>0)
                     {
                         //Fix tiles
-                        ed.contents[temp]=ed.edgetile(i,j)+ed.base(ed.levx,ed.levy);
+                        ed.settilelocal(i, j, ed.edgetile(i,j)+ed.base(ed.levx,ed.levy));
                     }
                 }
             }
@@ -5334,21 +5556,20 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
             {
                 for(int i=0; i<40; i++)
                 {
-                    temp=i+(ed.levx*40) + ed.vmult[j+(ed.levy*30)];
-                    if(ed.contents[temp]>=3 && ed.contents[temp]<80)
+                    if(ed.gettilelocal(i, j)>=3 && ed.gettilelocal(i, j)<80)
                     {
                         //Fix spikes
-                        ed.contents[temp]=ed.labspikedir(i,j, ed.level[ed.levx + (ed.maxwidth*ed.levy)].tilecol);
+                        ed.settilelocal(i, j, ed.labspikedir(i,j, ed.level[ed.levx + (ed.maxwidth*ed.levy)].tilecol));
                     }
-                    else if(ed.contents[temp]==2 || ed.contents[temp]>=680)
+                    else if(ed.gettilelocal(i, j)==2 || ed.gettilelocal(i, j)>=680)
                     {
                         //Fix background
-                        ed.contents[temp]=713;
+                        ed.settilelocal(i, j, 713);
                     }
-                    else if(ed.contents[temp]>0)
+                    else if(ed.gettilelocal(i, j)>0)
                     {
                         //Fix tiles
-                        ed.contents[temp]=ed.edgetile(i,j)+ed.base(ed.levx,ed.levy);
+                        ed.settilelocal(i, j, ed.edgetile(i,j)+ed.base(ed.levx,ed.levy));
                     }
                 }
             }
@@ -5358,22 +5579,21 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
             {
                 for(int i=0; i<40; i++)
                 {
-                    temp=i+(ed.levx*40) + ed.vmult[j+(ed.levy*30)];
-                    if(ed.contents[temp]>=3 && ed.contents[temp]<80)
+                    if(ed.gettilelocal(i, j)>=3 && ed.gettilelocal(i, j)<80)
                     {
                         //Fix spikes
-                        ed.contents[temp]=ed.spikedir(i,j);
+                        ed.settilelocal(i, j, ed.spikedir(i,j));
                     }
-                    else if(ed.contents[temp]==2 || ed.contents[temp]>=680)
+                    else if(ed.gettilelocal(i, j)==2 || ed.gettilelocal(i, j)>=680)
                     {
                         //Fix background
-                        ed.contents[temp]=713;//ed.backbase(ed.levx,ed.levy);
+                        ed.settilelocal(i, j, 713);//ed.backbase(ed.levx,ed.levy);
                     }
-                    else if(ed.contents[temp]>0)
+                    else if(ed.gettilelocal(i, j)>0)
                     {
                         //Fix tiles
-                        //ed.contents[temp]=ed.warpzoneedgetile(i,j)+ed.base(ed.levx,ed.levy);
-                        ed.contents[temp]=ed.edgetile(i,j)+ed.base(ed.levx,ed.levy);
+                        //ed.settilelocal(i, j, ed.warpzoneedgetile(i,j)+ed.base(ed.levx,ed.levy));
+                        ed.settilelocal(i, j, ed.edgetile(i,j)+ed.base(ed.levx,ed.levy));
                     }
                 }
             }
@@ -5383,26 +5603,46 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
             {
                 for(int i=0; i<40; i++)
                 {
-                    temp=i+(ed.levx*40) + ed.vmult[j+(ed.levy*30)];
-                    if(ed.contents[temp]>=3 && ed.contents[temp]<80)
+                    if(ed.gettilelocal(i, j)>=3 && ed.gettilelocal(i, j)<80)
                     {
                         //Fix spikes
-                        ed.contents[temp]=ed.spikedir(i,j);
+                        ed.settilelocal(i, j, ed.spikedir(i,j));
                     }
-                    else if(ed.contents[temp]==2 || ed.contents[temp]>=680)
+                    else if(ed.gettilelocal(i, j)==2 || ed.gettilelocal(i, j)>=680)
                     {
                         //Fix background
-                        ed.contents[temp]=ed.backedgetile(i,j)+ed.backbase(ed.levx,ed.levy);
+                        ed.settilelocal(i, j, ed.backbase(ed.levx,ed.levy));
                     }
-                    else if(ed.contents[temp]>0)
+                    else if(ed.gettilelocal(i, j)>0)
                     {
                         //Fix tiles
-                        ed.contents[temp]=ed.edgetile(i,j)+ed.base(ed.levx,ed.levy);
+                        ed.settilelocal(i, j, ed.edgetile(i,j)+ed.base(ed.levx,ed.levy));
                     }
                 }
             }
             break;
         case 5: //The Tower
+            for(int j=0; j<30; j++)
+            {
+                for(int i=0; i<40; i++)
+                {
+                    if(ed.gettiletyplocal(i, j) == TILE_SPIKE)
+                    {
+                        //Fix spikes
+                        ed.settilelocal(i, j, ed.towerspikedir(i,j)+ed.spikebase(ed.levx,ed.levy));
+                    }
+                    else if(ed.gettiletyplocal(i, j) == TILE_BACKGROUND)
+                    {
+                        //Fix background
+                        ed.settilelocal(i, j, ed.backbase(ed.levx,ed.levy));
+                    }
+                    else if(ed.gettiletyplocal(i, j) == TILE_FOREGROUND)
+                    {
+                        //Fix tiles
+                        ed.settilelocal(i, j, ed.toweredgetile(i,j)+ed.base(ed.levx,ed.levy));
+                    }
+                }
+            }
             break;
         case 6: //Custom Set 1
             break;
@@ -5437,6 +5677,15 @@ std::string find_tag(std::string_view buf, std::string_view start, std::string_v
     replaceAll(value, "&apos;", "'");
     replaceAll(value, "&lt;", "<");
     replaceAll(value, "&gt;", ">");
+    size_t start_pos = 0;
+    while ((start_pos = value.find("&#", start_pos)) != std::string::npos) {
+        auto end = value.find(';', start_pos);
+        int character = std::stoi(value.substr(start_pos + 2, end - start_pos));
+        int utf32[] = {character, 0};
+        std::string utf8;
+        utf8::utf32to8(utf32, utf32 + 1, std::back_inserter(utf8));
+        value.replace(start_pos, end - start_pos + 1, utf8);
+    }
     return value;
 }
 
@@ -5447,6 +5696,100 @@ int editorclass::getedaltstatenum(int rxi, int ryi, int state)
             return i;
 
     return -1;
+}
+
+void editorclass::addaltstate(int rxi, int ryi, int state)
+{
+    for (size_t i = 0; i < altstates.size(); i++)
+        if (altstates[i].x == -1 || altstates[i].y == -1) {
+            altstates[i].x = rxi;
+            altstates[i].y = ryi;
+            altstates[i].state = state;
+
+            // Copy the tiles from the main state
+            for (int ty = 0; ty < 30; ty++)
+                for (int tx = 0; tx < 40; tx++)
+                    altstates[i].tiles[tx + ty*40] = contents[tx + rxi*40 + vmult[ty + ryi*30]];
+
+            // Copy the entities from the main state
+            // But since we're incrementing numedentities, don't use it as a bounds check!
+            int limit = EditorData::GetInstance().numedentities;
+            for (int i = 0; i < limit; i++)
+                if (edentity[i].x >= rxi*40 && edentity[i].x < (rxi+1)*40
+                && edentity[i].y >= ryi*30 && edentity[i].y < (ryi+1)*30
+                && edentity[i].state == 0) {
+                    if (edentity[i].t == 9) {
+                        // TODO: If removing the 20 trinkets limit, update this
+                        if (numtrinkets >= 20)
+                            continue;
+                        numtrinkets++;
+                    } else if (edentity[i].t == 15) {
+                        // TODO: If removing the 20 crewmates limit, update this
+                        if (numcrewmates >= 20)
+                            continue;
+                        numcrewmates++;
+                    } else if (edentity[i].t == 16) {
+                        // Don't copy the start point
+                        continue;
+                    }
+                    // Why does copyedentity() copy from argument #2 to argument #1 instead of 1 to 2??? Makes no sense
+                    copyedentity(EditorData::GetInstance().numedentities, i);
+                    edentity[EditorData::GetInstance().numedentities].state = state;
+                    EditorData::GetInstance().numedentities++;
+                }
+
+            break;
+        }
+}
+
+void editorclass::removealtstate(int rxi, int ryi, int state)
+{
+    int n = getedaltstatenum(rxi, ryi, state);
+    if (n == -1) {
+        printf("Trying to remove nonexistent altstate (%i,%i)@%i!\n", rxi, ryi, state);
+        return;
+    }
+
+    altstates[n].x = -1;
+    altstates[n].y = -1;
+
+    for (int i = 0; i < EditorData::GetInstance().numedentities; i++)
+        if (edentity[i].x >= rxi*40 && edentity[i].x < (rxi+1)*40
+        && edentity[i].y >= ryi*30 && edentity[i].y < (ryi+1)*30
+        && edentity[i].state == state) {
+            removeedentity(i);
+            if (edentity[i].t == 9)
+                numtrinkets--;
+            else if (edentity[i].t == 15)
+                numcrewmates--;
+        }
+
+    // Ok, now update the rest
+    // This looks like it's O(n^2), and, well, it probably is lmao
+    int dothisstate = state;
+    while (true) {
+        dothisstate++;
+        int nextstate = getedaltstatenum(rxi, ryi, dothisstate);
+        if (nextstate == -1)
+            break;
+        altstates[nextstate].state--;
+    }
+
+    // Don't forget to update entities
+    for (int i = 0; i < EditorData::GetInstance().numedentities; i++)
+        if (edentity[i].x >= rxi*40 && edentity[i].x < (rxi+1)*40
+        && edentity[i].y >= ryi*30 && edentity[i].y < (ryi+1)*30
+        && edentity[i].state > state)
+            edentity[i].state--;
+}
+
+int editorclass::getnumaltstates(int rxi, int ryi)
+{
+    int num = 0;
+    for (size_t i = 0; i < altstates.size(); i++)
+        if (altstates[i].x == rxi && altstates[i].y == ryi)
+            num++;
+    return num;
 }
 
 #define TAG_FINDER(NAME, TAG) std::string NAME(std::string_view buf) { return find_tag(buf, "<" TAG ">", "</" TAG ">"); }

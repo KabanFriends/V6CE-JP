@@ -29,6 +29,8 @@ VVVVVV: Community Edition has accepted contributions from Info Teddy, AllyTally,
 
 - `drawtext(x,y,r,g,b,center)` - draw text for one frame. The text you want to display should be after the command. `center` should be either 0 or 1.
 
+- `drawrect(x,y,w,h,r,g,b)` - draw a rectangle for one frame.
+
 - `followposition` now works for the player
 
 - There's now an option to disable only the music
@@ -156,3 +158,7 @@ VVVVVV: Community Edition has accepted contributions from Info Teddy, AllyTally,
 - `position(centerx,<line>)` - Horizontally center the text box around the line x=\<line>
 
 - `position(centery,<line>)` - Vertically center the text box around the line y=\<line>
+
+- Added the Tower tileset
+
+- Added altstates - F6 to create, F7 to delete, press A to switch between

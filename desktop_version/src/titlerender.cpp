@@ -53,6 +53,8 @@ growing_vector<std::string> changelog = {
     "  for one frame. The text you want to",
     "  display should be after the command.",
     "  center should be either 0 or 1.",
+    "- drawrect(x,y,w,h,r,g,b) - draw a",
+    "  rectangle for one frame.",
     "- followposition now works for the",
     "  player",
     "- There's now an option to disable only",
@@ -199,6 +201,9 @@ growing_vector<std::string> changelog = {
     "- position(centery,<line>) - Vertically",
     "  center the text box around the line y=",
     "  line",
+    "- Added the Tower tileset",
+    "- Added altstates - F6 to create, F7 to",
+    "  delete, press A to switch between",
 
 };
 
@@ -1800,6 +1805,19 @@ void gamerender(Graphics& dwgfx, mapclass& map, Game& game, entityclass& obj, Ut
         scriptimage current = script.scriptrender[i];
         if (current.type == 0) {
             dwgfx.Print(current.x,current.y,current.text,current.r,current.g,current.b, current.center);
+        } else if (current.type == 1) {
+            auto pixels = (uint8_t*) dwgfx.backBuffer->pixels;
+            auto row = pixels + dwgfx.backBuffer->pitch * current.y;
+            auto pixel = (uint32_t*) (row + current.x);
+            *pixel = dwgfx.getRGB(current.r, current.g, current.b);
+        } else if (current.type == 2) {
+            SDL_Rect temprect;
+            temprect.x = current.x;
+            temprect.y = current.y;
+            temprect.w = current.w;
+            temprect.h = current.h;
+            SDL_FillRect(dwgfx.backBuffer, &temprect, dwgfx.getRGB(current.r,current.g,current.b));
+            //dwgfx.FillRect(dwgfx.backBuffer, current.x, current.y, current.w, current.h, current.r, current.g, current.b);
         }
     }
     script.scriptrender.clear();
