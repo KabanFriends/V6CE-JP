@@ -3690,7 +3690,7 @@ void editorrender( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, ent
             dwgfx.Print(4, 120, "F4: てきのかどうはんい",164,164,164,false);
             dwgfx.Print(4, 130, "F5: あしばのかどうはんい",164,164,164,false);
 
-            dwgfx.Print(4, 150, "F6: Alt Stateをついか",164,164,164,false);
+            dwgfx.Print(4, 150, "F6: Alt Stateをとうろく",164,164,164,false);
             dwgfx.Print(4, 160, "F7: Alt Stateをさくじょ",164,164,164,false);
 
             dwgfx.Print(4, 180, "F10: ダイレクトモード",164,164,164,false);
@@ -4587,18 +4587,18 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
                 // But did we get a new alt state?
                 if (ed.getedaltstatenum(ed.levx, ed.levy, newaltstate) == -1) {
                     // Don't switch to the new alt state, or we'll segfault!
-                    ed.note = "ERROR: Couldn't add new alt state";
+                    ed.note = "エラー: Alt Stateをとうろくできませんでした";
                 } else {
-                    ed.note = "Added new alt state " + help.String(newaltstate);
+                    ed.note = "Alt State " + help.String(newaltstate) + " をとうろくしました";
                     ed.levaltstate = newaltstate;
                 }
             }
             if (key.keymap[SDLK_F7] && ed.keydelay == 0) {
                 if (ed.levaltstate == 0) {
-                    ed.note = "Cannot remove main state";
+                    ed.note = "メインのStateはさくじょできません";
                 } else {
                     ed.removealtstate(ed.levx, ed.levy, ed.levaltstate);
-                    ed.note = "Removed alt state " + help.String(ed.levaltstate);
+                    ed.note = "Alt State " + help.String(ed.levaltstate) + " をさくじょしました";
                     ed.levaltstate--;
                 }
                 ed.keydelay = 6;
@@ -4702,12 +4702,12 @@ void editorinput( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, enti
             if (key.keymap[SDLK_a] && ed.keydelay == 0) {
                 if (ed.getedaltstatenum(ed.levx, ed.levy, ed.levaltstate + 1) != -1) {
                     ed.levaltstate++;
-                    ed.note = "Switched to alt state " + help.String(ed.levaltstate);
+                    ed.note = "Alt Stateを " + help.String(ed.levaltstate) + " にきりかえました";
                 } else if (ed.levaltstate == 0) {
-                    ed.note = "No alt states in this room";
+                    ed.note = "このへやにはAlt Stateがとうろくされていません";
                 } else {
                     ed.levaltstate = 0;
-                    ed.note = "Switched to main state";
+                    ed.note = "メインのStateにきりかえました";
                 }
                 ed.notedelay = 45;
                 ed.keydelay = 6;
