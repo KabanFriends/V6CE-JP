@@ -2181,21 +2181,21 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
     switch(game.menupage)
     {
     case 0:
-        dwgfx.Print(30 - 8, 220, "[MAP]", 196, 196, 255 - help.glow);
+        dwgfx.Print(30 - 8, 220, "[マップ]", 196, 196, 255 - help.glow);
         if (game.insecretlab)
         {
-            dwgfx.Print(103, 220, "GRAV", 64, 64, 64);
+            dwgfx.Print(103, 220, "グラビトロン", 64, 64, 64);
         }
         else if (obj.flags[67] == 1 && !map.custommode)
         {
-            dwgfx.Print(103, 220, "SHIP", 64,64,64);
+            dwgfx.Print(103, 220, "うちゅうせん", 64,64,64);
         }
         else
         {
-            dwgfx.Print(103, 220, "CREW", 64,64,64);
+            dwgfx.Print(103, 220, "なかま", 64,64,64);
         }
-        dwgfx.Print(185-4, 220, "STATS", 64,64,64);
-        dwgfx.Print(258, 220, "SAVE", 64,64,64);
+        dwgfx.Print(185-4, 220, "ステータス", 64,64,64);
+        dwgfx.Print(258, 220, "セーブ", 64,64,64);
 
         if (map.finalmode || (map.custommode&&!map.customshowmm))
         {
@@ -2444,10 +2444,10 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
     case 1:
         if (game.insecretlab)
         {
-            dwgfx.Print(30, 220, "MAP", 64,64,64);
-            dwgfx.Print(103-8, 220, "[GRAV]", 196, 196, 255 - help.glow);
-            dwgfx.Print(185-4, 220, "STATS", 64,64,64);
-            dwgfx.Print(258, 220, "SAVE", 64, 64, 64);
+            dwgfx.Print(30, 220, "マップ", 64,64,64);
+            dwgfx.Print(103-8, 220, "[グラビトロン]", 196, 196, 255 - help.glow);
+            dwgfx.Print(185-4, 220, "ステータス", 64,64,64);
+            dwgfx.Print(258, 220, "セーブ", 64, 64, 64);
 
             if (dwgfx.flipmode)
             {
@@ -2518,18 +2518,18 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
         }
         else if (obj.flags[67] == 1 && !map.custommode)
         {
-            dwgfx.Print(30, 220, "MAP", 64,64,64);
-            dwgfx.Print(103-8, 220, "[SHIP]", 196, 196, 255 - help.glow);
-            dwgfx.Print(185-4, 220, "STATS", 64,64,64);
-            dwgfx.Print(258, 220, "SAVE", 64, 64, 64);
+            dwgfx.Print(30, 220, "マップ", 64,64,64);
+            dwgfx.Print(103-8, 220, "[うちゅうせん]", 196, 196, 255 - help.glow);
+            dwgfx.Print(185-4, 220, "ステータス", 64,64,64);
+            dwgfx.Print(258, 220, "セーブ", 64, 64, 64);
 
             dwgfx.Print(0, 105, "Press ACTION to warp to the ship.", 196, 196, 255 - help.glow, true);
         }
         else if(map.custommode){
-          dwgfx.Print(30, 220, "MAP", 64,64,64);
-            dwgfx.Print(103-8, 220, "[CREW]", 196, 196, 255 - help.glow);
-            dwgfx.Print(185-4, 220, "STATS", 64,64,64);
-            dwgfx.Print(258, 220, "SAVE", 64, 64, 64);
+          dwgfx.Print(30, 220, "マップ", 64,64,64);
+            dwgfx.Print(103-8, 220, "[なかま]", 196, 196, 255 - help.glow);
+            dwgfx.Print(185-4, 220, "ステータス", 64,64,64);
+            dwgfx.Print(258, 220, "セーブ", 64, 64, 64);
 
             if (dwgfx.flipmode)
             {
@@ -2564,10 +2564,10 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
         }
         else
         {
-            dwgfx.Print(30, 220, "MAP", 64,64,64);
-            dwgfx.Print(103-8, 220, "[CREW]", 196, 196, 255 - help.glow);
-            dwgfx.Print(185-4, 220, "STATS", 64,64,64);
-            dwgfx.Print(258, 220, "SAVE", 64, 64, 64);
+            dwgfx.Print(30, 220, "マップ", 64,64,64);
+            dwgfx.Print(103-8, 220, "[なかま]", 196, 196, 255 - help.glow);
+            dwgfx.Print(185-4, 220, "ステータス", 64,64,64);
+            dwgfx.Print(258, 220, "セーブ", 64, 64, 64);
 
             if (dwgfx.flipmode)
             {
@@ -2630,21 +2630,21 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
         }
         break;
     case 2:
-        dwgfx.Print(30, 220, "MAP", 64,64,64);
+        dwgfx.Print(30, 220, "マップ", 64,64,64);
         if (game.insecretlab)
         {
-            dwgfx.Print(103, 220, "GRAV", 64, 64, 64);
+            dwgfx.Print(103, 220, "グラビトロン", 64, 64, 64);
         }
         else if (obj.flags[67] == 1 && !map.custommode)
         {
-            dwgfx.Print(103, 220, "SHIP", 64,64,64);
+            dwgfx.Print(103, 220, "うちゅうせん", 64,64,64);
         }
         else
         {
-            dwgfx.Print(103, 220, "CREW", 64,64,64);
+            dwgfx.Print(103, 220, "なかま", 64,64,64);
         }
-        dwgfx.Print(185-12, 220, "[STATS]", 196, 196, 255 - help.glow);
-        dwgfx.Print(258, 220, "SAVE", 64, 64, 64);
+        dwgfx.Print(185-12, 220, "[ステータス]", 196, 196, 255 - help.glow);
+        dwgfx.Print(258, 220, "セーブ", 64, 64, 64);
 
         if(map.custommode){
           if (dwgfx.flipmode)
@@ -2695,21 +2695,21 @@ void maprender(Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, Uti
         }
         break;
     case 3:
-        dwgfx.Print(30, 220, "MAP", 64,64,64);
+        dwgfx.Print(30, 220, "マップ", 64,64,64);
         if (game.insecretlab)
         {
-            dwgfx.Print(103, 220, "GRAV", 64, 64, 64);
+            dwgfx.Print(103, 220, "グラビトロン", 64, 64, 64);
         }
         else if (obj.flags[67] == 1 && !map.custommode)
         {
-            dwgfx.Print(103, 220, "SHIP", 64,64,64);
+            dwgfx.Print(103, 220, "うちゅうせん", 64,64,64);
         }
         else
         {
-            dwgfx.Print(103, 220, "CREW", 64,64,64);
+            dwgfx.Print(103, 220, "なかま", 64,64,64);
         }
-        dwgfx.Print(185-4, 220, "STATS", 64,64,64);
-        dwgfx.Print(258 - 8, 220, "[SAVE]", 196, 196, 255 - help.glow);
+        dwgfx.Print(185-4, 220, "ステータス", 64,64,64);
+        dwgfx.Print(258 - 8, 220, "[セーブ]", 196, 196, 255 - help.glow);
 
         if (game.inintermission)
         {
