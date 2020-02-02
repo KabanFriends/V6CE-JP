@@ -35,7 +35,15 @@ public:
 
     void clearcustom();
 
+    void settile_special(int x, int y, int tile, Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj);
+
+    int getimage(Game& game, std::string n);
+
     int getvar(std::string n);
+    
+    void setvar(std::string n, std::string c);
+
+    void updatevars(Game& game, entityclass& obj);
 
     std::string processvars(std::string t);
 
@@ -95,12 +103,11 @@ public:
 
     growing_vector<std::string> variablenames;
     growing_vector<std::string> variablecontents;
-    bool readingvar = false;
-    bool foundvar = false;
-    std::string tempvar;
-    std::string tempstring;
 
     std::vector<stackframe> callstack;
+
+    int getpixelx = -1;
+    int getpixely = -1;
 };
 
 #endif /* SCRIPT_H */

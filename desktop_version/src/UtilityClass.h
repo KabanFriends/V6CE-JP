@@ -15,8 +15,11 @@ struct scriptimage {
     int r = 0;
     int g = 0;
     int b = 0;
+    int index = 0;
     std::string text;
     bool center = false;
+    int bord = false;
+    int sc = 2;
 };
 
 template<typename T>
@@ -43,6 +46,12 @@ class growing_vector : public std::vector<T> {
         return std::vector<T>::operator[](index);
     }
 };
+
+// always return positive modulo result if modulus is positive
+template<typename N>
+N mod(const N &num, const N &mod) {
+    return (num % mod + mod) % mod;
+}
 
 int ss_toi(std::string _s);
 
@@ -74,7 +83,10 @@ public:
 
     void updateglow();
 
+    std::string getmusicname(int num);
+
     int glow = 0;
+    bool freezeglow = false;
     int slowsine = 0;
     int glowdir = 0;
     int globaltemp = 0;
@@ -83,5 +95,7 @@ public:
     std::string tempstring;
     growing_vector<int> splitseconds;
 };
+
+extern UtilityClass help;
 
 #endif /* UTILITYCLASS_H */

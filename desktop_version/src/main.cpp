@@ -1,7 +1,9 @@
 #include <SDL.h>
+#include <ctime>
 #include "SoundSystem.h"
 
 #include "UtilityClass.h"
+#include "Utilities.h"
 #include "Game.h"
 #include "Graphics.h"
 #include "KeyPoll.h"
@@ -26,31 +28,72 @@
 #include "FileSystemUtils.h"
 #include "Network.h"
 
+#include "git-rev.h"
+
 #include <stdio.h>
 #include <string.h>
+#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__HAIKU__)
+#include <unistd.h>
+#endif
+
+#include "Maths.h"
+
+#define STRINGIFY_UNEXPANDED(s) #s
+#define STRINGIFY(s) STRINGIFY_UNEXPANDED(s)
 
 scriptclass script;
-edentities edentity[3000];
-edaltstate altstates[1000];
+growing_vector<edentities> edentity;
 editorclass ed;
 
 bool startinplaytest = false;
+bool savefileplaytest = false;
+int savex = 0;
+int savey = 0;
+int saverx = 0;
+int savery = 0;
+int savegc = 0;
+int savemusic = 0;
+
 std::string playtestname;
+
+UtilityClass help;
+Graphics graphics;
+musicclass music;
+Game game;
+KeyPoll key;
+mapclass map;
+entityclass obj;
 
 int main(int argc, char *argv[])
 {
-    if(!FILESYSTEM_init(argv[0]))
-    {
-        return 1;
-    }
-    SDL_Init(
-        SDL_INIT_VIDEO |
-        SDL_INIT_AUDIO |
-        SDL_INIT_JOYSTICK |
-        SDL_INIT_GAMECONTROLLER
-    );
+    seed_xoshiro_64(std::time(nullptr));
+
+    bool headless = false;
+#ifdef __APPLE__
+    bool syslog = true;
+#else
+    bool syslog = false;
+#endif
 
     for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "--quiet") == 0) {
+            game.quiet = true;
+        }
+        if (strcmp(argv[i], "--version") == 0) {
+            puts("VVVVVV-CE");
+            puts("Version c1.0");
+            puts("Built from commit " STRINGIFY(GIT_HASH_RAW));
+            return 0;
+        }
+        if (strcmp(argv[i], "--headless") == 0) {
+            headless = true;
+        }
+        if (strcmp(argv[i], "--syslog") == 0) {
+            syslog = true;
+        }
+        if (strcmp(argv[i], "--no-syslog") == 0) {
+            syslog = false;
+        }
         if ((std::string(argv[i]) == "--playing") || (std::string(argv[i]) == "-p")) {
             if (i + 1 < argc) {
                 startinplaytest = true;
@@ -63,64 +106,119 @@ int main(int argc, char *argv[])
                 return 1;
             }
         }
+        if (strcmp(argv[i], "--playx") == 0 ||
+                strcmp(argv[i], "--playy") == 0 ||
+                strcmp(argv[i], "--playrx") == 0 ||
+                strcmp(argv[i], "--playry") == 0 ||
+                strcmp(argv[i], "--playgc") == 0 ||
+                strcmp(argv[i], "--playmusic") == 0) {
+            if (i + 1 < argc) {
+                savefileplaytest = true;
+                auto v = std::atoi(argv[i+1]);
+                if (strcmp(argv[i], "--playx") == 0) savex = v;
+                else if (strcmp(argv[i], "--playy") == 0) savey = v;
+                else if (strcmp(argv[i], "--playrx") == 0) saverx = v;
+                else if (strcmp(argv[i], "--playry") == 0) savery = v;
+                else if (strcmp(argv[i], "--playgc") == 0) savegc = v;
+                else if (strcmp(argv[i], "--playmusic") == 0) savemusic = v;
+                i++;
+            } else {
+                printf("--playing option requires one argument.\n");
+                return 1;
+            }
+        }
         if (std::string(argv[i]) == "-renderer") {
             SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, argv[2], SDL_HINT_OVERRIDE);
         }
     }
+
+    if (syslog) {
+#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__HAIKU__)
+        puts("Switching to syslog...");
+        auto logger = popen("logger", "w");
+        if (logger) {
+            auto logger_fd = fileno(logger);
+            auto stdout_fd = fileno(stdout);
+            auto stderr_fd = fileno(stderr);
+            dup2(logger_fd, stdout_fd);
+            dup2(logger_fd, stderr_fd);
+            setbuf(stdout, nullptr);
+        } else {
+            puts("Couldn't create logger!");
+        }
+#endif
+    }
+
+    if(!FILESYSTEM_init(argv[0]))
+    {
+        return 1;
+    }
+    SDL_Init(
+        SDL_INIT_VIDEO |
+        SDL_INIT_AUDIO |
+        SDL_INIT_JOYSTICK |
+        SDL_INIT_GAMECONTROLLER
+    );
 
     /*if (argc > 2 && strcmp(argv[1], "-renderer") == 0)
     {
         SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, argv[2], SDL_HINT_OVERRIDE);
     }*/
 
-    NETWORK_init();
+    if (!game.quiet) NETWORK_init(); // FIXME: this is probably bad
 
     Screen gameScreen;
+    gameScreen.headless = headless;
 
-	printf("\t\t\n");
-	printf("\t\t\n");
-	printf("\t\t       VVVVVV\n");
-	printf("\t\t\n");
-	printf("\t\t\n");
-	printf("\t\t  8888888888888888  \n");
-	printf("\t\t88888888888888888888\n");
-	printf("\t\t888888    8888    88\n");
-	printf("\t\t888888    8888    88\n");
-	printf("\t\t88888888888888888888\n");
-	printf("\t\t88888888888888888888\n");
-	printf("\t\t888888            88\n");
-	printf("\t\t88888888        8888\n");
-	printf("\t\t  8888888888888888  \n");
-	printf("\t\t      88888888      \n");
-	printf("\t\t  8888888888888888  \n");
-	printf("\t\t88888888888888888888\n");
-	printf("\t\t88888888888888888888\n");
-	printf("\t\t88888888888888888888\n");
-	printf("\t\t8888  88888888  8888\n");
-	printf("\t\t8888  88888888  8888\n");
-	printf("\t\t    888888888888    \n");
-	printf("\t\t    8888    8888    \n");
-	printf("\t\t  888888    888888  \n");
-	printf("\t\t  888888    888888  \n");
-	printf("\t\t  888888    888888  \n");
-	printf("\t\t\n");
-	printf("\t\t\n");
+    if (!game.quiet) {
+        printf("\t\t\n");
+        printf("\t\t\n");
+        printf("\t\t       VVVVVV\n");
+        printf("\t\t\n");
+        printf("\t\t\n");
+        printf("\t\t  8888888888888888  \n");
+        printf("\t\t88888888888888888888\n");
+        printf("\t\t888888    8888    88\n");
+        printf("\t\t888888    8888    88\n");
+        printf("\t\t88888888888888888888\n");
+        printf("\t\t88888888888888888888\n");
+        printf("\t\t888888            88\n");
+        printf("\t\t88888888        8888\n");
+        printf("\t\t  8888888888888888  \n");
+        printf("\t\t      88888888      \n");
+        printf("\t\t  8888888888888888  \n");
+        printf("\t\t88888888888888888888\n");
+        printf("\t\t88888888888888888888\n");
+        printf("\t\t88888888888888888888\n");
+        printf("\t\t8888  88888888  8888\n");
+        printf("\t\t8888  88888888  8888\n");
+        printf("\t\t    888888888888    \n");
+        printf("\t\t    8888    8888    \n");
+        printf("\t\t  888888    888888  \n");
+        printf("\t\t  888888    888888  \n");
+        printf("\t\t  888888    888888  \n");
+        printf("\t\t\n");
+        printf("\t\t\n");
+    }
 
     //Set up screen
 
 
 
 
-    UtilityClass help;
+    //UtilityClass help;
     // Load Ini
 
 
-    Graphics graphics;
+    //Graphics graphics;
+    graphics.init();
 
 
 
-    musicclass music;
-    Game game;
+    //musicclass music;
+    music.init();
+    //Game game;
+    game.init();
     game.infocus = true;
 
     graphics.MakeTileArray();
@@ -146,6 +244,10 @@ int main(int argc, char *argv[])
     const SDL_PixelFormat* fmt = gameScreen.GetFormat();
     graphics.backBuffer = SDL_CreateRGBSurface(SDL_SWSURFACE ,320 ,240 ,32,fmt->Rmask,fmt->Gmask,fmt->Bmask,fmt->Amask ) ;
     SDL_SetSurfaceBlendMode(graphics.backBuffer, SDL_BLENDMODE_NONE);
+    graphics.footerbuffer = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 10, 32, fmt->Rmask, fmt->Gmask, fmt->Bmask, fmt->Amask);
+    SDL_SetSurfaceBlendMode(graphics.footerbuffer, SDL_BLENDMODE_BLEND);
+    SDL_SetSurfaceAlphaMod(graphics.footerbuffer, 127);
+    FillRect(graphics.footerbuffer, SDL_MapRGB(fmt, 0, 0, 0));
     graphics.Makebfont();
 
 
@@ -177,8 +279,8 @@ int main(int argc, char *argv[])
     game.menustart = false;
     game.mainmenu = 0;
 
-    KeyPoll key;
-    mapclass map;
+    //KeyPoll key;
+    //mapclass map;
 
     map.ypos = (700-29) * 8;
     map.bypos = map.ypos / 2;
@@ -235,7 +337,7 @@ int main(int argc, char *argv[])
 		if(game.bestrank[4]>=3) NETWORK_unlockAchievement("vvvvvvtimetrial_warp_fixed");
 		if(game.bestrank[5]>=3) NETWORK_unlockAchievement("vvvvvvtimetrial_final_fixed");
 
-    entityclass obj;
+    //entityclass obj;
     obj.init();
 
     if (startinplaytest) {
@@ -260,33 +362,19 @@ int main(int argc, char *argv[])
         }
         game.customleveltitle=ed.ListOfMetaData[game.playcustomlevel].title;
         game.customlevelfilename=ed.ListOfMetaData[game.playcustomlevel].filename;
-        std::string name = game.saveFilePath + ed.ListOfMetaData[game.playcustomlevel].filename.substr(7) + ".vvv";
-        TiXmlDocument doc(name.c_str());
-	    game.mainmenu = 22;
-        ed.weirdloadthing(ed.ListOfMetaData[game.playcustomlevel].filename, graphics);
-        ed.findstartpoint(game);
-        game.gamestate = GAMEMODE;
-        script.hardreset(key, graphics, game, map, obj, help, music);
-        game.customstart(obj, music);
-        game.jumpheld = true;
-		map.custommodeforreal = true;
-        map.custommode = true;
-        map.customx = 100;
-        map.customy = 100;
-        if(obj.nentity==0) {
-            obj.createentity(game, game.savex, game.savey, 0, 0);
+        if (savefileplaytest) {
+            game.playx = savex;
+            game.playy = savey;
+            game.playrx = saverx;
+            game.playry = savery;
+            game.playgc = savegc;
+            game.cliplaytest = true;
+            music.play(savemusic);
+            script.startgamemode(23, key, graphics, game, map, obj, help, music);
         } else {
-            map.resetplayer(graphics, game, obj, music);
+            script.startgamemode(22, key, graphics, game, map, obj, help, music);
         }
-        map.gotoroom(game.saverx, game.savery, graphics, game, obj, music);
-		ed.generatecustomminimap(graphics, map);
-		map.customshowmm=true;
-        if(ed.levmusic>0){
-            music.play(ed.levmusic);
-        } else {
-            music.currentsong=-1;
-		}
-		//dwgfx.fademode = 4;
+        graphics.fademode = 0;
 
     }
     //Quick hack to start in final level ---- //Might be useful to leave this commented in for testing
@@ -315,6 +403,8 @@ int main(int argc, char *argv[])
     volatile Uint32 time, timePrev = 0;
     game.infocus = true;
     key.isActive = true;
+
+    game.gametimer = 0;
 
     while(!key.quitProgram)
     {
@@ -347,7 +437,6 @@ int main(int argc, char *argv[])
           timePrev = time;
 
         }
-
 
 
         key.Poll();
@@ -411,6 +500,7 @@ int main(int argc, char *argv[])
         {
             Mix_Resume(-1);
             Mix_ResumeMusic();
+            game.gametimer++;
             switch(game.gamestate)
             {
             case PRELOADER:
@@ -561,7 +651,8 @@ int main(int argc, char *argv[])
         }
 
         //Mute button
-        if (key.isDown(KEYBOARD_m) && game.mutebutton<=0 && !ed.textentry && ed.scripthelppage != 1)
+        if (key.isDown(KEYBOARD_m) && game.mutebutton<=0 && !ed.textentry &&
+            !ed.textmod && ed.scripthelppage != 1)
         {
             game.mutebutton = 8;
             if (game.muted)

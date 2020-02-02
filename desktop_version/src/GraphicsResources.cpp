@@ -21,7 +21,7 @@ extern "C" {
     );
 }
 
-SDL_Surface* LoadImage(const char *filename, bool noBlend /*= true*/, bool noAlpha /*= false*/)
+SDL_Surface* LoadImage(const char *filename, bool noBlend /*= true*/, bool noAlpha /*= false*/, bool optional /*= false*/)
 {
 	//Temporary storage for the image that's loaded
 	SDL_Surface* loadedImage = NULL;
@@ -56,7 +56,7 @@ SDL_Surface* LoadImage(const char *filename, bool noBlend /*= true*/, bool noAlp
 		noAlpha ? 0x00000000 : 0xFF000000
 	);
 
-	if (loadedImage != NULL)
+	if (loadedImage != NULL && data != NULL)
 	{
 		optimizedImage = SDL_ConvertSurfaceFormat(
 			loadedImage,
@@ -71,15 +71,15 @@ SDL_Surface* LoadImage(const char *filename, bool noBlend /*= true*/, bool noAlp
 		}
 		return optimizedImage;
 	}
-	else
+	else if (!optional)
 	{
 		fprintf(stderr,"Image not found: %s\n", filename);
 		SDL_assert(0 && "Image not found! See stderr.");
-		return NULL;
 	}
+        return NULL;
 }
 
-GraphicsResources::GraphicsResources(void)
+void GraphicsResources::init(void)
 {
 	im_tiles =		LoadImage("graphics/tiles.png");
 	im_tiles2 =		LoadImage("graphics/tiles2.png");
@@ -88,6 +88,8 @@ GraphicsResources::GraphicsResources(void)
 	im_sprites =		LoadImage("graphics/sprites.png");
 	im_flipsprites =	LoadImage("graphics/flipsprites.png");
 	im_bfont =		LoadImage("graphics/font.png");
+	im_unifont =		LoadImage("graphics/unifont.png", true, false, true);
+	im_wideunifont =	LoadImage("graphics/wideunifont.png", true, false, true);
 	im_bfontmask =		LoadImage("graphics/fontmask.png");
 	im_teleporter =		LoadImage("graphics/teleporter.png");
 
@@ -109,4 +111,29 @@ GraphicsResources::GraphicsResources(void)
 
 GraphicsResources::~GraphicsResources(void)
 {
+	SDL_FreeSurface(im_tiles);
+	SDL_FreeSurface(im_tiles2);
+	SDL_FreeSurface(im_tiles3);
+	SDL_FreeSurface(im_entcolours);
+	SDL_FreeSurface(im_sprites);
+	SDL_FreeSurface(im_flipsprites);
+	SDL_FreeSurface(im_bfont);
+	SDL_FreeSurface(im_unifont);
+	SDL_FreeSurface(im_wideunifont);
+	SDL_FreeSurface(im_bfontmask);
+	SDL_FreeSurface(im_teleporter);
+
+	SDL_FreeSurface(im_image0);
+	SDL_FreeSurface(im_image1);
+	SDL_FreeSurface(im_image2);
+	SDL_FreeSurface(im_image3);
+	SDL_FreeSurface(im_image4);
+	SDL_FreeSurface(im_image5);
+	SDL_FreeSurface(im_image6);
+	SDL_FreeSurface(im_image7);
+	SDL_FreeSurface(im_image8);
+	SDL_FreeSurface(im_image9);
+	SDL_FreeSurface(im_image10);
+	SDL_FreeSurface(im_image11);
+	SDL_FreeSurface(im_image12);
 }

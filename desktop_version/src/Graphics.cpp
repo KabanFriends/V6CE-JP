@@ -9,8 +9,10 @@
 #include <iterator>
 #include <fribidi/fribidi.h>
 
-Graphics::Graphics()
+void Graphics::init()
 {
+    grphx.init();
+
     flipmode = false;
     setRect(tiles_rect, 0,0,8,8);
     setRect(sprites_rect, 0,0,32,32);
@@ -127,6 +129,9 @@ Graphics::Graphics()
     trinketg = 0;
     trinketb = 0;
     warprect = SDL_Rect();
+
+    translucentroomname = false;
+    showmousecursor = true;
 }
 
 int Graphics::font_idx(char32_t ch) {
@@ -159,12 +164,41 @@ void Graphics::drawspritesetcol(int x, int y, int t, int c, UtilityClass& help)
 
 void Graphics::Makebfont()
 {
-    for (int j =  0; j < (grphx.im_bfont->h / 8); j++)
-    {
-        for (int i = 0; i < 16; i++)
+    if (PHYSFS_getRealDir("graphics/font.txt") != PHYSFS_getRealDir("graphics/font.png")) {
+        for (int j =  0; j < (grphx.im_bfont->h / 8); j++)
         {
+            for (int i = 0; i < 16; i++)
+            {
 
-            SDL_Surface* temp = GetSubSurface(grphx.im_bfont,i*8,j*8,8,8);
+                SDL_Surface* temp = GetSubSurface(grphx.im_bfont,i*8,j*8,8,8);
+                bfont.push_back(temp);
+
+                SDL_Surface* TempFlipped = FlipSurfaceVerticle(temp);
+                flipbfont.push_back(TempFlipped);
+            }
+        }
+    } else {
+        int pos = 0;
+        if (grphx.im_unifont) load_font("graphics/unifont.txt", grphx.im_unifont, 8, 16, pos);
+        if (grphx.im_wideunifont) load_font("graphics/wideunifont.txt", grphx.im_wideunifont, 16, 16, pos);
+        load_font("graphics/font.txt", grphx.im_bfont, 8, 8, pos);
+    }
+}
+
+void Graphics::load_font(const char* path, SDL_Surface* img, int char_w, int char_h, int& pos) {
+    size_t length;
+    unsigned char* charmap = nullptr;
+    FILESYSTEM_loadFileToMemory(path, &charmap, &length);
+
+    unsigned char* current = charmap;
+    unsigned char* end = charmap + length;
+
+    for (int j =  0; j < (img->h / char_h); j++) {
+        for (int i = 0; i < 16; i++) {
+            if (current >= end) break;
+            font_positions[utf8::next(current, end)] = bfont.size();
+
+            SDL_Surface* temp = GetSubSurface(img,i*char_w,j*char_h,char_w,char_h);
             bfont.push_back(temp);
 
             SDL_Surface* TempFlipped = FlipSurfaceVerticle(temp);
@@ -172,27 +206,11 @@ void Graphics::Makebfont()
         }
     }
 
-    unsigned char* charmap = NULL;
-    size_t length;
-    FILESYSTEM_loadFileToMemory("graphics/font.txt", &charmap, &length);
-    if (charmap != NULL) {
-        unsigned char* current = charmap;
-        unsigned char* end = charmap + length;
-        int pos = 0;
-        while (current != end) {
-            int codepoint = utf8::next(current, end);
-            if (codepoint != 0x0a) font_positions[codepoint] = pos;
-            ++pos;
-        }
-    }
+    FILESYSTEM_freeMemory(&charmap);
 }
 
 int Graphics::bfontlen(char32_t ch) {
-    if (ch < 32) {
-        return 6;
-    } else {
-        return 8;
-    }
+    return bfont[font_idx(ch)]->w;
 }
 
 std::vector<uint32_t> utf8to32(const std::string& src) {
@@ -250,20 +268,53 @@ void Graphics::maketelearray()
 
 void Graphics::MakeSpriteArray()
 {
-    for(int j = 0; j <16; j++)
+    int default_rows = 17;
+
+    int sprites_height = grphx.im_sprites->h;
+    for(int j = 0; j < sprites_height / 32; j++)
     {
         for(int i = 0; i <12; i++)
         {
             SDL_Surface* temp = GetSubSurface(grphx.im_sprites,i*32,j*32,32,32);
             sprites.push_back(temp);
-            temp = GetSubSurface(grphx.im_flipsprites,i*32,j*32,32,32);
+        }
+    }
+
+    int flip_sprites_height = grphx.im_flipsprites->h;
+    for(int j = 0; j < flip_sprites_height / 32; j++)
+    {
+        for(int i = 0; i <12; i++)
+        {
+            SDL_Surface* temp = GetSubSurface(grphx.im_flipsprites,i*32,j*32,32,32);
             flipsprites.push_back(temp);
+        }
+    }
+
+    int needed_sprites = (sprites_height - flip_sprites_height) / 32;
+
+    for(int j = 0; j < needed_sprites; j++)
+    {
+        for(int i = 0; i < 12; i++)
+        {
+            SDL_Surface* temp = GetSubSurface(grphx.im_sprites,i*32,flip_sprites_height + (j*32),32,32);
+            flipsprites.push_back(temp);
+        }
+    }
+
+    if ((sprites_height / 32) < default_rows) {
+        int rest = default_rows - (sprites_height / 32);
+        for (int j = 0; j < rest; j++) {
+            for(int i = 0; i < 12; i++) {
+                SDL_Surface* temp = GetSubSurface(grphx.im_sprites,0,0,32,32);
+                sprites.push_back(temp);
+                flipsprites.push_back(temp);
+            }
         }
     }
 }
 
 
-void Graphics::Print( int _x, int _y, std::string _s, int r, int g, int b, bool cen /*= false*/ )
+bool Graphics::Print( int _x, int _y, std::string _s, int r, int g, int b, bool cen /*= false*/ )
 {
     r = clamp(r,0,255);
     g = clamp(g,0,255);
@@ -274,6 +325,7 @@ void Graphics::Print( int _x, int _y, std::string _s, int r, int g, int b, bool 
     if (cen)
         _x = ((160 ) - ((len(_s)) / 2));
     int bfontpos = 0;
+    bool tallline = false;
     auto utf32 = utf8to32(_s);
     std::vector<uint32_t> bidi(utf32.size());
     FriBidiParType bidi_type = FRIBIDI_TYPE_ON;
@@ -290,6 +342,12 @@ void Graphics::Print( int _x, int _y, std::string _s, int r, int g, int b, bool 
         fontRect.x = tpoint.x ;
         fontRect.y = tpoint.y ;
 
+        if (bfont[font_idx(curr)]->h > 8) {
+            tallline = true;
+        } else if (tallline) {
+            fontRect.y += 4;
+        }
+
         if (flipmode)
         {
             BlitSurfaceColoured( flipbfont[font_idx(curr)], NULL, backBuffer, &fontRect , ct);
@@ -300,6 +358,7 @@ void Graphics::Print( int _x, int _y, std::string _s, int r, int g, int b, bool 
         }
         bfontpos+=bfontlen(curr) ;
     }
+    return tallline;
 }
 
 
@@ -778,6 +837,30 @@ void Graphics::drawimagecol( int t, int xp, int yp, int r = 0, int g = 0, int b 
         trect.h = images[t]->h;
         BlitSurfaceColoured(images[t], NULL, backBuffer, &trect, ct);
 
+    }
+}
+
+void Graphics::drawscriptimage( Game& game, int t, int xp, int yp, bool cent/*=false*/ )
+{
+
+    SDL_Rect trect;
+    if (cent)
+    {
+        trect.x = 160 - int(game.script_images[t]->w / 2);
+        trect.y = yp;
+        trect.w = game.script_images[t]->w;
+        trect.h = game.script_images[t]->h;
+        BlitSurfaceStandard(game.script_images[t], NULL, backBuffer, &trect);
+    }
+    else
+    {
+
+        trect.x = xp;
+        trect.y = yp;
+        trect.w = game.script_images[t]->w;
+        trect.h= game.script_images[t]->h;
+
+        BlitSurfaceStandard(game.script_images[t], NULL, backBuffer, &trect);
     }
 }
 
@@ -1441,6 +1524,8 @@ void Graphics::drawtrophytext( entityclass& obj, UtilityClass& help )
 
 void Graphics::drawentities( mapclass& map, entityclass& obj, UtilityClass& help )
 {
+    ct.nocolor = false;
+
     //Update line colours!
     if (linedelay <= 0)
     {
@@ -1968,6 +2053,8 @@ void Graphics::drawentities( mapclass& map, entityclass& obj, UtilityClass& help
             }
         }
     }
+
+    ct.nocolor = false;
 }
 
 void Graphics::drawbackground( int t, mapclass& map )
@@ -2390,7 +2477,7 @@ void Graphics::drawmap( mapclass& map )
     ///TODO forground once;
     if (!foregrounddrawn)
     {
-        FillRect(foregroundBuffer, 0xDEADBEEF);
+        FillRect(foregroundBuffer, 0x00000000);
         if(map.tileset==0)
         {
             for (j = 0; j < 29+map.extrarow; j++)
@@ -2423,7 +2510,7 @@ void Graphics::drawmap( mapclass& map )
         }
         foregrounddrawn = true;
     }
-    OverlaySurfaceKeyed(foregroundBuffer, backBuffer, 0xDEADBEEF);
+    OverlaySurfaceKeyed(foregroundBuffer, backBuffer, 0x00000000);
     //SDL_BlitSurface(foregroundBuffer, NULL, backBuffer, NULL);
 
 }
@@ -2446,7 +2533,7 @@ void Graphics::drawfinalmap(mapclass & map)
 	}
 
 	if (!foregrounddrawn) {
-		FillRect(foregroundBuffer, 0xDEADBEEF);
+		FillRect(foregroundBuffer, 0x00000000);
 		if(map.tileset==0){
 			for (int j = 0; j < 29+map.extrarow; j++) {
 				for (int i = 0; i < 40; i++) {
@@ -2465,7 +2552,7 @@ void Graphics::drawfinalmap(mapclass & map)
 		foregrounddrawn=true;
 	}
 
-	OverlaySurfaceKeyed(foregroundBuffer, backBuffer, 0xDEADBEEF);
+	OverlaySurfaceKeyed(foregroundBuffer, backBuffer, 0x00000000);
 }
 
 void Graphics::drawtowermap( mapclass& map )
@@ -2699,9 +2786,15 @@ void Graphics::setcol( int t, UtilityClass& help )
 {
 	int temp;
 
+        ct.nocolor = false;
+
 	//Setup predefinied colours as per our zany palette
 	switch(t)
 	{
+                //No color
+        case -1:
+                ct.nocolor = true;
+                break;
 		//Player Normal
 	case 0:
 		ct.colour = getRGB(160- help.glow/2 - (fRandom()*20), 200- help.glow/2, 220 - help.glow);
@@ -2888,6 +2981,13 @@ void Graphics::setcol( int t, UtilityClass& help )
 		{
 			ct.colour = getRGB(164+(fRandom()*64),164+(fRandom()*64), 255-(fRandom()*64));
 		}
+		break;
+	case 200: //HSV glow
+                { // C++ *please*
+                    HsvColor hsv = { .h = (unsigned char)(help.glow * 4), .s = 255, .v = 255};
+                    auto rgb = HsvToRgb(hsv);
+                    ct.colour = getRGB(rgb.r, rgb.g, rgb.b);
+                }
 		break;
 
 	default:
@@ -3183,6 +3283,23 @@ void Graphics::drawtele(int x, int y, int t, int c, UtilityClass& help)
 	BlitSurfaceColoured(tele[t], NULL, backBuffer, &telerect, ct);
 }
 
+void Graphics::drawtelepart(int x, int y, int t, int c, UtilityClass& help)
+{
+	setcolreal(getRGB(16,16,16));
+
+	SDL_Rect telerect;
+	setRect(telerect, x , y, 16, 16 );
+	SDL_Rect telerect2;
+	setRect(telerect2, 40, 40, 16, 16 );
+	BlitSurfaceColoured(tele[0], &telerect2, backBuffer, &telerect, ct);
+
+	setcol(c, help);
+	if (t > 9) t = 8;
+	if (t < 0) t = 0;
+
+	BlitSurfaceColoured(tele[t], &telerect2, backBuffer, &telerect, ct);
+}
+
 Uint32 Graphics::getRGB(Uint8 r, Uint8 g, Uint8 b)
 {
 	return SDL_MapRGB(backBuffer->format, b, g, r);
@@ -3225,26 +3342,35 @@ void Graphics::drawtile(int x, int y, int t)
 
 void Graphics::drawforetile(int x, int y, int t)
 {
-	//frontbuffer.copyPixels(tiles[t], tiles_rect, tpoint);
-	SDL_Rect rect;
-	setRect(rect, x,y,tiles_rect.w, tiles_rect.h);
-	BlitSurfaceStandard(tiles[t],NULL, foregroundBuffer, &rect  );
+        auto tile = t;
+        if (!noclear || (tile >= 6 && tile <= 9) || tile == 49 || tile == 50 || tile == 1 || (tile >= 80 && tile <= 679)) {
+            //frontbuffer.copyPixels(tiles[t], tiles_rect, tpoint);
+            SDL_Rect rect;
+            setRect(rect, x,y,tiles_rect.w, tiles_rect.h);
+            BlitSurfaceStandard(tiles[t],NULL, foregroundBuffer, &rect  );
+        }
 }
 
 void Graphics::drawforetile2(int x, int y, int t)
 {
-	//frontbuffer.copyPixels(tiles2[t], tiles_rect, tpoint);
-	SDL_Rect rect;
-	setRect(rect, x,y,tiles_rect.w, tiles_rect.h);
-	BlitSurfaceStandard(tiles2[t],NULL, foregroundBuffer, &rect  );
+        auto tile = t;
+        if (!noclear || (tile >= 6 && tile <= 9) || tile == 49 || tile == 50 || tile == 1 || (tile >= 80 && tile <= 679)) {
+            //frontbuffer.copyPixels(tiles2[t], tiles_rect, tpoint);
+            SDL_Rect rect;
+            setRect(rect, x,y,tiles_rect.w, tiles_rect.h);
+            BlitSurfaceStandard(tiles2[t],NULL, foregroundBuffer, &rect  );
+        }
 }
 
 void Graphics::drawforetile3(int x, int y, int t, int off)
 {
-	SDL_Rect rect;
-	setRect(rect, x,y,tiles_rect.w, tiles_rect.h);
-	BlitSurfaceStandard(tiles3[t+(off*30)],NULL, foregroundBuffer, &rect  );
-	//frontbuffer.copyPixels(tiles3[t+(off*30)], tiles_rect, tpoint);
+        auto tile = t % 30;
+        if (!noclear || (tile >= 6 && tile <= 11) || (tile >= 12 && tile <= 27)) {
+            SDL_Rect rect;
+            setRect(rect, x,y,tiles_rect.w, tiles_rect.h);
+            BlitSurfaceStandard(tiles3[t+(off*30)],NULL, foregroundBuffer, &rect  );
+            //frontbuffer.copyPixels(tiles3[t+(off*30)], tiles_rect, tpoint);
+        }
 }
 
 void Graphics::drawrect(int x, int y, int w, int h, int r, int g, int b)
@@ -3280,6 +3406,7 @@ bool Graphics::onscreen(int t)
 
 void Graphics::reloadresources() {
     grphx = GraphicsResources();
+    grphx.init();
 
     images.clear();
     tiles.clear();
@@ -3308,4 +3435,9 @@ void Graphics::reloadresources() {
     images.push_back(grphx.im_image10);
     images.push_back(grphx.im_image11);
     images.push_back(grphx.im_image12);
+}
+
+void Graphics::textboxcreatefast()
+{
+    textbox[m].createfast();
 }

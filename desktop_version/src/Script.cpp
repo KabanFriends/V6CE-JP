@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <cstring>
+#include <cstdlib>
 #include "Script.h"
 #include "Graphics.h"
 
@@ -9,6 +10,8 @@
 #include "Music.h"
 #include "KeyPoll.h"
 #include "Map.h"
+#include "FileSystemUtils.h"
+#include "Utilities.h"
 
 scriptclass::scriptclass()
 {
@@ -57,6 +60,99 @@ void scriptclass::call(std::string script) {
     load(script);
 }
 
+void scriptclass::settile_special(int x, int y, int tile, Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj) {
+	if (tile != 10) // There's nothing behind 1x1 quicksand
+		map.settile(x, y, tile);
+	else
+		// Don't change the `tile` var, we createentity by checking `tile` later
+		map.settile(x, y, 0);
+	dwgfx.foregrounddrawn = false;
+	// Kludge to fix spikes, one-ways, and 1x1 quicksand
+	// Remove them first, if there is one where we placed the tile
+	// The 1x1 quicksand is part entity, part block
+	// Remove its entity
+	for (int eqi = 0; eqi < obj.nentity; eqi++)
+		if (obj.entities[eqi].type == 3 && obj.entities[eqi].xp/8 == x && obj.entities[eqi].yp/8 == y)
+			obj.entities[eqi].active = false;
+	// The rest of these removals are blocks, which I'll just put in one for-loop
+	for (int bi = 0; bi < obj.nblocks; bi++) {
+		// Remove the block part of a 1x1 quicksand
+		// We check that it's 8x8 in order to not remove 4-wide quicksand / platforms / conveyors
+		if (obj.blocks[bi].type == BLOCK && obj.blocks[bi].xp/8 == x && obj.blocks[bi].yp/8 == y && obj.blocks[bi].wp == 8 && obj.blocks[bi].hp == 8)
+			obj.blocks[bi].clear();
+
+		// The spiky part of a spike is a block, remove it
+		if (obj.blocks[bi].type == DAMAGE &&
+			// Important - do the integer division by 8 on the left side of the equality, not multiply by 8 on the right side
+			// (Same applies to the one-way conditional below)
+			// Also important - for some godawful reason, the real position of spikes' blocks
+			// is stored in their 'x'/'y' attributes instead of 'xp'/'yp' like the rest,
+			// and also, the 'x'/'y' attributes are floats instead of ints
+			(int) obj.blocks[bi].x/8 == x && (int) obj.blocks[bi].y/8 == y)
+				obj.blocks[bi].clear();
+
+		// The collision of a one-way tile is a block, also remove it
+		if (obj.blocks[bi].type == DIRECTIONAL &&
+		// Read comment about integer division from above conditional
+		obj.blocks[bi].x/8 == x && obj.blocks[bi].y/8 == y)
+			obj.blocks[bi].clear();
+	}
+
+	// Clean up before adding any entities/blocks
+	obj.cleanup();
+	int n = obj.nblocks - 1;
+	while (n >= 0 && !obj.blocks[n].active) {
+		obj.nblocks--;
+		n--;
+	}
+
+	// Ok, now if we've added a tile that's an entity and/or block, actually add it now...
+	// TODO: This will need to be updated when the Tower tileset rolls around
+
+	// This is all copy-pasted from Map.cpp
+
+	// Spikes
+	if (map.tileset == 0) {
+		if (tile == 6 || tile == 8)
+			// Sticking up
+			obj.createblock(DAMAGE, 8*x, 8*y + 4, 8, 4);
+		if (tile == 7 || tile == 9)
+			// Sticking down
+			obj.createblock(DAMAGE, 8*x, 8*y, 8, 4);
+		if (tile == 49 || tile == 50)
+			// Left or right
+			obj.createblock(DAMAGE, 8*x, 8*y + 3, 8, 2);
+	} else if (map.tileset == 1) {
+		if ((tile >= 63 && tile <= 74) || (tile >= 6 && tile <= 9)) {
+			// Correct the {odd, even}-type of the tile, this will be un-corrected later
+			if (tile < 10)
+				tile++;
+
+			if(tile % 2 == 0)
+				// Sticking up
+				obj.createblock(DAMAGE, 8*x, 8*y, 8, 4);
+			else
+				// Sticking down
+				obj.createblock(DAMAGE, 8*x, 8*y + 4, 8, 4);
+
+			// Un-correct it now
+			if (tile < 11)
+				tile--;
+		}
+		if (tile >= 49 && tile <= 62)
+			// Left or right
+			obj.createblock(DAMAGE, 8*x, 8*y + 3, 8, 2);
+	}
+
+	// 1x1 quicksand
+	if (tile == 10)
+		obj.createentity(game, 8*x, 8*y, 4);
+
+	// One-way tiles
+	if (tile >= 14 && tile <= 17)
+		obj.createblock(DIRECTIONAL, 8*x, 8*y, 8, 8, tile-14);
+}
+
 int scriptclass::getvar(std::string n) {
 	for(std::size_t i = 0; i < variablenames.size(); i++) {
 		if (variablenames[i] == n) {
@@ -66,11 +162,39 @@ int scriptclass::getvar(std::string n) {
 	return -1;
 }
 
+int scriptclass::getimage(Game& game, std::string n) {
+	for(std::size_t i = 0; i < game.script_images.size(); i++) {
+		if (game.script_image_names[i] == n) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void scriptclass::setvar(std::string n, std::string c) {
+	int tempvar = getvar(n);
+	if (tempvar == -1) {
+		variablenames.push_back(n);
+		variablecontents.push_back(c);
+	} else {
+		variablecontents[tempvar] = c;
+	}
+}
+
+void scriptclass::updatevars(Game& game, entityclass& obj) {
+	int player = obj.getplayer();
+	setvar("deaths",   std::to_string(game.deathcounts));
+	setvar("player_x", std::to_string(obj.entities[player].xp));
+	setvar("player_y", std::to_string(obj.entities[player].yp));
+	setvar("trinkets", std::to_string(game.trinkets));
+	setvar("coins", std::to_string(game.coins));
+}
+
 std::string scriptclass::processvars(std::string t) {
-	tempstring = "";
-	tempvar = "";
-	readingvar = false;
-	foundvar = false;
+	std::string tempstring = "";
+	std::string tempvar = "";
+	bool readingvar = false;
+	bool foundvar = false;
 	for (size_t i = 0; i < t.length(); i++)
 	{
 		currentletter = t.substr(i, 1);
@@ -112,6 +236,46 @@ void scriptclass::tokenize( std::string t )
 	tempword = "";
     words.clear();
 
+	std::string varname = "";
+	std::string op = "";
+	std::string rest = "";
+	bool readop = false;
+	bool readingrest = false;
+	bool parseops = true;
+
+	for (size_t i = 0; i < t.length(); i++)
+	{
+		currentletter = t.substr(i, 1);
+		if ((currentletter == "(") ||
+		   (currentletter == ",") ||
+		   (currentletter == ")")) {
+			   parseops = false;
+			   break;
+	    } else if (((currentletter == "=") ||
+		   (currentletter == "+") ||
+		   (currentletter == "-")) &&
+		   !readop) {
+			op += currentletter;
+			readingrest = true;
+		} else if (currentletter != " ") {
+			if (readingrest) {
+				rest += currentletter;
+				readop = true;
+			} else {
+				varname += currentletter;
+			}
+		}
+	}
+	if (parseops) {
+		if (op == "+=") t = "addvar(" + varname + "," + rest + ")";
+		if (op == "++") t = "addvar(" + varname + ",1)";
+		if (op == "-=") t = "addvar(" + varname + ",-" + rest + ")";
+		if (op == "--") t = "addvar(" + varname + ",-1)";
+		if (op == "=")  t = "setvar(" + varname + "," + rest + ")";
+	}
+
+	tempword = "";
+
 	t = processvars(t);
     
 	for (size_t i = 0; i < t.length(); i++)
@@ -133,8 +297,8 @@ void scriptclass::tokenize( std::string t )
 		}
 	}
 
-        words.push_back(tempword);
-        words.push_back("");
+    words.push_back(tempword);
+    words.push_back("");
 }
 
 void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, UtilityClass& help, musicclass& music )
@@ -147,6 +311,9 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 		if (position < scriptlength)
 		{
 			//Let's split or command in an array of words
+
+			updatevars(game, obj);
+
 			tokenize(commands[position]);
 
 			//For script assisted input
@@ -178,7 +345,7 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
           map.warpx=false; map.warpy=false;
           if(ed.level[curlevel].warpdir==0){
             map.background = 1;
-            //Be careful, we could be in a Lab or Warp Zone room...
+            //Be careful, we could be in a Lab or Warp Zone or Tower room...
             if(ed.level[curlevel].tileset==2){
               //Lab
               map.background = 2;
@@ -186,6 +353,9 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
             }else if(ed.level[curlevel].tileset==3){
               //Warp Zone
               map.background = 6;
+            }else if(ed.level[curlevel].tileset==5){
+              //Tower
+              map.background = 10;
             }
           }else if(ed.level[curlevel].warpdir==1){
             map.warpx=true;
@@ -271,17 +441,55 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 							obj.entities[eci].active = false;
 				} else if (words[1] == "all" || words[1] == "everything") {
 					// Don't want to use obj.removeallblocks(), it'll remove all spikes and one-ways too
-					// And also we need to remove script boxes a certain way so reloadscriptboxes() will work
 					for (int bl = 0; bl < obj.nblocks; bl++)
-						if (obj.blocks[bl].type == TRIGGER)
-							obj.removetrigger(obj.blocks[bl].trigger);
-						else if (obj.blocks[bl].type != DAMAGE && obj.blocks[bl].type != DIRECTIONAL)
-							obj.blocks[bl].clear();
+						if (obj.blocks[bl].type != DAMAGE && obj.blocks[bl].type != DIRECTIONAL)
+							obj.removeblock(bl);
 
 					// Too bad there's no obj.removeallentities()
-					for (int ei = 0; ei < obj.nentity; ei++)
-						if (obj.entities[ei].rule != 0) // Destroy everything except the player
-							obj.entities[ei].active = false;
+					// (Wouldn't want to use it anyway, we need to take care of the conveyors' tile 1s)
+					for (int ei = 0; ei < obj.nentity; ei++) {
+						if (obj.entities[ei].rule == 0) // Destroy everything except the player
+							continue;
+
+						obj.entities[ei].active = false;
+
+						// Actually hold up, maybe this is an edentity conveyor, we want to remove all the tile 1s under it before deactivating it
+						// Of course this could be a createentity conveyor and someone placed tile 1s under it manually, but I don't care
+						// Also I don't care if there's not actually any tile 1s under it
+						if (!obj.entities[ei].active || obj.entities[ei].type != 1 ||
+						(obj.entities[ei].behave != 8 && obj.entities[ei].behave != 9))
+							continue;
+
+						// Ok, we've found a conveyor, is it aligned with the grid?
+						if (obj.entities[ei].xp % 8 != 0 || obj.entities[ei].yp % 8 != 0)
+							continue;
+
+						// Is its top-left corner outside the map?
+						if (obj.entities[ei].xp < 0 || obj.entities[ei].xp >= 320
+						|| obj.entities[ei].yp < 0 || obj.entities[ei].yp >= 240)
+							continue;
+
+						// Very well then, we might have an edentity conveyor...
+
+						int thisxp = obj.entities[ei].xp / 8;
+						int thisyp = obj.entities[ei].yp / 8;
+
+						int usethislength;
+						// Map.cpp uses this exact check to place 8 tiles down instead of 4,
+						// hope this conveyor's width didn't change in the meantime
+						if (obj.entities[ei].w == 64)
+							usethislength = 8;
+						else
+							usethislength = 4;
+
+						// Ok, finally fix the tiles
+						// I don't care enough to check for what was actually behind the tiles originally
+						for (int tilex = thisxp; tilex < thisxp + usethislength; tilex++)
+							map.settile(tilex, thisyp, 0);
+
+						// And of course, we have to force the game to redraw the room
+						dwgfx.foregrounddrawn = false;
+					}
 
 					// Copy-pasted from above
 					obj.horplatforms = false;
@@ -303,6 +511,7 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 						break;
 					}
 				} else if (words[1] == "conveyors") {
+					// Copy-pasted from above
 					for (int edc = 0; edc < obj.nentity; edc++) {
 						if (!obj.entities[edc].active || obj.entities[edc].type != 1 ||
 						(obj.entities[edc].behave != 8 && obj.entities[edc].behave != 9))
@@ -316,6 +525,40 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 						// Important: set width and height to 0, or there will still be collision
 						obj.entities[edc].w = 0;
 						obj.entities[edc].h = 0;
+
+						// Actually hold up, maybe this is an edentity conveyor, we want to remove all the tile 1s under it before deactivating it
+						// Of course this could be a createentity conveyor and someone placed tile 1s under it manually, but I don't care
+						// Also I don't care if there's not actually any tile 1s under it, even if it's a spike/one-way that's now invisible and can be touched by the player
+
+						// Ok, is it aligned with the grid?
+						if (obj.entities[edc].xp % 8 != 0 || obj.entities[edc].yp % 8 != 0)
+							continue;
+
+						// Is its top-left corner outside the map?
+						if (obj.entities[edc].xp < 0 || obj.entities[edc].xp >= 320
+						|| obj.entities[edc].yp < 0 || obj.entities[edc].yp >= 240)
+							continue;
+
+						// Very well then, we might have an edentity conveyor...
+
+						int thisxp = obj.entities[edc].xp / 8;
+						int thisyp = obj.entities[edc].yp / 8;
+
+						int usethislength;
+						// Map.cpp uses this exact check to place 8 tiles down instead of 4,
+						// hope this conveyor's width didn't change in the meantime
+						if (obj.entities[edc].w == 64)
+							usethislength = 8;
+						else
+							usethislength = 4;
+
+						// Ok, finally fix the tiles
+						// I don't care enough to check for what was actually behind the tiles originally
+						for (int tilex = thisxp; tilex < thisxp + usethislength; tilex++)
+							map.settile(tilex, thisyp, 0);
+
+						// And of course, we have to force the game to redraw the room
+						dwgfx.foregrounddrawn = false;
 					}
 				} else if (words[1] == "terminals") {
 					for (int eti = 0; eti < obj.nentity; eti++)
@@ -371,7 +614,7 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 				} else if (words[1] == "activityzones") {
 					for (int bai = 0; bai < obj.nblocks; bai++)
 						if (obj.blocks[bai].type == ACTIVITY)
-							obj.blocks[bai].active = false;
+							obj.removeblock(bai);
 				}
 
 				obj.cleanup();
@@ -432,102 +675,39 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 				int x = ss_toi(words[1]);
 				int y = ss_toi(words[2]);
 				int tile = ss_toi(words[3]);
-
-				if (tile != 10) // There's nothing behind 1x1 quicksand
-					map.settile(x, y, tile);
-				else
-					// Don't change the `tile` var, we createentity by checking `tile` later
-					map.settile(x, y, 0);
-
-				dwgfx.foregrounddrawn = false;
-
-				// Kludge to fix spikes, one-ways, and 1x1 quicksand
-
-				// Remove them first, if there is one where we placed the tile
-
-				// The 1x1 quicksand is part entity, part block
-				// Remove its entity
-				for (int eqi = 0; eqi < obj.nentity; eqi++)
-					if (obj.entities[eqi].type == 3 && obj.entities[eqi].xp/8 == x && obj.entities[eqi].yp/8 == y)
-						obj.entities[eqi].active = false;
-
-				// The rest of these removals are blocks, which I'll just put in one for-loop
-				for (int bi = 0; bi < obj.nblocks; bi++) {
-					// Remove the block part of a 1x1 quicksand
-					// We check that it's 8x8 in order to not remove 4-wide quicksand / platforms / conveyors
-					if (obj.blocks[bi].type == BLOCK && obj.blocks[bi].xp/8 == x && obj.blocks[bi].yp/8 == y && obj.blocks[bi].wp == 8 && obj.blocks[bi].hp == 8)
-						obj.blocks[bi].clear();
-
-					// The spiky part of a spike is a block, remove it
-					if (obj.blocks[bi].type == DAMAGE &&
-					// Important - do the integer division by 8 on the left side of the equality, not multiply by 8 on the right side
-					// (Same applies to the one-way conditional below)
-					// Also important - for some godawful reason, the real position of spikes' blocks
-					// is stored in their 'x'/'y' attributes instead of 'xp'/'yp' like the rest,
-					// and also, the 'x'/'y' attributes are floats instead of ints
-					(int) obj.blocks[bi].x/8 == x && (int) obj.blocks[bi].y/8 == y)
-						obj.blocks[bi].clear();
-
-					// The collision of a one-way tile is a block, also remove it
-					if (obj.blocks[bi].type == DIRECTIONAL &&
-					// Read comment about integer division from above conditional
-					obj.blocks[bi].x/8 == x && obj.blocks[bi].y/8 == y)
-						obj.blocks[bi].clear();
-				}
-
-				// Clean up before adding any entities/blocks
-				obj.cleanup();
-				int n = obj.nblocks - 1;
-				while (n >= 0 && !obj.blocks[n].active) {
-					obj.nblocks--;
-					n--;
-				}
-
-				// Ok, now if we've added a tile that's an entity and/or block, actually add it now...
-				// TODO: This will need to be updated when the Tower tileset rolls around
-
-				// This is all copy-pasted from Map.cpp
-
-				// Spikes
-				if (map.tileset == 0) {
-					if (tile == 6 || tile == 8)
-						// Sticking up
-						obj.createblock(DAMAGE, 8*x, 8*y + 4, 8, 4);
-					if (tile == 7 || tile == 9)
-						// Sticking down
-						obj.createblock(DAMAGE, 8*x, 8*y, 8, 4);
-					if (tile == 49 || tile == 50)
-						// Left or right
-						obj.createblock(DAMAGE, 8*x, 8*y + 3, 8, 2);
-				} else if (map.tileset == 1) {
-					if ((tile >= 63 && tile <= 74) || (tile >= 6 && tile <= 9)) {
-						// Correct the {odd, even}-type of the tile, this will be un-corrected later
-						if (tile < 10)
-							tile++;
-
-						if(tile % 2 == 0)
-							// Sticking up
-							obj.createblock(DAMAGE, 8*x, 8*y, 8, 4);
-						else
-							// Sticking down
-							obj.createblock(DAMAGE, 8*x, 8*y + 4, 8, 4);
-
-						// Un-correct it now
-						if (tile < 11)
-							tile--;
+				settile_special(x,y,tile, dwgfx, game, map, obj);
+			}
+			if (words[0] == "replacetiles")
+			{
+				// replacetiles(tile 1,tile 2)
+				int tile1 = ss_toi(words[1]);
+				int tile2 = ss_toi(words[2]);
+				for (int i = 0; i < 1200; i++) {
+					int x = i % 40;
+					int y = i / 40;
+					if (map.contents[i] == tile1) {
+						settile_special(x,y, tile2, dwgfx, game, map, obj);
 					}
-					if (tile >= 49 && tile <= 62)
-						// Left or right
-						obj.createblock(DAMAGE, 8*x, 8*y + 3, 8, 2);
 				}
-
-				// 1x1 quicksand
-				if (tile == 10)
-					obj.createentity(game, 8*x, 8*y, 4);
-
-				// One-way tiles
-				if (tile >= 14 && tile <= 17)
-					obj.createblock(DIRECTIONAL, 8*x, 8*y, 8, 8, tile-14);
+			}
+			else if (words[0] == "endtrial")
+			{
+				game.state = 82;
+				game.statedelay = 0;
+			}
+			else if (words[0] == "iftrial")
+			{
+				if (game.intimetrial) {
+					if (words[2] != "") {
+						if (game.currenttrial == ss_toi(words[1])) {
+							call("custom_"+words[2]);
+							position--;
+						}
+					} else {
+						call("custom_"+words[1]);
+						position--;
+					}
+				}
 			}
 			if (words[0] == "setroomname")
 			{
@@ -541,13 +721,11 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 				// OR
 				// setvar(name)
 				// <contents>
-				
-				variablenames.push_back(words[1]);
 				if (words[2] == "") {
     	            position++;
-					variablecontents.push_back(processvars(commands[position]));
+					setvar(words[1],processvars(commands[position]));
 				} else {
-					variablecontents.push_back(words[2]);
+					setvar(words[1],words[2]);
 				}
 			}
 			if (words[0] == "addvar")
@@ -574,6 +752,151 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 					}
 				}
 			}
+            if ((words[0] == "ifvar") || (words[0] == "if"))
+            {
+                int varid = getvar(words[1]);
+                if (varid != -1)
+                {
+                    if (words[4] == "") //fourth argument doesn't exist: this is a string
+                    {
+                        position++;
+                        if ((words[2] == "equal") ||
+                                (words[2] == "equals") ||
+                                (words[2] == "eq") ||
+                                (words[2] == "=") ||
+                                (words[2] == "==")) {
+                            if (variablecontents[varid] == processvars(commands[position])) {
+                                call("custom_" + words[3]);
+                                position--;
+                            }
+                        }
+                        if ((words[2] == "notequal") ||
+                                (words[2] == "noteq") ||
+                                (words[2] == "neq") ||
+                                (words[2] == "not") ||
+                                (words[2] == "notequal") ||
+                                (words[2] == "!=")) {
+                            if (variablecontents[varid] != processvars(commands[position])) {
+                                call("custom_" + words[3]);
+                                position--;
+                            }
+                        }
+
+                    } else { // fourth argument does exist, this is an integer
+                        if ((words[2] == "equal") ||
+                                (words[2] == "equals") ||
+                                (words[2] == "eq") ||
+                                (words[2] == "=") ||
+                                (words[2] == "==")) {
+                            if (variablecontents[varid] == words[3]) {
+                                call("custom_" + words[4]);
+                                position--;
+                            }
+                        }
+                        if ((words[2] == "notequal") ||
+                                (words[2] == "noteq") ||
+                                (words[2] == "neq") ||
+                                (words[2] == "not") ||
+                                (words[2] == "notequal") ||
+                                (words[2] == "!=")) {
+                            if (variablecontents[varid] != words[3]) {
+                                call("custom_" + words[4]);
+                                position--;
+                            }
+                        }
+                        if ((words[2] == "less") ||
+                                (words[2] == "lt") ||
+                                (words[2] == "<")) {
+                            if (variablecontents[varid] < words[3]) {
+                                call("custom_" + words[4]);
+                                position--;
+                            }
+                        }
+                        if ((words[2] == "lesseq") ||
+                                (words[2] == "leq") ||
+                                (words[2] == "<=")) {
+                            if (variablecontents[varid] <= words[3]) {
+                                call("custom_" + words[4]);
+                                position--;
+                            }
+                        }
+                        if ((words[2] == "greater") ||
+                                (words[2] == "gt") ||
+                                (words[2] == ">")) {
+                            if (variablecontents[varid] > words[3]) {
+                                call("custom_" + words[4]);
+                                position--;
+                            }
+                        }
+                        if ((words[2] == "greatereq") ||
+                                (words[2] == "geq") ||
+                                (words[2] == ">=")) {
+                            if (variablecontents[varid] >= words[3]) {
+                                call("custom_" + words[4]);
+                                position--;
+                            }
+                        }
+                    }
+                }
+            }
+            if (words[0] == "stop")
+            {
+                dwgfx.showcutscenebars = false;
+                call("stop");
+            }
+            if (words[0] == "clearon") {
+                dwgfx.noclear = false;
+            }
+            if (words[0] == "clearoff") {
+                dwgfx.noclear = true;
+            }
+            if (words[0] == "clear") {
+                auto alpha = ss_toi(words[1]);
+                if (words[1] == "") alpha = 255;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+                auto rmask = 0xff000000;
+                auto gmask = 0x00ff0000;
+                auto bmask = 0x0000ff00;
+                auto amask = 0x000000ff;
+#else
+                auto rmask = 0x000000ff;
+                auto gmask = 0x0000ff00;
+                auto bmask = 0x00ff0000;
+                auto amask = 0xff000000;
+#endif
+
+                auto s = SDL_CreateRGBSurface(0, dwgfx.backBuffer->w, dwgfx.backBuffer->h, 32, rmask, gmask, bmask, amask);
+                SDL_FillRect(s, nullptr, SDL_MapRGBA(s->format, 0, 0, 0, alpha));
+                SDL_BlitSurface(s, nullptr, dwgfx.backBuffer, nullptr);
+                SDL_FreeSurface(s);
+            }
+            if (words[0] == "drawentities") {
+                dwgfx.drawentities(map, obj, help);
+            }
+            if (words[0] == "debuggetpixel") {
+                getpixelx = ss_toi(words[1]);
+                getpixely = ss_toi(words[2]);
+            }
+            if (words[0] == "debugprint") {
+                position++;
+                std::cerr << processvars(commands[position]) << std::endl;
+            }
+            if (words[0] == "debugexit") {
+                auto code = ss_toi(words[1]);
+                std::exit(code);
+            }
+            if (words[0] == "debugsetglow") {
+                auto glow = ss_toi(words[1]);
+                help.freezeglow = true;
+                help.glow = glow;
+            }
+            if (words[0] == "debugseedrng") {
+                auto s1 = ss_toi(words[1]);
+                auto s2 = ss_toi(words[2]);
+                auto s3 = ss_toi(words[3]);
+                auto s4 = ss_toi(words[4]);
+                seed_xoshiro(s1, s2, s3, s4);
+            }
 			if (words[0] == "drawtext")
 			{
 				// drawtext(x,y,r,g,b,centered)
@@ -584,7 +907,20 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 				temp.r      = ss_toi(words[3]);
 				temp.g      = ss_toi(words[4]);
 				temp.b      = ss_toi(words[5]);
+				if (words[6] == "true")
+					words[6] = "1";
+				else if (words[6] == "false")
+					words[6] = "0";
+                if (words[7] == "true")
+					words[7] = "1";
+				else if (words[7] == "false" || words[7] == "")
+					words[7] = "0";
+                if (words[7] == "2")
+                {
+                    if (words[8] != "") temp.sc = ss_toi(words[8]); else temp.sc = 2;
+                }
 				temp.center = ss_toi(words[6]);
+                temp.bord   = ss_toi(words[7]);
                 position++;
 				temp.text = processvars(commands[position]);
 				scriptrender.push_back(temp);
@@ -615,9 +951,37 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 				temp.b      = ss_toi(words[5]);
 				scriptrender.push_back(temp);
                         }
+			if (words[0] == "loadimage")
+			{
+				game.script_images.push_back(LoadImage(words[1].c_str()));
+				game.script_image_names.push_back(words[1]);
+            }
+			if (words[0] == "drawimage")
+			{
+				// drawimage(x,y,name[, centered])
+				int tempindex = getimage(game, words[3]);
+				if (tempindex == -1) {
+					game.script_images.push_back(LoadImage(words[3].c_str()));
+					game.script_image_names.push_back(words[3]);
+					tempindex = (int)game.script_images.size() - 1;
+				}
+				if ((tempindex <= (int)game.script_images.size()) && tempindex >= 0) {
+					if (words[4] == "true" || words[4] == "1")
+						words[4] = "1";
+					else
+						words[4] = "0";
+					scriptimage temp;
+					temp.type   = 3;
+					temp.x      = ss_toi(words[1]);
+					temp.y      = ss_toi(words[2]);
+					temp.index  = tempindex;
+					temp.center = ss_toi(words[4]);
+					scriptrender.push_back(temp);
+				}
+            }
       if (words[0] == "flag")
 			{
-				if(ss_toi(words[1])>=0 && ss_toi(words[1])<100){
+				if(ss_toi(words[1])>=0 && ss_toi(words[1])<1000){
 					if(words[2]=="on"){
 						obj.changeflag(ss_toi(words[1]),1);
 					}else if(words[2]=="off"){
@@ -810,6 +1174,10 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			{
 				music.play(4);
 			}
+			if (words[0] == "realign_tower")
+			{
+				map.realign_tower();
+			}
 			if (words[0] == "gotoposition")
 			{
 				//USAGE: gotoposition(x position, y position, gravity position)
@@ -843,11 +1211,105 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			}
 			if (words[0] == "reloadscriptboxes")
 			{
-				for (int brs = 0; brs < obj.nresurrectblocks; brs++) {
-					obj.createblock(TRIGGER, obj.resurrectblocks[brs].x, obj.resurrectblocks[brs].y, obj.resurrectblocks[brs].wp, obj.resurrectblocks[brs].hp, obj.resurrectblocks[brs].trigger);
-					obj.resurrectblocks[brs].clear();
-				}
-				obj.nresurrectblocks = 0;
+				for (int brs = 0; brs < obj.nresurrectblocks; brs++)
+					if (obj.resurrectblocks[brs].active && obj.resurrectblocks[brs].type == TRIGGER) {
+						obj.createblock(
+							obj.resurrectblocks[brs].type,
+							obj.resurrectblocks[brs].x, obj.resurrectblocks[brs].y,
+							obj.resurrectblocks[brs].wp, obj.resurrectblocks[brs].hp,
+							obj.resurrectblocks[brs].trigger
+						);
+						obj.resurrectblocks[brs].clear();
+					}
+				obj.cleanupresurrectblocks();
+			}
+			if (words[0] == "reloadcustomactivityzones")
+			{
+				// "Custom" here being defined as activity zones whose prompts are NOT terminals' prompts,
+				// e.g. "Press ENTER to activate terminal" or "Press ENTER to activate terminals"
+				for (int brz = 0; brz < obj.nresurrectblocks; brz++)
+					if (obj.resurrectblocks[brz].active && obj.resurrectblocks[brz].type == ACTIVITY
+					&& obj.resurrectblocks[brz].prompt != "Press ENTER to activate terminal"
+					&& obj.resurrectblocks[brz].prompt != "Press ENTER to activate terminals") {
+						obj.customprompt = obj.resurrectblocks[brz].prompt;
+						if (obj.resurrectblocks[brz].script.length() < 7
+						|| obj.resurrectblocks[brz].script.substr(0, 7) != "custom_") {
+							// It's a main game activity zone, we won't reload it
+							obj.resurrectblocks[brz].clear();
+							continue;
+						}
+						obj.customscript = obj.resurrectblocks[brz].script.substr(7, std::string::npos);
+						obj.customr = obj.resurrectblocks[brz].r;
+						obj.customg = obj.resurrectblocks[brz].g;
+						obj.customb = obj.resurrectblocks[brz].b;
+
+						obj.createblock(
+							obj.resurrectblocks[brz].type,
+							obj.resurrectblocks[brz].x, obj.resurrectblocks[brz].y,
+							obj.resurrectblocks[brz].wp, obj.resurrectblocks[brz].hp,
+							101
+						);
+						obj.resurrectblocks[brz].clear();
+					}
+				obj.cleanupresurrectblocks();
+			}
+			if (words[0] == "reloadterminalactivityzones")
+			{
+				// Copied and pasted from the above, with some slight tweaks
+				// "Terminal" here being defined as activity zones whose prompts are terminals' prompts,
+				// e.g. "Press ENTER to activate terminal" or "Press ENTER to activate terminals"
+				for (int brt = 0; brt < obj.nresurrectblocks; brt++)
+					if (obj.resurrectblocks[brt].active && obj.resurrectblocks[brt].type == ACTIVITY
+					&& (obj.resurrectblocks[brt].prompt == "Press ENTER to activate terminal"
+					|| obj.resurrectblocks[brt].prompt == "Press ENTER to activate terminals")) {
+						obj.customprompt = obj.resurrectblocks[brt].prompt;
+						if (obj.resurrectblocks[brt].script.length() < 7
+						|| obj.resurrectblocks[brt].script.substr(0, 7) != "custom_") {
+							// It's a main game activity zone, we won't reload it
+							obj.resurrectblocks[brt].clear();
+							continue;
+						}
+						obj.customscript = obj.resurrectblocks[brt].script.substr(7, std::string::npos);
+						obj.customr = obj.resurrectblocks[brt].r;
+						obj.customg = obj.resurrectblocks[brt].g;
+						obj.customb = obj.resurrectblocks[brt].b;
+
+						obj.createblock(
+							obj.resurrectblocks[brt].type,
+							obj.resurrectblocks[brt].x, obj.resurrectblocks[brt].y,
+							obj.resurrectblocks[brt].wp, obj.resurrectblocks[brt].hp,
+							101
+						);
+						obj.resurrectblocks[brt].clear();
+					}
+				obj.cleanupresurrectblocks();
+			}
+			if (words[0] == "reloadactivityzones")
+			{
+				// Copied and pasted from the above, with some slight tweaks (again)
+				for (int brz = 0; brz < obj.nresurrectblocks; brz++)
+					if (obj.resurrectblocks[brz].active && obj.resurrectblocks[brz].type == ACTIVITY) {
+						obj.customprompt = obj.resurrectblocks[brz].prompt;
+						if (obj.resurrectblocks[brz].script.length() < 7
+						|| obj.resurrectblocks[brz].script.substr(0, 7) != "custom_") {
+							// It's a main game activity zone, we won't reload it
+							obj.resurrectblocks[brz].clear();
+							continue;
+						}
+						obj.customscript = obj.resurrectblocks[brz].script.substr(7, std::string::npos);
+						obj.customr = obj.resurrectblocks[brz].r;
+						obj.customg = obj.resurrectblocks[brz].g;
+						obj.customb = obj.resurrectblocks[brz].b;
+
+						obj.createblock(
+							obj.resurrectblocks[brz].type,
+							obj.resurrectblocks[brz].x, obj.resurrectblocks[brz].y,
+							obj.resurrectblocks[brz].wp, obj.resurrectblocks[brz].hp,
+							101
+						);
+						obj.resurrectblocks[brz].clear();
+					}
+				obj.cleanupresurrectblocks();
 			}
 			if (words[0] == "cutscene")
 			{
@@ -856,6 +1318,16 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			if (words[0] == "endcutscene")
 			{
 				dwgfx.showcutscenebars = false;
+			}
+			if (words[0] == "cutscenefast")
+			{
+				dwgfx.showcutscenebars = true;
+				dwgfx.cutscenebarspos = 360;
+			}
+			if (words[0] == "endcutscenefast")
+			{
+				dwgfx.showcutscenebars = false;
+				dwgfx.cutscenebarspos = 0;
 			}
 			if (words[0] == "untilbars" || words[0] == "puntilbars")
 			{
@@ -923,6 +1395,12 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 					r = 255;
 					g = 134;
 					b = 255;
+				}
+				else if (words[1] == "orange")
+				{
+					r = 255;
+					g = 130;
+					b = 20;
 				}
 				else if (words[1] == "gray")
 				{
@@ -1168,7 +1646,7 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 					dwgfx.textboxmoveto(textx);
 				}
 
-				if (textx == -500) {
+				if (textx == -500 || textx == -1) {
 					if (textcenterline != 0)
 						dwgfx.textboxcenterx(textcenterline);
 					else
@@ -1224,7 +1702,7 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 					dwgfx.textboxmoveto(textx);
 				}
 
-				if (textx == -500) {
+				if (textx == -500 || textx == -1) {
 					if (textcenterline != 0)
 						dwgfx.textboxcenterx(textcenterline);
 					else
@@ -1258,6 +1736,122 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 				}
 				game.backgroundtext = false;
 			}
+			else if (words[0] == "speak_active_fast")
+			{
+				// Copied and pasted from the above
+				//Ok, actually display the textbox we've initilised now!
+				dwgfx.createtextbox(txt[0], textx, texty, r, g, b);
+				if (txtnumlines > 1)
+				{
+					for (i = 1; i < txtnumlines; i++)
+					{
+						dwgfx.addline(txt[i]);
+					}
+				}
+
+				//the textbox cannot be outside the screen. Fix if it is.
+				if (textx <= -1000)
+				{
+					//position to the left of the player
+					textx += 10000;
+					textx -= dwgfx.textboxwidth();
+					textx += 16;
+					dwgfx.textboxmoveto(textx);
+				}
+
+				if (textx == -500 || textx == -1) {
+					if (textcenterline != 0)
+						dwgfx.textboxcenterx(textcenterline);
+					else
+						dwgfx.textboxcenterx(160);
+
+					// So it doesn't use the same line but Y instead of X for texty=-500
+					textcenterline = 0;
+				}
+
+				if (texty == -500) {
+					if (textcenterline != 0)
+						dwgfx.textboxcentery(textcenterline);
+					else
+						dwgfx.textboxcentery(120);
+
+					textcenterline = 0;
+				}
+
+				textcenterline = 0;
+
+				dwgfx.textboxadjust();
+				dwgfx.textboxactive();
+				dwgfx.textboxcreatefast();
+
+				if (!game.backgroundtext)
+				{
+					game.advancetext = true;
+					game.hascontrol = false;
+					game.pausescript = true;
+					if (key.isDown(90) || key.isDown(32) || key.isDown(86)
+						|| key.isDown(KEYBOARD_UP) || key.isDown(KEYBOARD_DOWN)) game.jumpheld = true;
+				}
+				game.backgroundtext = false;
+			}
+			else if (words[0] == "speak_fast")
+			{
+				// Copied and pasted from the above, again
+				//Exactly as above, except don't make the textbox active (so we can use multiple textboxes)
+				dwgfx.createtextbox(txt[0], textx, texty, r, g, b);
+				if (txtnumlines > 1)
+				{
+					for (i = 1; i < txtnumlines; i++)
+					{
+						dwgfx.addline(txt[i]);
+					}
+				}
+
+				//the textbox cannot be outside the screen. Fix if it is.
+				if (textx <= -1000)
+				{
+					//position to the left of the player
+					textx += 10000;
+					textx -= dwgfx.textboxwidth();
+					textx += 16;
+					dwgfx.textboxmoveto(textx);
+				}
+
+				if (textx == -500 || textx == -1) {
+					if (textcenterline != 0)
+						dwgfx.textboxcenterx(textcenterline);
+					else
+						dwgfx.textboxcenterx();
+
+					// So it doesn't use the same line but Y instead of X for texty=-500
+					textcenterline = 0;
+				}
+
+				if (texty == -500) {
+					if (textcenterline != 0)
+						dwgfx.textboxcentery(textcenterline);
+					else
+						dwgfx.textboxcentery();
+
+					textcenterline = 0;
+				}
+
+				textcenterline = 0;
+
+				dwgfx.textboxadjust();
+				//dwgfx.textboxactive();
+				dwgfx.textboxcreatefast();
+
+				if (!game.backgroundtext)
+				{
+					game.advancetext = true;
+					game.hascontrol = false;
+					game.pausescript = true;
+					if (key.isDown(90) || key.isDown(32) || key.isDown(86)
+						|| key.isDown(KEYBOARD_UP) || key.isDown(KEYBOARD_DOWN)) game.jumpheld = true;
+				}
+				game.backgroundtext = false;
+			}
 			else if (words[0] == "endtext")
 			{
 				dwgfx.textboxremove();
@@ -1269,6 +1863,10 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 				dwgfx.textboxremovefast();
 				game.hascontrol = true;
 				game.advancetext = false;
+			}
+			else if (words[0] == "textboxtimer")
+			{
+				dwgfx.textboxtimer(ss_toi(words[1]));
 			}
 			else if (words[0] == "do")
 			{
@@ -1343,7 +1941,21 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
                                             case 7:  obj.setenemyroom(k, 18+100, 3+100); break;
                                             case 8:  obj.setenemyroom(k, 16+100, 0+100); break;
                                             case 9:  obj.setenemyroom(k, 14+100, 2+100); break;
-                                            case 10:  obj.setenemyroom(k, 10+100, 7+100); break;
+                                            case 10: obj.setenemyroom(k, 10+100, 7+100); break;
+											case 11: obj.setenemyroom(k, 12+100, 5+100); break; // yes man
+        									case 12: obj.setenemyroom(k, 15+100, 3+100); break; // STOP
+        									case 13: obj.setenemyroom(k, 13+100, 3+100); break; // wave duude
+        									case 14: obj.setenemyroom(k, 15+100, 2+100); break; // numbers
+        									case 15: obj.setenemyroom(k, 16+100, 2+100); break; // the dudes that walk
+        									case 16: obj.setenemyroom(k, 18+100, 2+100); break; // boob
+        									case 17: obj.setenemyroom(k, 18+100, 0+100); break; // OBEY
+        									case 18: obj.setenemyroom(k, 17+100, 3+100); break; // edge games
+        									case 19: obj.setenemyroom(k, 13+100, 6+100); break; // sent over the bottom gottem lmao
+        									case 20: obj.setenemyroom(k, 16+100, 7+100); break; // ghos
+        									case 21: obj.setenemyroom(k, 17+100, 7+100); break; // they b walkin 2.0
+        									case 22: obj.setenemyroom(k, 14+100, 8+100); break; // what the fuck is this
+        									case 23: obj.setenemyroom(k, 11+100, 13+100); break; // TRUTH
+        									case 24: obj.setenemyroom(k, 14+100, 13+100); break; // DABBING SKELETON
                                             default: obj.setenemyroom(k, 4+100, 0+100); break;
                                         }
                                     }
@@ -1365,6 +1977,18 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			else if (words[0] == "fatal_bottom")
 			{
 				obj.fatal_bottom();
+			}
+			else if (words[0] == "supercrewmateon")
+			{
+				game.supercrewmate = true;
+			}
+			else if (words[0] == "supercrewmateoff")
+			{
+				game.supercrewmate = false;
+			}
+			else if (words[0] == "supercrewmateroom")
+			{
+				game.scmprogress = game.roomx - 41;
 			}
 			else if (words[0] == "createcrewman")
 			{
@@ -1783,7 +2407,7 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			}
 			else if (words[0] == "ifexplored")
 			{
-				if (map.explored[ss_toi(words[1]) + (20 * ss_toi(words[2]))] == 1)
+				if (map.explored[ss_toi(words[1]) + (ed.maxwidth * ss_toi(words[2]))] == 1)
 				{
 					call(words[3]);
 					position--;
@@ -1837,11 +2461,27 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 					position--;
 				}
 			}
+			else if (words[0] == "ifcoins")
+			{
+				if (game.coins >= ss_toi(words[1]))
+				{
+					call("custom_"+words[2]);
+					position--;
+				}
+			}
 			else if (words[0] == "iftrinketsless")
 			{
 				if (game.stat_trinkets < ss_toi(words[1]))
 				{
 					call(words[2]);
+					position--;
+				}
+			}
+			else if (words[0] == "ifcoinsless")
+			{
+				if (game.coins < ss_toi(words[1]))
+				{
+					call("custom_"+words[2]);
 					position--;
 				}
 			}
@@ -1861,11 +2501,11 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			}
 			else if (words[0] == "hidecoordinates")
 			{
-				map.explored[ss_toi(words[1]) + (20 * ss_toi(words[2]))] = 0;
+				map.explored[ss_toi(words[1]) + (ed.maxwidth * ss_toi(words[2]))] = 0;
 			}
 			else if (words[0] == "showcoordinates")
 			{
-				map.explored[ss_toi(words[1]) + (20 * ss_toi(words[2]))] = 1;
+				map.explored[ss_toi(words[1]) + (ed.maxwidth * ss_toi(words[2]))] = 1;
 			}
 			else if (words[0] == "hideship")
 			{
@@ -1877,25 +2517,25 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			}
 			else if (words[0] == "showsecretlab")
 			{
-				map.explored[16 + (20 * 5)] = 1;
-				map.explored[17 + (20 * 5)] = 1;
-				map.explored[18 + (20 * 5)] = 1;
-				map.explored[17 + (20 * 6)] = 1;
-				map.explored[18 + (20 * 6)] = 1;
-				map.explored[19 + (20 * 6)] = 1;
-				map.explored[19 + (20 * 7)] = 1;
-				map.explored[19 + (20 * 8)] = 1;
+				map.explored[16 + (ed.maxwidth * 5)] = 1;
+				map.explored[17 + (ed.maxwidth * 5)] = 1;
+				map.explored[18 + (ed.maxwidth * 5)] = 1;
+				map.explored[17 + (ed.maxwidth * 6)] = 1;
+				map.explored[18 + (ed.maxwidth * 6)] = 1;
+				map.explored[19 + (ed.maxwidth * 6)] = 1;
+				map.explored[19 + (ed.maxwidth * 7)] = 1;
+				map.explored[19 + (ed.maxwidth * 8)] = 1;
 			}
 			else if (words[0] == "hidesecretlab")
 			{
-				map.explored[16 + (20 * 5)] = 0;
-				map.explored[17 + (20 * 5)] = 0;
-				map.explored[18 + (20 * 5)] = 0;
-				map.explored[17 + (20 * 6)] = 0;
-				map.explored[18 + (20 * 6)] = 0;
-				map.explored[19 + (20 * 6)] = 0;
-				map.explored[19 + (20 * 7)] = 0;
-				map.explored[19 + (20 * 8)] = 0;
+				map.explored[16 + (ed.maxwidth * 5)] = 0;
+				map.explored[17 + (ed.maxwidth * 5)] = 0;
+				map.explored[18 + (ed.maxwidth * 5)] = 0;
+				map.explored[17 + (ed.maxwidth * 6)] = 0;
+				map.explored[18 + (ed.maxwidth * 6)] = 0;
+				map.explored[19 + (ed.maxwidth * 6)] = 0;
+				map.explored[19 + (ed.maxwidth * 7)] = 0;
+				map.explored[19 + (ed.maxwidth * 8)] = 0;
 			}
 			else if (words[0] == "showteleporters")
 			{
@@ -1931,8 +2571,16 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			}
 			else if (words[0] == "killplayer")
 			{
-				if (game.deathseq <= 0)
+				if (!map.invincibility && game.deathseq <= 0)
 					game.deathseq = 30;
+			}
+			else if (words[0] == "hidecoincounter")
+			{
+				game.nocoincounter = true;
+			}
+			else if (words[0] == "showcoincounter")
+			{
+				game.nocoincounter = true;
 			}
 			else if (words[0] == "teleportscript")
 			{
@@ -1958,6 +2606,10 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			{
 				dwgfx.fadeamount = 0;
 				dwgfx.fademode= 0;
+			}
+			else if (words[0] == "befadeout")
+			{
+				dwgfx.fademode = 1;
 			}
 			else if (words[0] == "fadein")
 			{
@@ -2012,6 +2664,9 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 					obj.collect[i] = 0;
 					obj.customcollect[i] = 0;
 				}
+
+				obj.coincollect.clear();
+				obj.coincollect.resize(100);
 				game.deathcounts = 0;
 				game.advancetext = false;
 				game.hascontrol = true;
@@ -2261,13 +2916,37 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			}
 			else if (words[0] == "createactivityzone")
 			{
-				if (words[1] == "green")
+				// WARNING: No one, and I mean NO ONE get any bright ideas to simplify this `if words[1] == "red" else if words[1] == "green"` etc. stuff
+				// ESPECIALLY if that bright idea involves using the version of obj.getcrewman that takes in a string instead of an int
+				// YOU RISK BREAKING BACKWARDS COMPATIBILITY WITH ALREADY-EXISTING VANILLA LEVELS IF YOU DO SO!
+				if (words[1] == "red")
 				{
-					obj.createblock(5, obj.entities[obj.getcrewman(4)].xp - 32, obj.entities[obj.getcrewman(4)].yp-20, 96, 60, i);
+					i=3;
+				}
+				else if (words[1] == "green")
+				{
+					i=4;
+				}
+				else if (words[1] == "yellow")
+				{
+					i=2;
+				}
+				else if (words[1] == "blue")
+				{
+					i=5;
+				}
+				else if (words[1] == "purple")
+				{
+					i=1;
+				}
+
+				if (i == 4)
+				{
+					obj.createblock(5, obj.entities[obj.getcrewman(i)].xp - 32, obj.entities[obj.getcrewman(i)].yp-20, 96, 60, i);
 				}
 				else
 				{
-					obj.createblock(5, obj.entities[obj.getcrewman(words[1])].xp - 32, 0, 96, 240, i);
+					obj.createblock(5, obj.entities[obj.getcrewman(i)].xp - 32, 0, 96, 240, i);
 				}
 			}
 			else if (words[0] == "createrescuedcrew")
@@ -2359,7 +3038,16 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 				dwgfx.addline("You have found a shiny trinket!");
 				dwgfx.textboxcenterx();
 
-				dwgfx.createtextbox(" " + help.number(game.trinkets) + " out of Twenty ", 50, 135, 174, 174, 174);
+				std::string usethisnum;
+				if (map.custommode)
+				{
+					usethisnum = help.number(map.customtrinkets);
+				}
+				else
+				{
+					usethisnum = "Twenty";
+				}
+				dwgfx.createtextbox(" " + help.number(game.trinkets) + " out of " + usethisnum + " ", 50, 135, 174, 174, 174);
 				dwgfx.textboxcenterx();
 
 				if (!game.backgroundtext)
@@ -2450,7 +3138,7 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 			else if (words[0] == "customquicksave")
 			{
 				if (!map.custommode || map.custommodeforreal)
-					game.customsavequick(ed.ListOfMetaData[game.playcustomlevel].filename, map, obj, music, dwgfx);
+					if (!game.intimetrial && !game.nodeathmode) game.customsavequick(ed.ListOfMetaData[game.playcustomlevel].filename, map, obj, music, dwgfx);
 			}
 			else if (words[0] == "createlastrescued")
 			{
@@ -2594,7 +3282,7 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 					call("talkred_7");
 					position--;
 				}
-				if (obj.flags[50] == 0 && game.crewstats[2])
+				else if (obj.flags[50] == 0 && game.crewstats[2])
 				{
 					//Vitellary's back
 					obj.flags[50] = 1;
@@ -2999,6 +3687,7 @@ void scriptclass::run( KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map,
 void scriptclass::resetgametomenu( Graphics& dwgfx, Game& game,mapclass& map, entityclass& obj, UtilityClass& help, musicclass& music )
 {
 	game.gamestate = TITLEMODE;
+    FILESYSTEM_unmountassets(dwgfx);
 	dwgfx.flipmode = false;
 	obj.nentity = 0;
 	dwgfx.fademode = 4;
@@ -3007,7 +3696,10 @@ void scriptclass::resetgametomenu( Graphics& dwgfx, Game& game,mapclass& map, en
 
 void scriptclass::startgamemode( int t, KeyPoll& key, Graphics& dwgfx, Game& game, mapclass& map, entityclass& obj, UtilityClass& help, musicclass& music )
 {
+    dwgfx.noclear = false;
     dwgfx.mapimage = std::nullopt;
+
+	game.gotoroomfromscript = true;
 	switch(t)
 	{
 	case 0:  //Normal new game
@@ -3326,14 +4018,12 @@ void scriptclass::startgamemode( int t, KeyPoll& key, Graphics& dwgfx, Game& gam
 		game.jumpheld = true;
 
 		//Secret lab, so reveal the map, give them all 20 trinkets
+		for (int j = 0; j < ed.maxheight; j++)
+			for (i = 0; i < ed.maxwidth; i++)
+				map.explored[i + (j * ed.maxwidth)] = 1;
+
 		for (int j = 0; j < 20; j++)
-		{
 			obj.collect[j] = true;
-			for (i = 0; i < 20; i++)
-			{
-				map.explored[i + (j * 20)] = 1;
-			}
-		}
 		game.trinkets = 20;
 		game.insecretlab = true;
 		map.showteleporters = true;
@@ -3627,6 +4317,7 @@ void scriptclass::startgamemode( int t, KeyPoll& key, Graphics& dwgfx, Game& gam
 		ed.reset();
 		music.fadeout();
 
+		map.teleporters.clear();
 		game.gamestate = EDITORMODE;
 		game.jumpheld = true;
 
@@ -3640,12 +4331,21 @@ void scriptclass::startgamemode( int t, KeyPoll& key, Graphics& dwgfx, Game& gam
 			map.resetplayer(dwgfx, game, obj, music);
 		}
 		map.gotoroom(game.saverx, game.savery, dwgfx, game, obj, music);
+		ed.generatecustomminimap(dwgfx, map);
 		dwgfx.fademode = 4;
 		break;
 	case 21:  //play custom level (in editor)
 		game.gamestate = GAMEMODE;
 		music.fadeout();
 		hardreset(key, dwgfx, game, map, obj, help, music);
+		//If warpdir() is used during playtesting, we need to set it back after!
+		for (int j = 0; j < ed.maxheight; j++)
+		{
+			for (int i = 0; i < ed.maxwidth; i++)
+			{
+				ed.kludgewarpdir[i+(j*ed.maxwidth)]=ed.level[i+(j*ed.maxwidth)].warpdir;
+			}
+		}
 		game.customstart(obj, music);
 		game.jumpheld = true;
 
@@ -3679,7 +4379,7 @@ void scriptclass::startgamemode( int t, KeyPoll& key, Graphics& dwgfx, Game& gam
   case 22:  //play custom level (in game)
     //Initilise the level
     //First up, find the start point
-    ed.weirdloadthing(ed.ListOfMetaData[game.playcustomlevel].filename,dwgfx);
+    ed.weirdloadthing(ed.ListOfMetaData[game.playcustomlevel].filename,dwgfx, map, game);
     ed.findstartpoint(game);
 
     game.gamestate = GAMEMODE;
@@ -3722,7 +4422,7 @@ void scriptclass::startgamemode( int t, KeyPoll& key, Graphics& dwgfx, Game& gam
   case 23: //Continue in custom level
       //Initilise the level
     //First up, find the start point
-    ed.weirdloadthing(ed.ListOfMetaData[game.playcustomlevel].filename, dwgfx);
+    ed.weirdloadthing(ed.ListOfMetaData[game.playcustomlevel].filename, dwgfx, map, game);
     ed.findstartpoint(game);
 
     game.gamestate = GAMEMODE;
@@ -3734,7 +4434,7 @@ void scriptclass::startgamemode( int t, KeyPoll& key, Graphics& dwgfx, Game& gam
     map.customy = 100;
 
     game.customstart(obj, music);
-		game.customloadquick(ed.ListOfMetaData[game.playcustomlevel].filename, map, obj, music, dwgfx);
+		game.customloadquick(ed.ListOfMetaData[game.playcustomlevel].filename, map, obj, music, dwgfx, game);
     game.jumpheld = true;
     game.gravitycontrol = game.savegc;
 
@@ -3765,6 +4465,70 @@ void scriptclass::startgamemode( int t, KeyPoll& key, Graphics& dwgfx, Game& gam
 		dwgfx.fademode = 4;
     //call("intro");
   break;
+
+  case 24: // Custom level time trial!
+    // Load the level first
+    game.incustomtrial = true;
+    ed.weirdloadthing(ed.ListOfMetaData[game.playcustomlevel].filename, dwgfx, map, game);
+	// ...then find the start point
+    ed.findstartpoint(game);
+
+    game.gamestate = GAMEMODE; // Set the gamemode
+    music.fadeout(); // Fade out the music
+    hardreset(key, dwgfx, game, map, obj, help, music); // Reset everything!!
+	map.custommodeforreal = true; // Yep, it's technically
+    map.custommode = true; // a custom level
+
+    map.customx = 100;
+    map.customy = 100;
+
+    game.customstart(obj, music); // I honestly have no idea what this does
+	// Actually, the level is already loaded! This is just to be safe...
+	game.customloadquick(ed.ListOfMetaData[game.playcustomlevel].filename, map, obj, music, dwgfx, game);
+    game.jumpheld = true;
+    game.gravitycontrol = game.savegc;
+
+
+	game.intimetrial = true;
+	game.timetrialcountdown = 150;
+	game.timetrialparlost = false;
+	game.timetriallevel = 21;
+	game.timetrialpar = game.customtrials[game.currenttrial].par;
+	game.timetrialshinytarget = game.customtrials[game.currenttrial].trinkets;
+
+    game.savex =  game.customtrials[game.currenttrial].startx;
+    game.savey =  game.customtrials[game.currenttrial].starty;
+    game.saverx = game.customtrials[game.currenttrial].roomx;
+    game.savery = game.customtrials[game.currenttrial].roomy;
+    game.savegc = game.customtrials[game.currenttrial].startf;
+    game.savedir = 1;
+    game.savepoint = 0;
+    game.gravitycontrol = game.customtrials[game.currenttrial].startf;
+    game.coins = 0;
+    game.trinkets = 0;
+    game.crewmates = 0;
+    game.state = 0;
+    game.deathseq = -1;
+    game.lifeseq = 0;
+
+    //set flipmode
+    if (dwgfx.setflipmode) dwgfx.flipmode = true;
+
+    if(obj.nentity==0)
+    {
+      obj.createentity(game, game.savex, game.savey, 0, 0); //In this game, constant, never destroyed
+    }
+    else
+    {
+      map.resetplayer(dwgfx, game, obj, music);
+    }
+    map.gotoroom(game.saverx, game.savery, dwgfx, game, obj, music);
+	//music.play(-1);
+    music.currentsong = -1;
+    ed.generatecustomminimap(dwgfx, map);
+	dwgfx.fademode = 4;
+    //call("intro");
+	break;
 	case 100:
 		game.savestats(map, dwgfx, music);
 
@@ -3783,7 +4547,8 @@ void scriptclass::teleport( Graphics& dwgfx, Game& game, mapclass& map, entitycl
 	i = obj.getplayer(); //less likely to have a serious collision error if the player is centered
 	obj.entities[i].xp = 150;
 	obj.entities[i].yp = 110;
-	if(game.teleport_to_x==17 && game.teleport_to_y==17) obj.entities[i].xp = 88; //prevent falling!
+	if (!map.custommode)
+		if(game.teleport_to_x==17 && game.teleport_to_y==17) obj.entities[i].xp = 88; //prevent falling!
 
 	if (game.teleportscript == "levelonecomplete")
 	{
@@ -3811,40 +4576,45 @@ void scriptclass::teleport( Graphics& dwgfx, Game& game, mapclass& map, entitycl
 	game.savery = game.roomy;
 	game.savedir = obj.entities[obj.getplayer()].dir;
 
-	if(game.teleport_to_x==0 && game.teleport_to_y==0)
-	{
-		game.state = 4020;
-	}
-	else if(game.teleport_to_x==0 && game.teleport_to_y==16)
-	{
-		game.state = 4030;
-	}
-	else if(game.teleport_to_x==7 && game.teleport_to_y==9)
-	{
-		game.state = 4040;
-	}
-	else if(game.teleport_to_x==8 && game.teleport_to_y==11)
-	{
-		game.state = 4050;
-	}
-	else if(game.teleport_to_x==14 && game.teleport_to_y==19)
-	{
-		game.state = 4030;
-	}
-	else if(game.teleport_to_x==17 && game.teleport_to_y==12)
-	{
-		game.state = 4020;
-	}
-	else if(game.teleport_to_x==17 && game.teleport_to_y==17)
-	{
-		game.state = 4020;
-	}
-	else if(game.teleport_to_x==18 && game.teleport_to_y==7)
-	{
-		game.state = 4060;
-	}
-	else
-	{
+	if (!map.custommode) {
+
+		if(game.teleport_to_x==0 && game.teleport_to_y==0)
+		{
+			game.state = 4020;
+		}
+		else if(game.teleport_to_x==0 && game.teleport_to_y==16)
+		{
+			game.state = 4030;
+		}
+		else if(game.teleport_to_x==7 && game.teleport_to_y==9)
+		{
+			game.state = 4040;
+		}
+		else if(game.teleport_to_x==8 && game.teleport_to_y==11)
+		{
+			game.state = 4050;
+		}
+		else if(game.teleport_to_x==14 && game.teleport_to_y==19)
+		{
+			game.state = 4030;
+		}
+		else if(game.teleport_to_x==17 && game.teleport_to_y==12)
+		{
+			game.state = 4020;
+		}
+		else if(game.teleport_to_x==17 && game.teleport_to_y==17)
+		{
+			game.state = 4020;
+		}
+		else if(game.teleport_to_x==18 && game.teleport_to_y==7)
+		{
+			game.state = 4060;
+		}
+		else
+		{
+			game.state = 4010;
+		}
+	} else {
 		game.state = 4010;
 	}
 
@@ -3857,27 +4627,36 @@ void scriptclass::teleport( Graphics& dwgfx, Game& game, mapclass& map, entitycl
 	else
 	{
 		//change music based on location
-		if (dwgfx.setflipmode && game.teleport_to_x == 11 && game.teleport_to_y == 4)
-		{
-			music.niceplay(9);
+		if (!map.custommode) {
+			if (dwgfx.setflipmode && game.teleport_to_x == 11 && game.teleport_to_y == 4)
+			{
+				music.niceplay(9);
+			}
+			else
+			{
+				music.changemusicarea(game.teleport_to_x, game.teleport_to_y);
+			}
 		}
-		else
+			if (!game.intimetrial && !game.nodeathmode && !game.inintermission)
 		{
-			music.changemusicarea(game.teleport_to_x, game.teleport_to_y);
-		}
-		if (!game.intimetrial && !game.nodeathmode && !game.inintermission)
-		{
+			std::string gamesavedtext = "    Game Saved    ";
+			if (!map.custommodeforreal && map.custommode) {
+                gamesavedtext = " Game (Not) Saved ";
+            }
 			if (dwgfx.flipmode)
 			{
-				dwgfx.createtextbox("    Game Saved    ", -1, 202, 174, 174, 174);
+				dwgfx.createtextbox(gamesavedtext, -1, 202, 174, 174, 174);
 				dwgfx.textboxtimer(25);
 			}
 			else
 			{
-				dwgfx.createtextbox("    Game Saved    ", -1, 12, 174, 174, 174);
+				dwgfx.createtextbox(gamesavedtext, -1, 12, 174, 174, 174);
 				dwgfx.textboxtimer(25);
 			}
-			game.savetele(map, obj, music);
+			if (map.custommodeforreal)
+				game.customsavequick(ed.ListOfMetaData[game.playcustomlevel].filename, map, obj, music, dwgfx);
+			else if (!map.custommode)
+    			game.savetele(map, obj, music);
 		}
 	}
 }
@@ -3890,6 +4669,10 @@ void scriptclass::hardreset( KeyPoll& key, Graphics& dwgfx, Game& game,mapclass&
 	game.teleport = false;
 	game.companion = 0;
 	game.roomchange = false;
+	game.roomx = 0;
+	game.roomy = 0;
+	game.prevroomx = 0;
+	game.prevroomy = 0;
 	game.teleport_to_new_area = false;
 	game.teleport_to_x = 0;
 	game.teleport_to_y = 0;
@@ -3925,6 +4708,8 @@ void scriptclass::hardreset( KeyPoll& key, Graphics& dwgfx, Game& game,mapclass&
 	game.savetime = "00:00";
 	game.savearea = "nowhere";
 	game.savetrinkets = 0;
+	game.saverx = 0;
+	game.savery = 0;
 
 	game.intimetrial = false;
 	game.timetrialcountdown = 0;
@@ -3970,16 +4755,21 @@ void scriptclass::hardreset( KeyPoll& key, Graphics& dwgfx, Game& game,mapclass&
   game.hascontrol = true;
   game.advancetext = false;
 
+	game.pausescript = false;
+
 	game.noflip = false;
 	game.infiniflip = false;
 
 	game.nosuicide = false;
+
+	game.onetimescripts.clear();
 
 	//dwgraphicsclass
 	dwgfx.backgrounddrawn = false;
 	dwgfx.textboxremovefast();
 	dwgfx.flipmode = false; //This will be reset if needs be elsewhere
 	dwgfx.showcutscenebars = false;
+	dwgfx.cutscenebarspos = 0;
 
   //mapclass
 	map.warpx = false;
@@ -4001,18 +4791,21 @@ void scriptclass::hardreset( KeyPoll& key, Graphics& dwgfx, Game& game,mapclass&
 	map.resetnames();
 	map.custommode=false;
 	map.custommodeforreal=false;
-
+	map.towermode=false;
+	map.cameraseekframe = 0;
+	map.resumedelay = 0;
 	map.customshowmm=true;
 
-	for (j = 0; j < 20; j++)
-	{
-		for (i = 0; i < 20; i++)
-		{
-			map.roomdeaths[i + (j * 20)] = 0;
-			map.roomdeathsfinal[i + (j * 20)] = 0;
-			map.explored[i + (j * 20)] = 0;
+	for (j = 0; j < ed.maxheight; j++)
+		for (i = 0; i < ed.maxwidth; i++) {
+			map.roomdeaths[i + j*ed.maxwidth] = 0;
+			map.explored[i + j*ed.maxwidth] = 0;
 		}
-	}
+
+	for (j = 0; j < 20; j++)
+		for (i = 0; i < 20; i++)
+			map.roomdeathsfinal[i + j*20] = 0;
+
 	//entityclass
 	obj.nearelephant = false;
 	obj.upsetmode = false;
@@ -4022,7 +4815,7 @@ void scriptclass::hardreset( KeyPoll& key, Graphics& dwgfx, Game& game,mapclass&
 	obj.trophytype = 0;
 	obj.altstates = 0;
 
-	for (i = 0; i < 100; i++)
+	for (size_t i = 0; i < obj.flags.size(); i++)
 	{
 		obj.flags[i] = false;
 	}
@@ -4037,9 +4830,15 @@ void scriptclass::hardreset( KeyPoll& key, Graphics& dwgfx, Game& game,mapclass&
 		obj.customcollect[i] = 0;
 	}
 
+	obj.coincollect.clear();
+	obj.coincollect.resize(100);
+	game.nocoincounter = false;
+
 	if (obj.getplayer() > -1){
 		obj.entities[obj.getplayer()].tile = 0;
 	}
+
+	obj.kludgeonetimescript = false;
 
 	//Script Stuff
 	position = 0;
@@ -4052,6 +4851,11 @@ void scriptclass::hardreset( KeyPoll& key, Graphics& dwgfx, Game& game,mapclass&
 	variablecontents.clear();
 	variablenames.resize(100);
 	variablecontents.resize(100);
+
+	game.script_images.clear();
+	game.script_image_names.clear();
+
+	// WARNING: Don't reset teleporter locations, at this point we've already loaded the level!
 }
 
 int scriptclass::getlabelnum(std::string thelabel)

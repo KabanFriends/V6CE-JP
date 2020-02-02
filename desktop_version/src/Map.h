@@ -25,7 +25,9 @@ public:
 
     int intpol(int a, int b, float c);
 
-    void setteleporter(int t, int x, int y);
+    void setteleporter(int x, int y);
+
+    void remteleporter(int x, int y);
 
     void settrinket(int t, int x, int y);
 
@@ -72,8 +74,16 @@ public:
 
     void showship();
 
+    void realign_tower();
+
     void resetplayer(Graphics& dwgfx, Game& game, entityclass& obj, musicclass& music);
 
+    int tower_row(int rx, int ry);
+    int get_tower_offset(int tower, int ix, int iy, int *ry, int ypos);
+    int tower_connection(int *rx, int *ry, int ypos);
+    int get_tower(int rx, int ry);
+    int entering_tower(int rx, int ry, int *entry);
+    bool leaving_tower(int *rx, int *ry, entityclass &obj);
     void warpto(int rx, int ry , int t, int tx, int ty,  Graphics& dwgfx, Game& game, entityclass& obj, musicclass& music);
 
     void gotoroom(int rx, int ry, Graphics& dwgfx,  Game& game, entityclass& obj, musicclass& music);
@@ -111,6 +121,7 @@ public:
     int cameraseek, cameraseekframe = 0;
     int resumedelay = 0;
     bool minitowermode = false;
+    int minitowersize = 0;
     int scrolldir = 0;
 
     //This is the old colour cycle
@@ -134,6 +145,7 @@ public:
     int customx, customy = 0;
     int customwidth, customheight = 0;
     int customtrinkets = 0;
+    int customcoins=0;
     int customcrewmates = 0;
     int custommmxoff, custommmyoff, custommmxsize, custommmysize = 0;
     int customzoom = 0;
@@ -155,7 +167,7 @@ public:
     growing_vector<point> teleporters;
     growing_vector<point> shinytrinkets;
 
-    int numteleporters, numshinytrinkets = 0;
+    int numshinytrinkets = 0;
     bool showteleporters, showtargets, showtrinkets = false;
 
     //Roomtext
@@ -181,5 +193,7 @@ public:
 
     bool nofog = false;
 };
+
+extern mapclass map;
 
 #endif /* MAPGAME_H */

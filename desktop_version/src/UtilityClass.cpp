@@ -163,15 +163,42 @@ std::string UtilityClass::timestring( int t )
 
 std::string UtilityClass::number( int _t )
 {
-	const int BIGGEST_SMALL_NUMBER = 50;
-	const char* smallnumbers[] = {"0", "1", "2", "3", 
-		"4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50"};
+	const std::string ones_place[] = {"One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"};
+	const std::string tens_place[] = {"Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"};
+	const std::string teens[] = {"Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"};
 
-	if(_t <= BIGGEST_SMALL_NUMBER) {
-		return smallnumbers[_t];
+	if (_t < 0)
+	{
+		return "???";
 	}
-
-	return "Lots";
+	else if (_t > 100)
+	{
+		return "Lots";
+	}
+	else if (_t == 0)
+	{
+		return "Zero";
+	}
+	else if (_t == 100)
+	{
+		return "One Hundred";
+	}
+	else if (_t >= 1 && _t <= 9)
+	{
+		return ones_place[_t-1];
+	}
+	else if (_t >= 11 && _t <= 19)
+	{
+		return teens[_t-11];
+	}
+	else if (_t % 10 == 0)
+	{
+		return tens_place[(_t/10)-1];
+	}
+	else
+	{
+		return tens_place[(_t/10)-1] + " " + ones_place[(_t%10)-1];
+	}
 }
 
 bool UtilityClass::intersects( SDL_Rect A, SDL_Rect B )
@@ -181,6 +208,7 @@ bool UtilityClass::intersects( SDL_Rect A, SDL_Rect B )
 
 void UtilityClass::updateglow()
 {
+        if (freezeglow) return;
 	slowsine++;
 	if (slowsine >= 64) slowsine = 0;
 
@@ -191,4 +219,26 @@ void UtilityClass::updateglow()
 		glow-=2;
 		if (glow < 2) glowdir = 0;
 	}
+}
+
+std::string UtilityClass::getmusicname(int num) {
+	std::string names[16] = {
+		"Nothing",
+		"Pushing Onwards",
+		"Positive Force",
+		"Potential for Anything",
+		"Passion For Exploring",
+		"Pause",
+		"Presenting VVVVVV",
+		"Plenary",
+		"Predestined Fate",
+        "Positive Force Reversed",
+        "Popular Potpourri",
+        "Pipe Dream",
+        "Pressure Cooker",
+        "Paced Energy",
+        "Piercing the Sky",
+        "Predestined Fate Remix"
+	};
+	return names[num];
 }

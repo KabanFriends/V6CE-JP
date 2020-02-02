@@ -1,4 +1,5 @@
 #include "Textbox.h"
+#include "Graphics.h"
 #include <utf8/checked.h>
 
 textboxclass::textboxclass()
@@ -134,12 +135,17 @@ void textboxclass::resize()
     max = 0;
     for (int iter = 0; iter < numlines; iter++)
     {
-        unsigned int len = utf8::distance(line[iter].begin(), line[iter].end());
+        auto utf = line[iter].begin();
+        unsigned int len = 0;
+        while (utf != line[iter].end()) {
+            auto ch = utf8::next(utf, line[iter].end());
+            len += graphics.bfontlen(ch);
+        }
         if (len > (unsigned int)max) max = len;
     }
 
-    lw = max;
-    w = (max +2) * 8;
+    lw = max / 8;
+    w = max + 16;
     h = (numlines + 2) * 8;
     textrect.x = xp;
     textrect.y = yp;
@@ -149,8 +155,23 @@ void textboxclass::resize()
 
 void textboxclass::addline(std::string t)
 {
+    auto max = 8;
+    auto utf = t.begin();
+    while (utf != t.end()) {
+        auto ch = utf8::next(utf, t.end());
+        auto len = graphics.bfont[graphics.font_idx(ch)]->h;
+        if (len > max) max = len;
+    }
+
     line[numlines] = t;
-    numlines++;
+    numlines += max / 8;
     resize();
     if (numlines >= 12) numlines = 0;
+}
+
+void textboxclass::createfast()
+{
+    tm = 1;
+    tl = 1.0f;
+    setcol(int(tr * tl), int(tg * tl), int(tb * tl));
 }

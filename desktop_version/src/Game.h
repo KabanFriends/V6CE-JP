@@ -19,10 +19,30 @@ struct scriptmarker {
     int tile = 0;
 };
 
+struct customtrial {
+    int roomx = 0;
+    int roomy = 0;
+    int startx = 0;
+    int starty = 0;
+    int startf = 0;
+    int par = 0;
+    int trinkets = 0;
+    int music = 0;
+    std::string name = "";
+};
+
+struct customtrialrecord {
+    int time = 0;
+    int trinkets = 0;
+    int lives = 0;
+    int rank = 0;
+    int attempted = false;
+};
+
 class Game
 {
 public:
-    Game(void);
+    void init(void);
     ~Game(void);
 
 
@@ -111,7 +131,9 @@ public:
 
     void deathsequence(mapclass& map, entityclass& obj, musicclass& music);
 
-    void customloadquick(std::string savfile, mapclass& map, entityclass& obj, musicclass& music, Graphics& dwgfx);
+    void customloadtrialsave(std::string savfile);
+    void customsavetrialsave(std::string savfile);
+    void customloadquick(std::string savfile, mapclass& map, entityclass& obj, musicclass& music, Graphics& dwgfx, Game& game);
     void loadquick(mapclass& map, entityclass& obj, musicclass& music);
 
     void loadsummary(mapclass& map, UtilityClass& help);
@@ -126,6 +148,7 @@ public:
     int door_up = 0;
     int door_down = 0;
     int roomx, roomy, roomchangedir = 0;
+    int prevroomx, prevroomy = 0;
     int temp, j, k = 0;
 
     int savex, savey, saverx, savery = 0;
@@ -380,6 +403,32 @@ public:
 
     bool kludgeroominitscript = false;
     bool gotoroomfromscript = false;
+
+    int gametimer = 0;
+
+    bool cliplaytest = false;
+    int playx = 0;
+    int playy = 0;
+    int playrx = 0;
+    int playry = 0;
+    int playgc = 0;
+
+    growing_vector<SDL_Surface*> script_images;
+    growing_vector<std::string> script_image_names;
+
+    growing_vector<customtrial> customtrials;
+    bool incustomtrial = false;
+    int currenttrial = 0;
+
+    growing_vector<customtrialrecord> customtrialstats;
+    bool nocoincounter = false;
+
+
+    bool quiet = false;
+
+    growing_vector<std::string> onetimescripts;
 };
+
+extern Game game;
 
 #endif /* GAME_H */

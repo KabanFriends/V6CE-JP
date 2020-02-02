@@ -51,6 +51,7 @@ void entityclass::init()
     nentity = 0;
     nblocks = 0;
 
+    skipblocks = false;
     skipdirblocks = false;
     platformtile = 0;
     customplatformtile=0;
@@ -73,11 +74,13 @@ void entityclass::init()
       customcrewmoods[i]=1;
     }
 
-    flags.resize(100);
+    flags.resize(1000);
     blocks.resize(500);
     entities.resize(200);
     linecrosskludge.resize(100);
     collect.resize(100);
+    coincollect.clear();
+    coincollect.resize(100);
     customcollect.resize(100);
 
     nlinecrosskludge = 0;
@@ -88,7 +91,7 @@ void entityclass::init()
 
 void entityclass::resetallflags()
 {
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 1000; i++)
     {
         flags[i] = 0;
     }
@@ -906,6 +909,17 @@ void entityclass::createblock( int t, int xp, int yp, int w, int h, int trig /*=
         nblocks++;
         break;
     case TRIGGER: //Trigger
+        // Are we creating a script box with a one-time script?
+        // Only abort creation if the script is in the list of already-run one-time scripts
+        // AND the script box is a one-time script box
+        if (kludgeonetimescript && trig >= 300)
+            for (size_t i = 0; i < game.onetimescripts.size(); i++)
+                if (game.onetimescripts[i] == game.customscript[trig - 300]) {
+                    blocks[k].active = false;
+                    kludgeonetimescript = false;
+                    return;
+                }
+
         blocks[k].type = TRIGGER;
         blocks[k].x = xp;
         blocks[k].y = yp;
@@ -913,6 +927,11 @@ void entityclass::createblock( int t, int xp, int yp, int w, int h, int trig /*=
         blocks[k].hp = h;
         blocks[k].rectset(xp, yp, w, h);
         blocks[k].trigger = trig;
+
+        if (kludgeonetimescript) {
+            blocks[k].onetime = true;
+            kludgeonetimescript = false;
+        }
 
         nblocks++;
         break;
@@ -960,151 +979,151 @@ void entityclass::createblock( int t, int xp, int yp, int w, int h, int trig /*=
         switch(trig)
         {
         case 0: //testing zone
-            blocks[k].prompt = "ENTER をおしてばくはつ";
+            blocks[k].prompt = "Press ENTER to explode";
             blocks[k].script = "intro";
             setblockcolour(k, "orange");
             trig=1;
             break;
         case 1:
-            blocks[k].prompt = "ENTER をおしてバイオレットとはなす";
+            blocks[k].prompt = "Press ENTER to talk to Violet";
             blocks[k].script = "talkpurple";
             setblockcolour(k, "purple");
             trig=0;
             break;
         case 2:
-            blocks[k].prompt = "ENTER をおしてビテラリーとはなす";
+            blocks[k].prompt = "Press ENTER to talk to Vitellary";
             blocks[k].script = "talkyellow";
             setblockcolour(k, "yellow");
             trig=0;
             break;
         case 3:
-            blocks[k].prompt = "ENTER をおしてバーミリオンとはなす";
+            blocks[k].prompt = "Press ENTER to talk to Vermilion";
             blocks[k].script = "talkred";
             setblockcolour(k, "red");
             trig=0;
             break;
         case 4:
-            blocks[k].prompt = "ENTER をおしてバーディグリスとはなす";
+            blocks[k].prompt = "Press ENTER to talk to Verdigris";
             blocks[k].script = "talkgreen";
             setblockcolour(k, "green");
             trig=0;
             break;
         case 5:
-            blocks[k].prompt = "ENTER をおしてビクトリアとはなす";
+            blocks[k].prompt = "Press ENTER to talk to Victoria";
             blocks[k].script = "talkblue";
             setblockcolour(k, "blue");
             trig=0;
             break;
         case 6:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_station_1";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 7:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_outside_1";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 8:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_outside_2";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 9:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_outside_3";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 10:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_outside_4";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 11:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_outside_5";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 12:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_outside_6";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 13:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_finallevel";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 14:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_station_2";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 15:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_station_3";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 16:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_station_4";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 17:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_warp_1";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 18:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_warp_2";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 19:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_lab_1";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 20:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_lab_2";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 21:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_secretlab";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 22:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_shipcomputer";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 23:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどうs";
+            blocks[k].prompt = "Press ENTER to activate terminals";
             blocks[k].script = "terminal_radio";
             setblockcolour(k, "orange");
             trig=0;
             break;
         case 24:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "terminal_jukebox";
             setblockcolour(k, "orange");
             trig=0;
@@ -1170,7 +1189,7 @@ void entityclass::createblock( int t, int xp, int yp, int w, int h, int trig /*=
             trig=0;
             break;
         case 35:
-            blocks[k].prompt = "ENTER をおしてターミナルをきどう";
+            blocks[k].prompt = "Press ENTER to activate terminal";
             blocks[k].script = "custom_"+customscript;
             setblockcolour(k, "orange");
             trig=0;
@@ -1193,6 +1212,8 @@ void entityclass::createblock( int t, int xp, int yp, int w, int h, int trig /*=
         nblocks++;
         break;
     }
+
+    kludgeonetimescript = false;
 }
 
 void entityclass::removeallblocks()
@@ -1209,14 +1230,22 @@ void entityclass::removeallresurrectblocks()
 
 void entityclass::removeblock( int t )
 {
-    if (blocks[t].type == TRIGGER) {
+    if (!blocks[t].active)
+        // Don't remove it twice, that'll wreak havoc with resurrectblocks
+        return;
+    if (blocks[t].type == TRIGGER || blocks[t].type == ACTIVITY) {
         resurrectblocks[nresurrectblocks].active = true;
-        resurrectblocks[nresurrectblocks].type = TRIGGER;
+        resurrectblocks[nresurrectblocks].type = blocks[t].type;
         resurrectblocks[nresurrectblocks].x = blocks[t].x;
         resurrectblocks[nresurrectblocks].y = blocks[t].y;
         resurrectblocks[nresurrectblocks].wp = blocks[t].wp;
         resurrectblocks[nresurrectblocks].hp = blocks[t].hp;
+        resurrectblocks[nresurrectblocks].r = blocks[t].r;
+        resurrectblocks[nresurrectblocks].g = blocks[t].g;
+        resurrectblocks[nresurrectblocks].b = blocks[t].b;
         resurrectblocks[nresurrectblocks].trigger = blocks[t].trigger;
+        resurrectblocks[nresurrectblocks].prompt = blocks[t].prompt;
+        resurrectblocks[nresurrectblocks].script = blocks[t].script;
         nresurrectblocks++;
     }
     blocks[t].clear();
@@ -1238,17 +1267,32 @@ void entityclass::removeblockat( int x, int y )
 
 void entityclass::removetrigger( int t )
 {
+    bool actuallyonetime = false;
     for(int i=0; i<nblocks; i++)
     {
         if(blocks[i].type == TRIGGER)
         {
             if (blocks[i].trigger == t)
             {
-                blocks[i].active = false;
+                if (blocks[i].onetime && t >= 300)
+                    game.onetimescripts.push_back(game.customscript[t - 300]);
+                actuallyonetime = blocks[i].onetime;
                 removeblock(i);
             }
         }
     }
+
+    // If it is a one-time script box,
+    // remove all other script boxes in the room with the same script
+    // that are also one-time
+    if (kludgeonetimescript && actuallyonetime && t >= 300)
+        for (int i = 0; i < nblocks; i++)
+            if (blocks[i].type == TRIGGER && blocks[i].onetime
+            && blocks[i].trigger >= 300
+            && game.customscript[blocks[i].trigger - 300] == game.customscript[t - 300])
+                removeblock(i);
+
+    kludgeonetimescript = false;
 }
 
 void entityclass::copylinecross( int t )
@@ -2068,7 +2112,7 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
         entities[k].rule = 3;
         entities[k].type = 4;
         entities[k].size = 0;
-        entities[k].tile = 11;
+        entities[k].tile = 11 + vx;
         entities[k].xp = xp;
         entities[k].yp = yp;
         entities[k].w = 16;
@@ -2116,7 +2160,7 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
 
         //Check if it's already been collected
         entities[k].para = vx;
-        if (collect[vx] == 1) entities[k].active = false;
+        if (coincollect[vx] == 1) entities[k].active = false;
         break;
     case 9: //Something Shiny
         entities[k].rule = 3;
@@ -2139,7 +2183,7 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
         entities[k].rule = 3;
         entities[k].type = 8;
         entities[k].size = 0;
-        entities[k].tile = 20 + vx;
+        if (vx == 0 || vx == 1) entities[k].tile = 20 + vx; else entities[k].tile = 188 + vx;
         entities[k].xp = xp;
         entities[k].yp = yp;
         entities[k].w = 16;
@@ -2656,6 +2700,7 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
         //entities[k].colour = 0;
         entities[k].onentity = 1;
         entities[k].invis=true;
+        if (map.custommode) customwarpmode = true;
         break;
       case 52: //Vertical Warp Line
         entities[k].rule = 5;
@@ -2669,6 +2714,7 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
         //entities[k].colour = 0;
         entities[k].onentity = 1;
         entities[k].invis=true;
+        if (map.custommode) customwarpmode = true;
         break;
       case 53: //Horizontal Warp Line
         entities[k].rule = 7;
@@ -2681,6 +2727,7 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
         entities[k].h = 1;
         entities[k].onentity = 1;
         entities[k].invis=true;
+        if (map.custommode) customwarpmode = true;
         break;
       case 54: //Horizontal Warp Line
         entities[k].rule = 7;
@@ -2693,6 +2740,7 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
         entities[k].h = 1;
         entities[k].onentity = 1;
         entities[k].invis=true;
+        if (map.custommode) customwarpmode = true;
         break;
       case 55: // Crew Member (custom, collectable)
         //1 - position in array
@@ -2754,6 +2802,21 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
           case 8: setenemyroom(k, 16+100, 0+100); break;
           case 9: setenemyroom(k, 14+100, 2+100); break;
           case 10: setenemyroom(k, 10+100, 7+100); break;
+
+          case 11: setenemyroom(k, 12+100, 5+100); break; // yes man
+          case 12: setenemyroom(k, 15+100, 3+100); break; // STOP
+          case 13: setenemyroom(k, 13+100, 3+100); break; // wave duude
+          case 14: setenemyroom(k, 15+100, 2+100); break; // numbers
+          case 15: setenemyroom(k, 16+100, 2+100); break; // the dudes that walk
+          case 16: setenemyroom(k, 18+100, 2+100); break; // boob
+          case 17: setenemyroom(k, 18+100, 0+100); break; // OBEY
+          case 18: setenemyroom(k, 17+100, 3+100); break; // edge games
+          case 19: setenemyroom(k, 13+100, 6+100); break; // sent over the bottom gottem lmao
+          case 20: setenemyroom(k, 16+100, 7+100); break; // ghos
+          case 21: setenemyroom(k, 17+100, 7+100); break; // they b walkin 2.0
+          case 22: setenemyroom(k, 14+100, 8+100); break; // what the fuck is this
+          case 23: setenemyroom(k, 11+100, 13+100); break; // TRUTH
+          case 24: setenemyroom(k, 14+100, 13+100); break; // DABBING SKELETON
           default: setenemyroom(k, 4+100, 0+100); break;
         }
 
@@ -2764,11 +2827,11 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
           switch(entcol){
             //RED
             case 3: case 7: case 12: case 23: case 28:
-            case 34: case 42: case 48: case 58:
+            case 34: case 42: case 48: case 58: case 59:
               entities[k].colour = 6; break;
             //GREEN
             case 5: case 9: case 22: case 25: case 29:
-            case 31: case 38: case 46: case 52: case 53:
+            case 31: case 38: case 46: case 52: case 53: case 61:
               entities[k].colour = 7; break;
             //BLUE
             case 1: case 6: case 14: case 27: case 33:
@@ -2776,18 +2839,18 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
               entities[k].colour = 12; break;
             //YELLOW
             case 4: case 17: case 24: case 30: case 37:
-            case 45: case 51: case 55:
+            case 45: case 51: case 55: case 60:
               entities[k].colour = 9; break;
             //PURPLE
             case 2: case 11: case 15: case 19: case 32:
-            case 36: case 49:
+            case 36: case 49: case 63:
               entities[k].colour = 20; break;
             //CYAN
             case 8: case 10: case 13: case 18: case 26:
-            case 35: case 41: case 47: case 54:
+            case 35: case 41: case 47: case 54: case 62:
               entities[k].colour = 11; break;
             //PINK
-            case 16: case 20: case 39: case 43: case 56:
+            case 16: case 20: case 39: case 43: case 56: case 64:
               entities[k].colour = 8; break;
             //ORANGE
             case 21: case 40:
@@ -2796,9 +2859,9 @@ int entityclass::createentity( Game& game, float xp, float yp, int t, float vx /
               entities[k].colour = 6;
             break;
           }
-          if (ed.grayenemieskludge)
-            entities[k].colour = 18;
         }
+        if (ed.grayenemieskludge)
+          entities[k].colour = 18;
 
         break;
     }
@@ -3230,7 +3293,13 @@ bool entityclass::updateentities( int i, UtilityClass& help, Game& game, musiccl
                 {
                     entities[i].active = false;
                     game.gravitycontrol = (game.gravitycontrol + 1) % 2;
-
+                    if (entities[getplayer()].onground > 0) {
+                        music.playef(0, 10);
+                    } else if (entities[getplayer()].onroof > 0) {
+                        music.playef(1, 10);
+                    } else {
+                        music.playef(8, 10);
+                    }
                 }
                 break;
             case 5:  //Particle sprays
@@ -3246,7 +3315,7 @@ bool entityclass::updateentities( int i, UtilityClass& help, Game& game, musiccl
                 {
                     game.coins++;
                     music.playef(4,10);
-                    collect[entities[i].para] = 1;
+                    coincollect[entities[i].para] = 1;
 
                     entities[i].active = false;
                 }
@@ -3306,6 +3375,16 @@ bool entityclass::updateentities( int i, UtilityClass& help, Game& game, musiccl
                     {
                         game.savey = entities[i].yp-8;
                         game.savegc = 0;
+                    }
+                    else if (entities[i].tile == 190)
+                    {
+                        game.savey = entities[i].yp - 4;
+                        game.savegc = 0;
+                    }
+                    else if (entities[i].tile == 191)
+                    {
+                        game.savey = entities[i].yp - 4;
+                        game.savegc = 1;
                     }
 
                     game.saverx = game.roomx;
@@ -4212,6 +4291,25 @@ void entityclass::animateentities( int _i, Game& game, UtilityClass& help )
                     break;
                 }
                 break;
+
+            case 4: // Gravity token anim
+                entities[_i].framedelay--;
+                if(entities[_i].framedelay<=0)
+                {
+                    entities[_i].framedelay = 8;
+                    entities[_i].walkingframe++;
+                    if (entities[_i].walkingframe == 4)
+                    {
+                        entities[_i].walkingframe = 0;
+                    }
+                }
+
+                entities[_i].drawframe = entities[_i].tile;
+                if (entities[_i].para != 0) {
+                    entities[_i].drawframe += (entities[_i].walkingframe);
+                }
+                break;
+
             case 11:
                 entities[_i].drawframe = entities[_i].tile;
                 if(entities[_i].animate==2)
@@ -5151,6 +5249,15 @@ void entityclass::cleanup()
     while (i >= 0 && !entities[i].active)
     {
         nentity--;
+        i--;
+    }
+}
+
+void entityclass::cleanupresurrectblocks()
+{
+    int i = nresurrectblocks - 1;
+    while (i >= 0 && !(resurrectblocks[i].active)) {
+        nresurrectblocks--;
         i--;
     }
 }

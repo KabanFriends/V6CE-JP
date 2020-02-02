@@ -25,7 +25,7 @@ class map;
 class Graphics
 {
 public:
-	Graphics();
+	void init();
 	~Graphics();
 
 	GraphicsResources grphx;
@@ -34,6 +34,9 @@ public:
         int font_idx(char32_t ch);
 
 	void Makebfont();
+	void load_font(const char* path, SDL_Surface* img, int char_w, int char_h, int& pos);
+
+    std::string assetdir;
 
 	void drawhuetile(int x, int y, int t, int c);
 
@@ -97,6 +100,8 @@ public:
 
 	void drawpartimage(int t, int xp, int yp, int wp, int hp);
 
+	void drawscriptimage(Game& game, int t, int xp, int yp, bool cent=false);
+
 	void drawimage(int t, int xp, int yp, bool cent=false);
 
 	void drawimagecol(int t, int xp, int yp, int r, int g, int b, bool cent= false);
@@ -111,7 +116,7 @@ public:
 
 	void printcrewnamedark(int x, int y, int t);
 
-	void Print(int _x, int _y, std::string _s, int r, int g, int b, bool cen = false);
+	bool Print(int _x, int _y, std::string _s, int r, int g, int b, bool cen = false);
 
 	void RPrint(int _x, int _y, std::string _s, int r, int g, int b, bool cen = false);
 
@@ -139,6 +144,8 @@ public:
 
 
 	void drawtele(int x, int y, int t, int c, UtilityClass& help);
+
+	void drawtelepart(int x, int y, int t, int c, UtilityClass& help);
 
 	Uint32 getRGB(Uint8 r, Uint8 g, Uint8 b);
 
@@ -196,6 +203,8 @@ public:
     
     void reloadresources();
 
+	void textboxcreatefast();
+
 	colourTransform ct = {0};
 
 	std::string tempstring;
@@ -245,6 +254,7 @@ public:
 	SDL_Rect foot_rect = {0};
 	SDL_Rect prect = {0};
 	SDL_Rect footerrect = {0};
+	SDL_Surface* footerbuffer;
 
 	int linestate, linedelay = 0;
 	int backoffset = 0;
@@ -286,6 +296,12 @@ public:
         std::unordered_map<int, int> font_positions;
         std::optional<std::string> mapimage;
 
+        bool noclear = false;
+        bool translucentroomname = false;;
+
+	bool showmousecursor = false;
 };
+
+extern Graphics graphics;
 
 #endif /* GRAPHICS_H */

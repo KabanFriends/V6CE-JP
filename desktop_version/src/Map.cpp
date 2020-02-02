@@ -41,6 +41,7 @@ mapclass::mapclass()
 	custommode=false;
 	custommodeforreal=false;
 	customtrinkets=0;
+	customcoins=0;
 	customx=0; customy=0;
 	customwidth=20; customheight=20;
 	custommmxoff=0; custommmyoff=0; custommmxsize=0; custommmysize=0;
@@ -68,16 +69,10 @@ mapclass::mapclass()
 		}
 	}
 
-	for (int j = 0; j < 20; j++)
-	{
-		for (int i = 0; i < 20; i++)
-		{
-			areamap.push_back(0);
-			roomdeaths.push_back(0);
-			roomdeathsfinal.push_back(0);
-			explored.push_back(0);
-		}
-	}
+	areamap.resize(20 * 20);
+	roomdeaths.resize(ed.maxwidth * ed.maxheight);
+	roomdeathsfinal.push_back(20 * 20);
+	explored.push_back(ed.maxwidth * ed.maxheight);
 
 	tileset = 0;
 	initmapdata();
@@ -134,10 +129,22 @@ int mapclass::intpol(int a, int b, float c)
 	return static_cast<int>(a + ((b - a) * c));
 }
 
-void mapclass::setteleporter(int t, int x, int y)
+void mapclass::setteleporter(int x, int y)
 {
-	teleporters[t].x = x;
-	teleporters[t].y = y;
+	point temp;
+	temp.x = x;
+	temp.y = y;
+	teleporters.push_back(temp);
+}
+
+void mapclass::remteleporter(int x, int y)
+{
+	for (size_t i = 0; i < teleporters.size(); i++) {
+		if (teleporters[i].x == x && teleporters[i].y == y) {
+			teleporters.erase(teleporters.begin() + i);
+			break;
+		}
+	}
 }
 
 void mapclass::settrinket(int t, int x, int y)
@@ -149,11 +156,11 @@ void mapclass::settrinket(int t, int x, int y)
 void mapclass::resetmap()
 {
 	//clear the explored area of the map
-	for (int j = 0; j < 20; j++)
+	for (int j = 0; j < ed.maxheight; j++)
 	{
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < ed.maxwidth; i++)
 		{
-			explored[i + (j * 20)] = 0;
+			explored[i + (j * ed.maxwidth)] = 0;
 		}
 	}
 }
@@ -426,24 +433,23 @@ std::string mapclass::getglitchname(int x, int y)
 void mapclass::initmapdata()
 {
 	//Set up static map information like teleporters and shiny trinkets.
-	numteleporters = 17;
-	setteleporter(0, 0, 0);
-	setteleporter(1, 0, 16);
-	setteleporter(2, 2, 4);
-	setteleporter(3, 2, 11);
-	setteleporter(4, 7, 9);
-	setteleporter(5, 7, 15);
-	setteleporter(6, 8, 11);
-	setteleporter(7, 10, 5);
-	setteleporter(8, 11, 4);
-	setteleporter(9, 13, 2);
-	setteleporter(10, 13, 8);
-	setteleporter(11, 14, 19);
-	setteleporter(12, 15, 0);
-	setteleporter(13, 17, 12);
-	setteleporter(14, 17, 17);
-	setteleporter(15, 18, 1);
-	setteleporter(16, 18, 7);
+	setteleporter(0, 0);
+	setteleporter(0, 16);
+	setteleporter(2, 4);
+	setteleporter(2, 11);
+	setteleporter(7, 9);
+	setteleporter(7, 15);
+	setteleporter(8, 11);
+	setteleporter(10, 5);
+	setteleporter(11, 4);
+	setteleporter(13, 2);
+	setteleporter(13, 8);
+	setteleporter(14, 19);
+	setteleporter(15, 0);
+	setteleporter(17, 12);
+	setteleporter(17, 17);
+	setteleporter(18, 1);
+	setteleporter(18, 7);
 
 	numshinytrinkets = 18;
 	settrinket(0, 14, 4);
@@ -823,36 +829,57 @@ void mapclass::exploretower()
 {
 	for (int i = 0; i < 20; i++)
 	{
-		explored[9 + (i * 20)] = 1;
+		explored[9 + (i * ed.maxwidth)] = 1;
 	}
 }
 
 void mapclass::hideship()
 {
 	//remove the ship from the explored areas
-	explored[2 + (10 * 20)] = 0;
-	explored[3 + (10 * 20)] = 0;
-	explored[4 + (10 * 20)] = 0;
-	explored[2 + (11 * 20)] = 0;
-	explored[3 + (11 * 20)] = 0;
-	explored[4 + (11 * 20)] = 0;
+	explored[2 + (10 * ed.maxwidth)] = 0;
+	explored[3 + (10 * ed.maxwidth)] = 0;
+	explored[4 + (10 * ed.maxwidth)] = 0;
+	explored[2 + (11 * ed.maxwidth)] = 0;
+	explored[3 + (11 * ed.maxwidth)] = 0;
+	explored[4 + (11 * ed.maxwidth)] = 0;
 }
 
 void mapclass::showship()
 {
 	//remove the ship from the explored areas
-	explored[2 + (10 * 20)] = 1;
-	explored[3 + (10 * 20)] = 1;
-	explored[4 + (10 * 20)] = 1;
-	explored[2 + (11 * 20)] = 1;
-	explored[3 + (11 * 20)] = 1;
-	explored[4 + (11 * 20)] = 1;
+	explored[2 + (10 * ed.maxwidth)] = 1;
+	explored[3 + (10 * ed.maxwidth)] = 1;
+	explored[4 + (10 * ed.maxwidth)] = 1;
+	explored[2 + (11 * ed.maxwidth)] = 1;
+	explored[3 + (11 * ed.maxwidth)] = 1;
+	explored[4 + (11 * ed.maxwidth)] = 1;
 }
 
-void mapclass::resetplayer(Graphics& dwgfx, Game& game, entityclass& obj, musicclass& music)
-{
-	if (game.roomx != game.saverx || game.roomy != game.savery)
-	{
+// Centers the tower camera on the player position
+void mapclass::realign_tower() {
+	int i = obj.getplayer();
+	ypos = obj.entities[i].yp - 120;
+
+	if (ypos < 0)
+		ypos = 0;
+	bypos = ypos / 2;
+}
+
+void mapclass::resetplayer(Graphics& dwgfx, Game& game, entityclass& obj, musicclass& music) {
+	// Possibly warp if we died in a different room than our checkpoint is
+	bool room_different = true;
+	int old_tower = get_tower(game.roomx, game.roomy);
+	int new_tower = get_tower(game.saverx, game.savery);
+
+	// Towers use more than one screen, so compare tower ID
+	if (towermode && old_tower == new_tower)
+		room_different = false;
+
+	// Obviously, identical death room and checkpoint room isn't different
+	if (game.roomx == game.saverx && game.roomy == game.savery)
+		room_different = false;
+
+	if (room_different) {
 		gotoroom(game.saverx, game.savery, dwgfx, game, obj, music);
 		// If in finalstretch, update the colors of entities immediately
 		if (custommode && finalstretch)
@@ -873,6 +900,9 @@ void mapclass::resetplayer(Graphics& dwgfx, Game& game, entityclass& obj, musicc
 		obj.entities[i].colour = 0;
 		game.lifeseq = 10;
 		obj.entities[i].invis = true;
+
+		if (towermode && old_tower != new_tower)
+			realign_tower();
 	}
 
 	game.scmhurt = false; //Just in case the supercrewmate is fucking this up!
@@ -897,9 +927,134 @@ void mapclass::resetplayer(Graphics& dwgfx, Game& game, entityclass& obj, musicc
 	}
 }
 
+// Returns tower row for given room, or -1 if invalid
+int mapclass::tower_row(int rx, int ry) {
+	if (custommode)
+		return ed.tower_row(rx - 100, ry - 100);
+
+	int tower = get_tower(rx, ry);
+	if (tower == 1 && ry == 109)
+		return 671;
+	else if ((tower == 2 && ry == 53) ||
+			 (tower == 3 && ry == 54))
+		return 71;
+	else if (!tower || (tower == 1 && ry != 104))
+		return -1;
+	return 0;
+}
+
+int mapclass::get_tower_offset(int tower, int ix, int iy, int *ry, int ypos) {
+	if (tower != get_tower(ix, iy))
+		return -1;
+
+	int rpos = tower_row(ix, iy) * 8;
+	if (rpos >= 0 && ypos >= rpos && ypos < rpos + 240) {
+		*ry += (iy - (*ry));
+		return ypos - rpos;
+	}
+
+	return -1;
+}
+
+// Returns y offset upon tower entry/exit. ypos is negative if entering.
+// Returns -1 for an invalid boundary.
+int mapclass::tower_connection(int *rx, int *ry, int ypos) {
+	/* Figure out the location of tower connections */
+	int ix, iy, rix, riy, rpos;
+	rix = (*rx);
+	riy = (*ry);
+	ix = rix;
+	iy = riy;
+
+	if (ypos < 0) // entering
+		return tower_row(ix, iy) * 8;
+
+	/* Iterate all rooms connected to this tower and figure out our exit
+	   position. */
+	int ymin = 100;
+	int ymax = 100 + ed.maxheight - 1;
+	int tower = get_tower(ix, iy);
+	if (!custommode) {
+		ymax = 119;
+		if (rix < 100) {
+			ymin = 52;
+			ymax = 54;
+		}
+	}
+
+	for (iy = riy; iy >= ymin; iy--)
+		if ((rpos = get_tower_offset(tower, ix, iy, ry, ypos)) >= 0)
+			return rpos;
+
+	for (iy = riy + 1; iy <= ymax; iy++)
+		if ((rpos = get_tower_offset(tower, ix, iy, ry, ypos)) >= 0)
+			return rpos;
+
+	// We failed to find an exit boundary!
+	return -1;
+}
+
+/* Returns custom tower ID or for the maingame 1 (The Tower), 2 (Panic Room),
+   3 (The Final Challenge) */
+int mapclass::get_tower(int rx, int ry) {
+	if (custommode)
+		return ed.get_tower(rx - 100, ry - 100);
+
+#if defined(MAKEANDPLAY)
+	return 0;
+#endif
+
+	if (rx == 109)
+		return 1; // The Tower
+
+	if (rx == 49 && ry >= 52 && ry <= 53)
+		return 2; // Panic Room
+
+	if (rx == 51 && ry >= 53 && ry <= 54)
+		return 3; // The Final Challenge
+
+	return 0; // Not a tower
+}
+
+// Returns tower ID like get_tower() and updates entry with entry row
+int mapclass::entering_tower(int rx, int ry, int *entry) {
+	int tower = get_tower(rx, ry);
+	if (!tower)
+		return 0;
+
+	*entry = tower_connection(&rx, &ry, -1);
+	return tower;
+}
+
+// Moves player y appropriate and possibly change destination screen.
+bool mapclass::leaving_tower(int *rx, int *ry, entityclass &obj) {
+	int i = obj.getplayer();
+
+	// Check if we're inside a valid exit boundary
+	int yp = tower_connection(rx, ry, obj.entities[i].yp);
+
+	if (yp < 0)
+		return false;
+
+	// Fix x position
+	if (obj.entities[i].xp < -14) {
+		(*rx)--;
+		obj.entities[i].xp += 320;
+	} else {
+		if (obj.entities[i].xp >= 308)
+			obj.entities[i].xp -= 320;
+		(*rx)++;
+	}
+
+	obj.entities[i].yp = yp;
+	return true;
+}
+
 void mapclass::warpto(int rx, int ry , int t, int tx, int ty, Graphics& dwgfx, Game& game, entityclass& obj, musicclass& music)
 {
 	gotoroom(rx, ry, dwgfx, game, obj, music);
+	if (towermode)
+		realign_tower();
 	game.teleport = false;
 	obj.entities[t].xp = tx * 8;
 	obj.entities[t].yp = (ty * 8) - obj.entities[t].h;
@@ -908,6 +1063,8 @@ void mapclass::warpto(int rx, int ry , int t, int tx, int ty, Graphics& dwgfx, G
 
 void mapclass::gotoroom(int rx, int ry, Graphics& dwgfx, Game& game, entityclass& obj, musicclass& music)
 {
+	FillRect(dwgfx.backBuffer,0x00000);
+
 	//First, destroy the current room
 	obj.removeallblocks();
 	obj.removeallresurrectblocks();
@@ -991,93 +1148,105 @@ void mapclass::gotoroom(int rx, int ry, Graphics& dwgfx, Game& game, entityclass
 	}
 	else if (custommode)
 	{
-		game.roomx = rx;
-		game.roomy = ry;
+		// Get a positive modulo
+		int ix = rx - 100;
+		int iy = ry - 100;
+		int ih = ed.mapheight;
+		int iw = ed.mapwidth;
+		ix = (iw + (ix % iw)) % iw;
+		iy = (ih + (iy % ih)) % ih;
+		game.roomx = ix + 100;
+		game.roomy = iy + 100;
 		game.roomchange = true;
-		if (game.roomx < 100) game.roomx = 100 + ed.mapwidth-1;
-		if (game.roomy < 100) game.roomy = 100 + ed.mapheight-1;
-		if (game.roomx > 100 + ed.mapwidth-1) game.roomx = 100;
-		if (game.roomy > 100 + ed.mapheight-1) game.roomy = 100;
 	}
 	else
 	{
-		game.roomx = rx;
-		game.roomy = ry;
-		game.roomchange = true;
-		if (game.roomx < 100) game.roomx = 119;
-		if (game.roomy < 100) game.roomy = 119;
-		if (game.roomx > 119) game.roomx = 100;
-		if (game.roomy > 119) game.roomy = 100;
+	game.roomx = rx;
+	game.roomy = ry;
+	game.roomchange = true;
+	if (game.roomx < 100) game.roomx = 119;
+	if (game.roomy < 100) game.roomy = 119;
+	if (game.roomx > 119) game.roomx = 100;
+	if (game.roomy > 119) game.roomy = 100;
 
-		game.currentroomdeaths = roomdeaths[game.roomx - 100 + (20 * (game.roomy - 100))];
+	game.currentroomdeaths = roomdeaths[game.roomx - 100 + (ed.maxwidth * (game.roomy - 100))];
 
-		//Alright, change music depending on where we are:
-		//Tower
-		if (game.roomx == 107 && game.roomy == 106) music.niceplay(4);
-		if (game.roomx == 107 && game.roomy == 107) music.niceplay(4);
-		if (game.roomx == 107 && game.roomy == 108) music.niceplay(4);
-		if (game.roomx == 107 && game.roomy == 109) music.niceplay(4);
-		if (game.roomx == 108 && game.roomy == 109)
+	//Alright, change music depending on where we are:
+	//Tower
+	if (game.roomx == 107 && game.roomy == 106) music.niceplay(4);
+	if (game.roomx == 107 && game.roomy == 107) music.niceplay(4);
+	if (game.roomx == 107 && game.roomy == 108) music.niceplay(4);
+	if (game.roomx == 107 && game.roomy == 109) music.niceplay(4);
+	if (game.roomx == 108 && game.roomy == 109)
+	{
+		if (dwgfx.setflipmode)
 		{
-			if (dwgfx.setflipmode)
-			{
-				music.niceplay(9);
-			}
-			else
-			{
-				music.niceplay(2);
-			}
-		}
-		if (game.roomx == 109)
-		{
-			if (dwgfx.setflipmode)
-			{
-				music.niceplay(9);
-			}
-			else
-			{
-				music.niceplay(2);
-			}
-		}
-		//Warp Zone
-		if (game.roomx == 112 && game.roomy == 101) music.niceplay(4);
-		if (game.roomx == 113 && game.roomy == 101) music.niceplay(4);
-		if (game.roomx == 113 && game.roomy == 102) music.niceplay(4);
-		if (game.roomx == 114 && game.roomy == 101) music.niceplay(12);
-		if (game.roomx == 115 && game.roomy == 101) music.niceplay(12);
-		if (game.roomx == 115 && game.roomy == 102) music.niceplay(12);
-		//Lab
-		if (game.roomx == 101 && game.roomy == 115) music.niceplay(4);
-		if (game.roomx == 100 && game.roomy == 115) music.niceplay(4);
-		if (game.roomx == 101 && game.roomy == 116) music.niceplay(4);
-		if (game.roomx == 100 && game.roomy == 116) music.niceplay(4);
-		if (game.roomx == 102 && game.roomy == 116) music.niceplay(3);
-		if (game.roomx == 102 && game.roomy == 117) music.niceplay(3);
-		if (game.roomx == 101 && game.roomy == 117) music.niceplay(3);
-		//Space Station
-		if (game.intimetrial)
-		{
-			if (game.roomx == 111 && game.roomy == 112) music.niceplay(1);
-			if (game.roomx == 111 && game.roomy == 113) music.niceplay(1);
-			if (game.roomx == 112 && game.roomy == 114) music.niceplay(1);
-			if (game.roomx == 112 && game.roomy == 115) music.niceplay(1);
+			music.niceplay(9);
 		}
 		else
 		{
-			if (game.roomx == 111 && game.roomy == 112) music.niceplay(1);
-			if (game.roomx == 111 && game.roomy == 113) music.niceplay(1);
-			if (game.roomx == 112 && game.roomy == 114) music.niceplay(4);
-			if (game.roomx == 112 && game.roomy == 115) music.niceplay(4);
+			music.niceplay(2);
 		}
-		//Leaving the Ship
-		if (game.roomx == 104 && game.roomy == 112) music.niceplay(4);
+	}
+	if (game.roomx == 109)
+	{
+		if (dwgfx.setflipmode)
+		{
+			music.niceplay(9);
+		}
+		else
+		{
+			music.niceplay(2);
+		}
+	}
+	//Warp Zone
+	if (game.roomx == 112 && game.roomy == 101) music.niceplay(4);
+	if (game.roomx == 113 && game.roomy == 101) music.niceplay(4);
+	if (game.roomx == 113 && game.roomy == 102) music.niceplay(4);
+	if (game.roomx == 114 && game.roomy == 101) music.niceplay(12);
+	if (game.roomx == 115 && game.roomy == 101) music.niceplay(12);
+	if (game.roomx == 115 && game.roomy == 102) music.niceplay(12);
+	//Lab
+	if (game.roomx == 101 && game.roomy == 115) music.niceplay(4);
+	if (game.roomx == 100 && game.roomy == 115) music.niceplay(4);
+	if (game.roomx == 101 && game.roomy == 116) music.niceplay(4);
+	if (game.roomx == 100 && game.roomy == 116) music.niceplay(4);
+	if (game.roomx == 102 && game.roomy == 116) music.niceplay(3);
+	if (game.roomx == 102 && game.roomy == 117) music.niceplay(3);
+	if (game.roomx == 101 && game.roomy == 117) music.niceplay(3);
+	//Space Station
+	if (game.intimetrial)
+	{
+		if (game.roomx == 111 && game.roomy == 112) music.niceplay(1);
+		if (game.roomx == 111 && game.roomy == 113) music.niceplay(1);
+		if (game.roomx == 112 && game.roomy == 114) music.niceplay(1);
+		if (game.roomx == 112 && game.roomy == 115) music.niceplay(1);
+	}
+	else
+	{
+		if (game.roomx == 111 && game.roomy == 112) music.niceplay(1);
+		if (game.roomx == 111 && game.roomy == 113) music.niceplay(1);
+		if (game.roomx == 112 && game.roomy == 114) music.niceplay(4);
+		if (game.roomx == 112 && game.roomy == 115) music.niceplay(4);
+	}
+	//Leaving the Ship
+	if (game.roomx == 104 && game.roomy == 112) music.niceplay(4);
 	}
 	temp = rx + (ry * 100);
 	loadlevel(game.roomx, game.roomy, dwgfx, game, obj, music);
 
 
-	dwgfx.backgrounddrawn = false; //Used for background caching speedup
+	//Do we need to reload the background?
+	bool redrawbg = game.roomx != game.prevroomx || game.roomy != game.prevroomy;
+
+	if(redrawbg)
+	{
+		dwgfx.backgrounddrawn = false; //Used for background caching speedup
+	}
 	dwgfx.foregrounddrawn = false; //Used for background caching speedup
+
+	game.prevroomx = game.roomx;
+	game.prevroomy = game.roomy;
 
 	//a very special case: if entering the communication room, room 13,4 before tag 5 is set, set the game state to a background
 	//textbox thingy. if tag five is not set when changing room, reset the game state. (tag 5 is set when you get back to the ship)
@@ -1144,6 +1313,7 @@ void mapclass::gotoroom(int rx, int ry, Graphics& dwgfx, Game& game, entityclass
 	if (!game.gotoroomfromscript && obj.checktrigger() > -1) {
 		game.startscript = true;
 		game.newscript = "custom_" + game.customscript[obj.activetrigger - 300];
+		obj.kludgeonetimescript = true;
 		obj.removetrigger(obj.activetrigger);
 		game.state = 0;
 		game.kludgeroominitscript = true;
@@ -1202,7 +1372,7 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 	//roomname = "[UNTITLED] (" + String(rx)+","+String(ry)+")";
 	if (!finalmode)
 	{
-		explored[rx - 100 + ((ry - 100) * 20)] = 1;
+		explored[rx - 100 + ((ry - 100) * ed.maxwidth)] = 1;
 		if (rx == 109 && !custommode)
 		{
 			exploretower();
@@ -1232,6 +1402,32 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 	obj.customwarpmodehon=false;
 
 	growing_vector<std::string> tmap;
+
+	int tower_entry = 0;
+	int newtower = entering_tower(rx, ry, &tower_entry);
+	if (newtower) {
+		// Set up baseline tower settings
+		tdrawback = true;
+		minitowermode = false;
+		tower.minitowermode = false;
+		minitowersize = 100;
+		bscroll = 0;
+		scrolldir = 0;
+
+		tileset = 1;
+		background = 3;
+		towermode = true;
+
+		cameramode = 0;
+		colstate = 0;
+		colsuperstate = 0;
+
+		int i = obj.getplayer();
+		obj.entities[i].yp += tower_entry;
+
+		ypos = tower_entry;
+		bypos = ypos/2;
+	}
 
 	if (finalmode)
 	{
@@ -1265,32 +1461,6 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 	else
 	{
 		t = area(rx, ry);
-
-		if (t == 3)
-		{
-			//correct position for tower
-			if (ry == 109)
-			{
-				//entered from ground floor
-				int player = obj.getplayer();
-				obj.entities[player].yp += (671 * 8);
-
-				ypos = (700-29) * 8;
-				bypos = ypos / 2;
-				cameramode = 0;
-				colstate = 0;
-				colsuperstate = 0;
-			}
-			else if (ry == 104)
-			{
-				//you've entered from the top floor
-				ypos = 0;
-				bypos = 0;
-				cameramode = 0;
-				colstate = 0;
-				colsuperstate = 0;
-			}
-		}
 
 		if (t < 2) //on the world map, want to test if we're in the secret lab
 		{
@@ -1364,17 +1534,7 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 		dwgfx.rcol = lablevel.rcol;
 		break;
 	case 3: //The Tower
-		tdrawback = true;
-		minitowermode = false;
-		tower.minitowermode = false;
-		bscroll = 0;
-		scrolldir = 0;
-
 		roomname = "The Tower";
-		tileset = 1;
-		background = 3;
-		towermode = true;
-		//bypos = 0; ypos = 0; cameramode = 0;
 
 		//All the entities for here are just loaded here; it's essentially one room after all
 
@@ -1450,64 +1610,19 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 		changefinalcol(final_mapcol, obj, game);
 		break;
 	case 7: //Final Level, Tower 1
-		tdrawback = true;
+	case 8:
+		roomname = "Panic Room";
 		minitowermode = true;
 		tower.minitowermode = true;
-		bscroll = 0;
 		scrolldir = 1;
 
-		roomname = "Panic Room";
-		tileset = 1;
-		background = 3;
-		towermode = true;
-
 		tower.loadminitower1();
-
-		ypos = 0;
-		bypos = 0;
-		cameramode = 0;
-		colstate = 0;
-		colsuperstate = 0;
-		break;
-	case 8: //Final Level, Tower 1 (reentered from below)
-	{
-		tdrawback = true;
-		minitowermode = true;
-		tower.minitowermode = true;
-		bscroll = 0;
-		scrolldir = 1;
-
-		roomname = "Panic Room";
-		tileset = 1;
-		background = 3;
-		towermode = true;
-
-		tower.loadminitower1();
-
-		int i = obj.getplayer();
-		obj.entities[i].yp += (71 * 8);
-		game.roomy--;
-		finaly--;
-
-		ypos = (100-29) * 8;
-		bypos = ypos/2;
-		cameramode = 0;
-		colstate = 0;
-		colsuperstate = 0;}
 		break;
 	case 9: //Final Level, Tower 2
-	{
-		tdrawback = true;
+	case 10:
+		roomname = "The Final Challenge";
 		minitowermode = true;
 		tower.minitowermode = true;
-		bscroll = 0;
-		scrolldir = 0;
-		final_colorframe = 2;
-
-		roomname = "The Final Challenge";
-		tileset = 1;
-		background = 3;
-		towermode = true;
 
 		tower.loadminitower2();
 
@@ -1524,56 +1639,6 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 		obj.createentity(game, 56, 212, 11, 144); // (horizontal gravity line)
 		obj.createentity(game, 32, 20, 11, 96); // (horizontal gravity line)
 		obj.createentity(game, 72, 156, 11, 200); // (horizontal gravity line)
-
-		int i = obj.getplayer();
-		obj.entities[i].yp += (71 * 8);
-		game.roomy--;
-		finaly--;
-
-		ypos = (100-29) * 8;
-		bypos = ypos/2;
-		cameramode = 0;
-		colstate = 0;
-		colsuperstate = 0;
-	}
-		break;
-	case 10: //Final Level, Tower 2
-	{
-
-		tdrawback = true;
-		minitowermode = true;
-		tower.minitowermode = true;
-		bscroll = 0;
-		scrolldir = 0;
-		final_colorframe = 2;
-
-		roomname = "The Final Challenge";
-		tileset = 1;
-		background = 3;
-		towermode = true;
-
-		tower.loadminitower2();
-
-		obj.createentity(game, 56, 556, 11, 136); // (horizontal gravity line)
-		obj.createentity(game, 184, 592, 10, 0, 50500); // (savepoint)
-		obj.createentity(game, 184, 644, 11, 88); // (horizontal gravity line)
-		obj.createentity(game, 56, 460, 11, 136); // (horizontal gravity line)
-		obj.createentity(game, 216, 440, 10, 0, 50501); // (savepoint)
-		obj.createentity(game, 104, 508, 11, 168); // (horizontal gravity line)
-		obj.createentity(game, 219, 264, 12, 56); // (vertical gravity line)
-		obj.createentity(game, 120, 332, 11, 96); // (horizontal gravity line)
-		obj.createentity(game, 219, 344, 12, 56); // (vertical gravity line)
-		obj.createentity(game, 224, 332, 11, 48); // (horizontal gravity line)
-		obj.createentity(game, 56, 212, 11, 144); // (horizontal gravity line)
-		obj.createentity(game, 32, 20, 11, 96); // (horizontal gravity line)
-		obj.createentity(game, 72, 156, 11, 200); // (horizontal gravity line)
-
-		ypos = 0;
-		bypos = 0;
-		cameramode = 0;
-		colstate = 0;
-		colsuperstate = 0;
-	}
 		break;
 	case 11: //Tower Hallways //Content is held in final level routine
 	{
@@ -1603,41 +1668,94 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 		int curlevel=(rx-100)+((ry-100)*ed.maxwidth);
 		game.customcol=ed.getlevelcol(curlevel)+1;
 		obj.customplatformtile=game.customcol*12;
-		switch(ed.level[curlevel].tileset){
+
+		if (newtower) {
+			minitowermode = true;
+			tower.minitowermode = true;
+			minitowersize = ed.tower_size(newtower);
+			scrolldir = ed.tower_scroll(newtower);
+
+			extrarow = 0;
+
+			int ix = rx - 100;
+			int iy;
+			for (iy = 0; iy < ed.maxheight; iy++)
+				if (ed.get_tower(ix, iy) == newtower)
+					explored[ix + iy*ed.maxwidth] = 1;
+		} else {
+			switch(ed.level[curlevel].tileset){
 			case 0: //Space Station
-			tileset = 0;
-			background = 1;
-			break;
+				tileset = 0;
+				background = 1;
+				break;
 			case 1: //Outside
-			tileset = 1;
-			background = 1;
-			break;
+				tileset = 1;
+				background = 1;
+				break;
 			case 2: //Lab
-			tileset = 1;
-			background = 2;
-			dwgfx.rcol = ed.level[curlevel].tilecol;
-			break;
+				tileset = 1;
+				background = 2;
+				dwgfx.rcol = ed.level[curlevel].tilecol;
+				break;
 			case 3: //Warp Zone/intermission
-			tileset = 1;
-			background = 6;
-			break;
+				tileset = 1;
+				background = 6;
+				break;
 			case 4://Ship
-			tileset = 1;
-			background = 1;
-			break;
+				tileset = 1;
+				background = 1;
+				break;
 			case 5://Tower
-			tileset = 2;
-			background = 10;
-			dwgfx.rcol = ed.level[curlevel].tilecol;
-			break;
+				tileset = 2;
+				background = 10;
+				dwgfx.rcol = ed.level[curlevel].tilecol;
+				break;
 			default:
-			tileset = 1;
-			background = 1;
-			break;
+				tileset = 1;
+				background = 1;
+				break;
+			}
+
+			//If screen warping, then override all that:
+			dwgfx.backgrounddrawn = false;
+
+			if (ed.level[curlevel].warpdir > 0) {
+				if(ed.level[curlevel].warpdir==1){
+					warpx=true;
+					background=3;
+					dwgfx.rcol = ed.getwarpbackground(rx-100,ry-100);
+				}else if(ed.level[curlevel].warpdir==2){
+					warpy=true;
+					background=4;
+					dwgfx.rcol = ed.getwarpbackground(rx-100,ry-100);
+				}else if(ed.level[curlevel].warpdir==3){
+					warpx=true; warpy=true;
+					background = 5;
+					dwgfx.rcol = ed.getwarpbackground(rx-100,ry-100);
+				}
+			}
+
+			extrarow = 1;
+		}
+
+		ed.loadlevel(rx, ry, obj.altstates);
+		int ymax = 30;
+		if (newtower) {
+			ymax = minitowersize;
+			tower.loadcustomtower(ed.swapmap, ymax);
+		} else {
+			for (int edj = 0; edj < ymax; edj++) {
+				for (int edi = 0; edi < 40; edi++) {
+					contents[edi + vmult[edj]] = ed.swapmap[edi + vmult[edj]];
+				}
+			}
 		}
 
 		//If screen warping, then override all that:
-		dwgfx.backgrounddrawn = false;
+		bool redrawbg = game.roomx != game.prevroomx || game.roomy != game.prevroomy;
+		if(redrawbg){
+			dwgfx.backgrounddrawn = false;
+		}
 		if(ed.level[curlevel].warpdir>0){
 			if(ed.level[curlevel].warpdir==1){
 			warpx=true;
@@ -1658,150 +1776,186 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 		if(ed.level[curlevel].roomname!=""){
 			roomname=ed.level[curlevel].roomname;
 		}
-		extrarow = 1;
-		ed.loadlevel(rx, ry, obj.altstates);
-
 
 		roomtexton = false;
 		roomtextnumlines=0;
-
-		for (int edj = 0; edj < 30; edj++){
-			for(int edi = 0; edi < 40; edi++){
-			contents[edi + vmult[edj]] = ed.swapmap[edi + vmult[edj]];
-			}
-		}
 
 		//Entities have to be created HERE, akwardly
 		int tempcheckpoints=0;
 		int tempscriptbox=0;
 		for(int edi=0; edi<EditorData::GetInstance().numedentities; edi++){
-			if (edentity[edi].state != 0 && obj.altstates != edentity[edi].state)
+			if (obj.altstates != edentity[edi].state ||
+				newtower != edentity[edi].intower)
 				continue;
 
-			//If entity is in this room, create it
-			int tsx=(edentity[edi].x-(edentity[edi].x%40))/40;
-			int tsy=(edentity[edi].y-(edentity[edi].y%30))/30;
-			if(tsx==rx-100 && tsy==ry-100){
-			switch(edentity[edi].t){
-				case 1: //Enemies
-				int bx1, by1, bx2, by2;
-				bx1=ed.level[rx-100+((ry-100)*ed.maxwidth)].enemyx1;
-				by1=ed.level[rx-100+((ry-100)*ed.maxwidth)].enemyy1;
-				bx2=ed.level[rx-100+((ry-100)*ed.maxwidth)].enemyx2;
-				by2=ed.level[rx-100+((ry-100)*ed.maxwidth)].enemyy2;
+			// If entity is in this room, create it
+			int bx1, by1, bx2, by2;
+			int tsx = (edentity[edi].x-(edentity[edi].x%40))/40;
+			int tsy = (edentity[edi].y-(edentity[edi].y%30))/30;
+			int ex = edentity[edi].x * 8;
+			int ey = edentity[edi].y * 8;
+			if (!newtower) {
+				/* Non-tower entity xy is stored with an xy offset denoting
+				   the room */
+				ex -= tsx * 40 * 8;
+				ey -= tsy * 30 * 8;
+			}
+			ex += edentity[edi].subx;
+			ey += edentity[edi].suby;
 
-				if(warpx){ if(bx1==0 && bx2==320){ bx1=-100; bx2=420; } }
-				if(warpy){ if(by1==0 && by2==240){ by1=-100; by2=340; } }
+			/* Enemy or platform boundaries */
+			bx1=ed.level[curlevel].enemyx1;
+			by1=ed.level[curlevel].enemyy1;
+			bx2=ed.level[curlevel].enemyx2;
+			by2=ed.level[curlevel].enemyy2;
 
-				obj.customenemy=ed.level[tsx+((ed.maxwidth)*tsy)].enemytype;
-				obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8),(edentity[edi].y*8)- ((ry-100)*30*8), 56,
-								 edentity[edi].p1, 4, bx1, by1, bx2, by2);
+			if (edentity[edi].t == 2) {
+				bx1=ed.level[curlevel].platx1;
+				by1=ed.level[curlevel].platy1;
+				bx2=ed.level[curlevel].platx2;
+				by2=ed.level[curlevel].platy2;
+			}
+
+			/* Allow wrap-around if the room wraps */
+			if (warpx && bx1 == 0 && bx2 == 320) {
+				bx1 -= 100;
+				bx2 += 100;
+			}
+
+			if (warpy && by1 == 0 && by2 == 240) {
+				by1 -= 100;
+				by2 += 100;
+			}
+
+			if (newtower || (tsx == rx-100 && tsy == ry-100)) {
+			switch (edentity[edi].t){
+			case 1: // Enemies
+				obj.customenemy=ed.level[curlevel].enemytype;
+				obj.createentity(game, ex, ey, 56, edentity[edi].p1,
+								 ed.level[curlevel].enemyv + edentity[edi].p2, bx1, by1, bx2, by2);
 				break;
-				case 2: //Platforms and Threadmills
-				if(edentity[edi].p1<=4){
-					int bx1, by1, bx2, by2;
-					bx1=ed.level[rx-100+((ry-100)*ed.maxwidth)].platx1;
-					by1=ed.level[rx-100+((ry-100)*ed.maxwidth)].platy1;
-					bx2=ed.level[rx-100+((ry-100)*ed.maxwidth)].platx2;
-					by2=ed.level[rx-100+((ry-100)*ed.maxwidth)].platy2;
+			case 2: // Platforms and Threadmills
+				/* Conveyors */
+				if (edentity[edi].p1 > 4) {
+					if (edentity[edi].p1 > 8)
+						break;
 
-					if(warpx){ if(bx1==0 && bx2==320){ bx1=-100; bx2=420; } }
-					if(warpy){ if(by1==0 && by2==240){ by1=-100; by2=340; } }
-
-					obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8),(edentity[edi].y*8)- ((ry-100)*30*8), 2,
-									 edentity[edi].p1, ed.level[rx-100+((ry-100)*ed.mapwidth)].platv, bx1, by1, bx2, by2);
-				}else if(edentity[edi].p1>=5 && edentity[edi].p1<=8){ //Threadmill
-					obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8),(edentity[edi].y*8)- ((ry-100)*30*8), 2,
-									 edentity[edi].p1+3, 4);
+					obj.createentity(game, ex, ey, 2, edentity[edi].p1 + 3, 4);
+					break;
 				}
+
+				/* Just in case */
+				if (edentity[edi].p1 < 0)
+					break;
+
+				obj.createentity(game, ex, ey, 2, edentity[edi].p1,
+								 ed.level[curlevel].platv + edentity[edi].p2, bx1, by1, bx2, by2);
 				break;
-				case 3: //Disappearing platforms
-				obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8),(edentity[edi].y*8)- ((ry-100)*30*8), 3);
+			case 3: // Disappearing platforms
+				obj.createentity(game, ex, ey, 3);
 				break;
-				case 9:
-				obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8),(edentity[edi].y*8)- ((ry-100)*30*8), 9, ed.findtrinket(edi));
+			case 5: // Flip tokens
+				obj.createentity(game, ex, ey, 5, edentity[edi].p1, edentity[edi].p2);
 				break;
-				case 10: //Checkpoints
-				obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8),(edentity[edi].y*8)- ((ry-100)*30*8), 10,
-								edentity[edi].p1,((rx+(ry*100))*20)+tempcheckpoints);
+			case 8: // Coins
+				obj.createentity(game, ex, ey, 8, ed.findcoin(edi));
+				break;
+			case 9: // Trinkets
+				obj.createentity(game, ex, ey, 9, ed.findtrinket(edi));
+				break;
+			case 10: // Checkpoints
+				obj.createentity(game, ex, ey, 10, edentity[edi].p1,
+								 ((rx+(ry*100))*20)+tempcheckpoints);
 				tempcheckpoints++;
 				break;
-				case 11: //Gravity Lines
-				if(edentity[edi].p1==0){ //Horizontal
-					obj.createentity(game, (edentity[edi].p2*8),(edentity[edi].y*8)- ((ry-100)*30*8)+4, 11, edentity[edi].p3);
-				}else{ //Vertical
-					obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8)+3,(edentity[edi].p2*8), 12, edentity[edi].p3);
-				}
+			case 11: // Gravity Lines
+				if (edentity[edi].p1==0) //Horizontal
+					obj.createentity(game, edentity[edi].p2 * 8, ey + 4, 11,
+									 edentity[edi].p3);
+				else // Vertical
+					obj.createentity(game, ex + 3, edentity[edi].p2 * 8, 12,
+									 edentity[edi].p3);
 				break;
-				case 13: //Warp Tokens
-				obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8),(edentity[edi].y*8)- ((ry-100)*30*8), 13, edentity[edi].p1, edentity[edi].p2);
+			case 13: // Warp Tokens
+				obj.createentity(game, ex, ey, 13, edentity[edi].p1,
+								 edentity[edi].p2);
 				break;
-				case 15: //Collectable crewmate
-				obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8)-4,(edentity[edi].y*8)- ((ry-100)*30*8)+1, 55, ed.findcrewmate(edi), edentity[edi].p1, edentity[edi].p2);
+			case 14: // Round teleporter (whyy)
+				obj.createentity(game, ex, ey, 14);
 				break;
-				case 17: //Roomtext!
+			case 15: // Collectable crewmate
+				obj.createentity(game, ex, ey, 55, ed.findcrewmate(edi),
+								 edentity[edi].p1, edentity[edi].p2);
+				break;
+			case 17: // Roomtext!
 				roomtexton = true;
-				roomtextx[roomtextnumlines] = edentity[edi].x - ((rx-100)*40);
-				roomtexty[roomtextnumlines] = edentity[edi].y - ((ry-100)*30);
+				roomtextx[roomtextnumlines] = ex / 8;
+				roomtexty[roomtextnumlines] = ey / 8;
 				roomtext[roomtextnumlines] = edentity[edi].scriptname;
 				roomtextnumlines++;
 				break;
-				case 18: //Terminals
-				{ // We declare variables here, so we have to put this in its own block
-				obj.customscript=edentity[edi].scriptname;
-				int usethistile = edentity[edi].p1;
-				int usethisy = edentity[edi].y;
-				if (usethistile == 0) {
-					usethistile = 1; // Unflipped
-				} else if (usethistile == 1) {
-					usethistile = 0; // Flipped
-					usethisy--;
-				}
-				obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8),(usethisy*8)- ((ry-100)*30*8)+8, 20, usethistile);
-				obj.createblock(5, (edentity[edi].x*8)- ((rx-100)*40*8)-8, (usethisy*8)- ((ry-100)*30*8)+8, 20, 16, 35);
+			case 18: // Terminals
+				obj.customscript = edentity[edi].scriptname;
+
+				if (!edentity[edi].p1) // Unflipped
+					ey += 8;
+
+				obj.createentity(game, ex, ey, 20, !edentity[edi].p1);
+				obj.createblock(5, ex-8, ey, 20, 16, 35);
 				break;
-				}
-				case 19: //Script Box
+			case 19: // Script Box
 				game.customscript[tempscriptbox]=edentity[edi].scriptname;
-				obj.createblock(1, (edentity[edi].x*8)- ((rx-100)*40*8), (edentity[edi].y*8)- ((ry-100)*30*8),
-								edentity[edi].p1*8, edentity[edi].p2*8, 300+tempscriptbox);
+				if (edentity[edi].onetime)
+					obj.kludgeonetimescript = true;
+				obj.createblock(1, ex, ey, edentity[edi].p1*8 + edentity[edi].p3,
+								edentity[edi].p2*8 + edentity[edi].p4, 300+tempscriptbox);
 				tempscriptbox++;
 				break;
-				case 50: //Warp Lines
+			case 20: // Activity Zone
+				obj.customprompt = edentity[edi].activityname;
+				obj.customcolour = edentity[edi].activitycolor;
+				obj.customscript = edentity[edi].scriptname;
+				obj.createblock(ACTIVITY, ex, ey, edentity[edi].p1*8 + edentity[edi].p3,
+								edentity[edi].p2*8 + edentity[edi].p4, 100);
+				//tempscriptbox++;
+				break;
+			case 50: // Warp Lines
 				obj.customwarpmode=true;
-				if(edentity[edi].p1==0){ //
-					obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8)+4,(edentity[edi].p2*8), 51, edentity[edi].p3);
-				}else if(edentity[edi].p1==1){ //Horizontal, right
-					obj.createentity(game, (edentity[edi].x*8)- ((rx-100)*40*8)+4,(edentity[edi].p2*8), 52, edentity[edi].p3);
-				}else if(edentity[edi].p1==2){ //Vertical, top
-					obj.createentity(game, (edentity[edi].p2*8),(edentity[edi].y*8)- ((ry-100)*30*8)+7, 53, edentity[edi].p3);
-				}else if(edentity[edi].p1==3){
-					obj.createentity(game, (edentity[edi].p2*8),(edentity[edi].y*8)- ((ry-100)*30*8), 54, edentity[edi].p3);
-				}
+				if (edentity[edi].p1==0) //
+					obj.createentity(game, ex, (edentity[edi].p2*8), 51,
+									 edentity[edi].p3);
+				else if (edentity[edi].p1==1) //Horizontal, right
+					obj.createentity(game, ex + 4, (edentity[edi].p2*8), 52,
+									 edentity[edi].p3);
+				else if (edentity[edi].p1==2) //Vertical, top
+					obj.createentity(game, (edentity[edi].p2*8), ey + 7, 53,
+									 edentity[edi].p3);
+				else if (edentity[edi].p1==3)
+					obj.createentity(game, (edentity[edi].p2*8), ey, 54,
+									 edentity[edi].p3);
+				break;
+			case 999: // ?
+				obj.customenemy=ed.level[curlevel].enemytype;
+				int temp;
+				temp = obj.createentity(game, ex, ey, 1, 0, 0, -10000, -10000, 10000, 10000);
+				obj.entities[temp].tile = 0;
+				obj.entities[temp].colour = 102;
+				obj.entities[temp].animate = 0;
+				obj.entities[temp].w = 464;
+				obj.entities[temp].h = 320;
+				obj.entities[temp].size = 11;
+				obj.entities[temp].harmful = false;
 				break;
 			}
 			}
-			}
+		}
 		if (ed.grayenemieskludge)
 			ed.grayenemieskludge = false;
 
 		customtrinkets=ed.numtrinkets;
+		customcoins=ed.numcoins;
 		customcrewmates=ed.numcrewmates;
 
-		//do the appear/remove roomname here
-		/*
-
-		if (otherlevel.roomtexton)
-		{
-			roomtexton = true;
-			roomtextx[0] = otherlevel.roomtextx;
-			roomtexty[0] = otherlevel.roomtexty;
-			roomtextnumlines = otherlevel.roomtextnumlines;
-			for (int i = 0; i < roomtextnumlines; i++)
-			{
-				roomtext[i] = otherlevel.roomtext[i];
-			}
-		}*/
 		break;
 	}
 	//The room's loaded: now we fill out damage blocks based on the tiles.
@@ -1901,8 +2055,6 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 			}
 		}
 
-		// Commenting this out because I see no reason to put tile 1s under conveyors -Info Teddy
-		/*
 		for (int i = 0; i < obj.nentity; i++)
 		{
 			if (obj.entities[i].active)
@@ -1925,7 +2077,7 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 					}
 				}
 			}
-		}*/
+		}
 	}
 
 	//Special scripting: Create objects and triggers based on what crewmembers are rescued.
@@ -1933,7 +2085,7 @@ void mapclass::loadlevel(int rx, int ry, Graphics& dwgfx, Game& game, entityclas
 	{
 		//First up: the extra bits:
 		//Vermilion's quest:
-		if (rx == 100 && ry == 105)	 //On path to verdigris
+		if (rx == 100 && ry == 105)  //On path to verdigris
 		{
 			if (game.crewstats[3] && !game.crewstats[4])
 			{

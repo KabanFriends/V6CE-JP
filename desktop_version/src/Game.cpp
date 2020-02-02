@@ -114,9 +114,9 @@ bool GetButtonFromString(const char *pText, SDL_GameControllerButton *button)
 }
 
 
-Game::Game(void):
-    mutebutton(0)
+void Game::init(void)
 {
+    mutebutton = 0;
     infocus = true;
     paused = false;
     muted = false;
@@ -299,7 +299,7 @@ Game::Game(void):
     {
         quickcookieexists = false;
         quicksummary = "";
-        printf("Quick Save Not Found\n");
+        if (!quiet) printf("Quick Save Not Found\n");
     }
     else
     {
@@ -337,7 +337,7 @@ Game::Game(void):
     {
         telecookieexists = false;
         telesummary = "";
-        printf("Teleporter Save Not Found\n");
+        if (!quiet) printf("Teleporter Save Not Found\n");
     }
     else
     {
@@ -728,7 +728,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             break;
         case 4:
             //End of opening cutscene for now
-            dwgfx.createtextbox("  やじるしか WASD キーでいどう  ", -1, 195, 174, 174, 174);
+            dwgfx.createtextbox("  Press arrow keys or WASD to move  ", -1, 195, 174, 174, 174);
             dwgfx.textboxtimer(60);
             state = 0;
             break;
@@ -759,8 +759,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             if (obj.flags[13] == 0)
             {
                 obj.changeflag(13, 1);
-                dwgfx.createtextbox("  ENTER をおしてマップをみたり  ", -1, 155, 174, 174, 174);
-                dwgfx.addline("      クイックセーブしたりする");
+                dwgfx.createtextbox("  Press ENTER to view map  ", -1, 155, 174, 174, 174);
+                dwgfx.addline("      and quicksave");
                 dwgfx.textboxtimer(60);
             }
             state = 0;
@@ -930,8 +930,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
         case 17:
             //Arrow key tutorial
             obj.removetrigger(17);
-            dwgfx.createtextbox(" ACTION のかわりに うえ または ", -1, 195, 174, 174, 174);
-            dwgfx.addline("   した をおしてもはんてんできます。");
+            dwgfx.createtextbox(" If you prefer, you can press UP or ", -1, 195, 174, 174, 174);
+            dwgfx.addline("   DOWN instead of ACTION to flip.");
             dwgfx.textboxtimer(100);
             state = 0;
             break;
@@ -960,7 +960,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
                 dwgfx.textboxremovefast();
                 obj.changeflag(3, 1);
                 state = 0;
-                dwgfx.createtextbox("  ACTION をおしてはんてん  ", -1, 25, 174, 174, 174);
+                dwgfx.createtextbox("  Press ACTION to flip  ", -1, 25, 174, 174, 174);
                 dwgfx.textboxtimer(60);
             }
             obj.removetrigger(22);
@@ -1379,33 +1379,63 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             if (trinkets >= timetrialshinytarget) timetrialrank++;
             if (deathcounts == 0) timetrialrank++;
 
-            if (timetrialresulttime < besttimes[timetriallevel] || besttimes[timetriallevel]==-1)
-            {
-                besttimes[timetriallevel] = timetrialresulttime;
-            }
-            if (trinkets > besttrinkets[timetriallevel] || besttrinkets[timetriallevel]==-1)
-            {
-                besttrinkets[timetriallevel] = trinkets;
-            }
-            if (deathcounts < bestlives[timetriallevel] || bestlives[timetriallevel]==-1)
-            {
-                bestlives[timetriallevel] = deathcounts;
-            }
-            if (timetrialrank > bestrank[timetriallevel] || bestrank[timetriallevel]==-1)
-            {
-                bestrank[timetriallevel] = timetrialrank;
-								if(timetrialrank>=3){
-									if(timetriallevel==0) NETWORK_unlockAchievement("vvvvvvtimetrial_station1_fixed");
-									if(timetriallevel==1) NETWORK_unlockAchievement("vvvvvvtimetrial_lab_fixed");
-									if(timetriallevel==2) NETWORK_unlockAchievement("vvvvvvtimetrial_tower_fixed");
-									if(timetriallevel==3) NETWORK_unlockAchievement("vvvvvvtimetrial_station2_fixed");
-									if(timetriallevel==4) NETWORK_unlockAchievement("vvvvvvtimetrial_warp_fixed");
-									if(timetriallevel==5) NETWORK_unlockAchievement("vvvvvvtimetrial_final_fixed");
-								}
-            }
+            
 
-            savestats(map, dwgfx, music);
-
+            if (incustomtrial) {
+                if ((currenttrial + 1) > (int)customtrialstats.size()) {
+                    customtrialrecord temp;
+                    temp.attempted = false;
+                    temp.lives = 0;
+                    temp.rank = 0;
+                    temp.time = 0;
+                    temp.trinkets = 0;
+                    customtrialstats[currenttrial] = temp;
+                }
+                if (timetrialresulttime < customtrialstats[currenttrial].time || !customtrialstats[currenttrial].attempted)
+                {
+                    customtrialstats[currenttrial].time = timetrialresulttime;
+                }
+                if (trinkets > customtrialstats[currenttrial].trinkets || !customtrialstats[currenttrial].attempted)
+                {
+                    customtrialstats[currenttrial].trinkets = trinkets;
+                }
+                if (deathcounts < customtrialstats[currenttrial].lives || !customtrialstats[currenttrial].attempted)
+                {
+                    customtrialstats[currenttrial].lives = deathcounts;
+                }
+                if (timetrialrank > customtrialstats[currenttrial].rank || !customtrialstats[currenttrial].attempted)
+                {
+                    customtrialstats[currenttrial].rank = timetrialrank;
+                }
+                customtrialstats[currenttrial].attempted = true;
+                customsavetrialsave(ed.ListOfMetaData[playcustomlevel].filename);
+            } else {
+                if (timetrialresulttime < besttimes[timetriallevel] || besttimes[timetriallevel]==-1)
+                {
+                    besttimes[timetriallevel] = timetrialresulttime;
+                }
+                if (trinkets > besttrinkets[timetriallevel] || besttrinkets[timetriallevel]==-1)
+                {
+                    besttrinkets[timetriallevel] = trinkets;
+                }
+                if (deathcounts < bestlives[timetriallevel] || bestlives[timetriallevel]==-1)
+                {
+                    bestlives[timetriallevel] = deathcounts;
+                }
+                if (timetrialrank > bestrank[timetriallevel] || bestrank[timetriallevel]==-1)
+                {
+                    bestrank[timetriallevel] = timetrialrank;
+    				if(timetrialrank>=3){
+    					if(timetriallevel==0) NETWORK_unlockAchievement("vvvvvvtimetrial_station1_fixed");
+    					if(timetriallevel==1) NETWORK_unlockAchievement("vvvvvvtimetrial_lab_fixed");
+    					if(timetriallevel==2) NETWORK_unlockAchievement("vvvvvvtimetrial_tower_fixed");
+    					if(timetriallevel==3) NETWORK_unlockAchievement("vvvvvvtimetrial_station2_fixed");
+    					if(timetriallevel==4) NETWORK_unlockAchievement("vvvvvvtimetrial_warp_fixed");
+    					if(timetriallevel==5) NETWORK_unlockAchievement("vvvvvvtimetrial_final_fixed");
+    				}
+                }
+                savestats(map, dwgfx, music);
+            }
             dwgfx.fademode = 2;
             music.fadeout();
             state++;
@@ -1726,225 +1756,47 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
 
         case 300:
-            startscript = true;
-            newscript="custom_"+customscript[0];
-            obj.removetrigger(300);
-            state = 0;
-            break;
         case 301:
-            startscript = true;
-            newscript="custom_"+customscript[1];
-            obj.removetrigger(301);
-            state = 0;
-            break;
         case 302:
-            startscript = true;
-            newscript="custom_"+customscript[2];
-            obj.removetrigger(302);
-            state = 0;
-            break;
         case 303:
-            startscript = true;
-            newscript="custom_"+customscript[3];
-            obj.removetrigger(303);
-            state = 0;
-            break;
         case 304:
-            startscript = true;
-            newscript="custom_"+customscript[4];
-            obj.removetrigger(304);
-            state = 0;
-            break;
         case 305:
-            startscript = true;
-            newscript="custom_"+customscript[5];
-            obj.removetrigger(305);
-            state = 0;
-            break;
         case 306:
-            startscript = true;
-            newscript="custom_"+customscript[6];
-            obj.removetrigger(306);
-            state = 0;
-            break;
         case 307:
-            startscript = true;
-            newscript="custom_"+customscript[7];
-            obj.removetrigger(307);
-            state = 0;
-            break;
         case 308:
-            startscript = true;
-            newscript="custom_"+customscript[8];
-            obj.removetrigger(308);
-            state = 0;
-            break;
         case 309:
-            startscript = true;
-            newscript="custom_"+customscript[9];
-            obj.removetrigger(309);
-            state = 0;
-            break;
         case 310:
-            startscript = true;
-            newscript="custom_"+customscript[10];
-            obj.removetrigger(310);
-            state = 0;
-            break;
         case 311:
-            startscript = true;
-            newscript="custom_"+customscript[11];
-            obj.removetrigger(311);
-            state = 0;
-            break;
         case 312:
-            startscript = true;
-            newscript="custom_"+customscript[12];
-            obj.removetrigger(312);
-            state = 0;
-            break;
         case 313:
-            startscript = true;
-            newscript="custom_"+customscript[13];
-            obj.removetrigger(313);
-            state = 0;
-            break;
         case 314:
-            startscript = true;
-            newscript="custom_"+customscript[14];
-            obj.removetrigger(314);
-            state = 0;
-            break;
         case 315:
-            startscript = true;
-            newscript="custom_"+customscript[15];
-            obj.removetrigger(315);
-            state = 0;
-            break;
         case 316:
-            startscript = true;
-            newscript="custom_"+customscript[16];
-            obj.removetrigger(316);
-            state = 0;
-            break;
         case 317:
-            startscript = true;
-            newscript="custom_"+customscript[17];
-            obj.removetrigger(317);
-            state = 0;
-            break;
         case 318:
-            startscript = true;
-            newscript="custom_"+customscript[18];
-            obj.removetrigger(318);
-            state = 0;
-            break;
         case 319:
-            startscript = true;
-            newscript="custom_"+customscript[19];
-            obj.removetrigger(319);
-            state = 0;
-            break;
         case 320:
-            startscript = true;
-            newscript="custom_"+customscript[20];
-            obj.removetrigger(320);
-            state = 0;
-            break;
         case 321:
-            startscript = true;
-            newscript="custom_"+customscript[21];
-            obj.removetrigger(321);
-            state = 0;
-            break;
         case 322:
-            startscript = true;
-            newscript="custom_"+customscript[22];
-            obj.removetrigger(322);
-            state = 0;
-            break;
         case 323:
-            startscript = true;
-            newscript="custom_"+customscript[23];
-            obj.removetrigger(323);
-            state = 0;
-            break;
         case 324:
-            startscript = true;
-            newscript="custom_"+customscript[24];
-            obj.removetrigger(324);
-            state = 0;
-            break;
         case 325:
-            startscript = true;
-            newscript="custom_"+customscript[25];
-            obj.removetrigger(325);
-            state = 0;
-            break;
         case 326:
-            startscript = true;
-            newscript="custom_"+customscript[26];
-            obj.removetrigger(326);
-            state = 0;
-            break;
         case 327:
-            startscript = true;
-            newscript="custom_"+customscript[27];
-            obj.removetrigger(327);
-            state = 0;
-            break;
         case 328:
-            startscript = true;
-            newscript="custom_"+customscript[28];
-            obj.removetrigger(328);
-            state = 0;
-            break;
         case 329:
-            startscript = true;
-            newscript="custom_"+customscript[29];
-            obj.removetrigger(329);
-            state = 0;
-            break;
         case 330:
-            startscript = true;
-            newscript="custom_"+customscript[30];
-            obj.removetrigger(330);
-            state = 0;
-            break;
         case 331:
-            startscript = true;
-            newscript="custom_"+customscript[31];
-            obj.removetrigger(331);
-            state = 0;
-            break;
         case 332:
-            startscript = true;
-            newscript="custom_"+customscript[32];
-            obj.removetrigger(332);
-            state = 0;
-            break;
         case 333:
-            startscript = true;
-            newscript="custom_"+customscript[33];
-            obj.removetrigger(333);
-            state = 0;
-            break;
         case 334:
-            startscript = true;
-            newscript="custom_"+customscript[34];
-            obj.removetrigger(334);
-            state = 0;
-            break;
         case 335:
-            startscript = true;
-            newscript="custom_"+customscript[35];
-            obj.removetrigger(335);
-            state = 0;
-            break;
         case 336:
+            // WARNING: If updating this code, make sure to update the 2-frame-delay init fix in Map.cpp!
             startscript = true;
-            newscript="custom_"+customscript[36];
-            obj.removetrigger(336);
+            newscript="custom_"+customscript[state - 300];
+            obj.kludgeonetimescript = true;
+            obj.removetrigger(state);
             state = 0;
             break;
 
@@ -1961,14 +1813,14 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             state++;
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("        おめでとうございます!       ", 50, 105, 174, 174, 174);
+                dwgfx.createtextbox("        Congratulations!       ", 50, 105, 174, 174, 174);
                 dwgfx.addline("");
-                dwgfx.addline("ぴかぴかのトリンケットをみつけた!");
+                dwgfx.addline("You have found a shiny trinket!");
                 dwgfx.textboxcenterx();
 
                 if(map.custommode)
                 {
-                    dwgfx.createtextbox(" " + help.number(map.customtrinkets) + "こ ちゅうの " + help.number(trinkets) + "こ ", 50, 65, 174, 174, 174);
+                    dwgfx.createtextbox(" " + help.number(trinkets) + " out of " + help.number(map.customtrinkets)+ " ", 50, 65, 174, 174, 174);
                     dwgfx.textboxcenterx();
                 }
                 else
@@ -1979,14 +1831,14 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else
             {
-                dwgfx.createtextbox("        おめでとうございます!       ", 50, 85, 174, 174, 174);
+                dwgfx.createtextbox("        Congratulations!       ", 50, 85, 174, 174, 174);
                 dwgfx.addline("");
-                dwgfx.addline("ぴかぴかのトリンケットをみつけた!");
+                dwgfx.addline("You have found a shiny trinket!");
                 dwgfx.textboxcenterx();
 
                 if(map.custommode)
                 {
-                    dwgfx.createtextbox(" " + help.number(map.customtrinkets) + "こ ちゅうの " + help.number(trinkets) + "こ ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox(" " + help.number(trinkets) + " out of " + help.number(map.customtrinkets)+ " ", 50, 135, 174, 174, 174);
                     dwgfx.textboxcenterx();
                 }
                 else
@@ -2020,44 +1872,44 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             state++;
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("        おめでとうございます!       ", 50, 105, 174, 174, 174);
+                dwgfx.createtextbox("        Congratulations!       ", 50, 105, 174, 174, 174);
                 dwgfx.addline("");
-                dwgfx.addline("ゆくえふめいのなかまをみつけた!");
+                dwgfx.addline("You have found a lost crewmate!");
                 dwgfx.textboxcenterx();
 
                 if(int(map.customcrewmates-crewmates)==0)
                 {
-                    dwgfx.createtextbox("     なかまをみんなたすけた!    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("     All crewmates rescued!    ", 50, 135, 174, 174, 174);
                 }
                 else if(map.customcrewmates-crewmates==1)
                 {
-                    dwgfx.createtextbox("    のこり " + help.number(int(map.customcrewmates-crewmates))+ "にん    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("    " + help.number(int(map.customcrewmates-crewmates))+ " remains    ", 50, 135, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("     のこり " + help.number(int(map.customcrewmates-crewmates))+ "にん    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("     " + help.number(int(map.customcrewmates-crewmates))+ " remain    ", 50, 135, 174, 174, 174);
                 }
                 dwgfx.textboxcenterx();
 
             }
             else
             {
-                dwgfx.createtextbox("        おめでとうございます!       ", 50, 85, 174, 174, 174);
+                dwgfx.createtextbox("        Congratulations!       ", 50, 85, 174, 174, 174);
                 dwgfx.addline("");
-                dwgfx.addline("ゆくえふめいのなかまをみつけた!");
+                dwgfx.addline("You have found a lost crewmate!");
                 dwgfx.textboxcenterx();
 
                 if(int(map.customcrewmates-crewmates)==0)
                 {
-                    dwgfx.createtextbox("     なかまをみんなたすけた!    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("     All crewmates rescued!    ", 50, 135, 174, 174, 174);
                 }
                 else if(map.customcrewmates-crewmates==1)
                 {
-                    dwgfx.createtextbox("    のこり " + help.number(int(map.customcrewmates-crewmates))+ "にん    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("    " + help.number(int(map.customcrewmates-crewmates))+ " remains    ", 50, 135, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("     のこり " + help.number(int(map.customcrewmates-crewmates))+ "にん    ", 50, 135, 174, 174, 174);
+                    dwgfx.createtextbox("     " + help.number(int(map.customcrewmates-crewmates))+ " remain    ", 50, 135, 174, 174, 174);
                 }
                 dwgfx.textboxcenterx();
             }
@@ -2099,6 +1951,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
         case 1015:
             dwgfx.flipmode = false;
             gamestate = TITLEMODE;
+            FILESYSTEM_unmountassets(dwgfx);
             dwgfx.fademode = 4;
             music.play(6);
             dwgfx.backgrounddrawn = true;
@@ -2130,15 +1983,22 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else
             {
-                savetele(map, obj, music);
+                std::string gamesavedtext = "    Game Saved    ";
+                if (map.custommodeforreal) {
+                    customsavequick(ed.ListOfMetaData[playcustomlevel].filename, map, obj, music, dwgfx);
+                } else if (!map.custommode) {
+                    savetele(map, obj, music);
+                } else {
+                    gamesavedtext = " Game (Not) Saved ";
+                }
                 if (dwgfx.flipmode)
                 {
-                    dwgfx.createtextbox("    Game Saved    ", -1, 202, 174, 174, 174);
+                    dwgfx.createtextbox(gamesavedtext, -1, 202, 174, 174, 174);
                     dwgfx.textboxtimer(25);
                 }
                 else
                 {
-                    dwgfx.createtextbox("    Game Saved    ", -1, 12, 174, 174, 174);
+                    dwgfx.createtextbox(gamesavedtext, -1, 12, 174, 174, 174);
                     dwgfx.textboxtimer(25);
                 }
                 state = 0;
@@ -2368,8 +2228,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 dwgfx.createtextbox("", -1, 64+8+16, 175,174,174);
             }
-            dwgfx.addline("      なかまを     ");
-            dwgfx.addline("     たすけた!     ");
+            dwgfx.addline("     You have rescued  ");
+            dwgfx.addline("      a crew member!   ");
             dwgfx.addline("");
             dwgfx.textboxcenterx();
             break;
@@ -2380,7 +2240,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             temp = 6 - crewrescued();
             if (temp == 1)
             {
-                tempstring = "  のこり 1にん  ";
+                tempstring = "  One remains  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2392,7 +2252,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else if (temp > 0)
             {
-                tempstring = "  のこり " + help.number(temp) + "にん  ";
+                tempstring = "  " + help.number(temp) + " remain  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2421,11 +2281,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -2483,8 +2343,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 dwgfx.createtextbox("", -1, 64+8+16, 174,175,174);
             }
-            dwgfx.addline("      なかまを     ");
-            dwgfx.addline("     たすけた!     ");
+            dwgfx.addline("     You have rescued  ");
+            dwgfx.addline("      a crew member!   ");
             dwgfx.addline("");
             dwgfx.textboxcenterx();
             break;
@@ -2495,7 +2355,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             temp = 6 - crewrescued();
             if (temp == 1)
             {
-                tempstring = "  のこり 1にん  ";
+                tempstring = "  One remains  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2507,7 +2367,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else if (temp > 0)
             {
-                tempstring = "  のこり " + help.number(temp) + "にん  ";
+                tempstring = "  " + help.number(temp) + " remain  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2521,11 +2381,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 if (dwgfx.flipmode)
                 {
-                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 72, 174, 174, 174);
+                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 72, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 128+16, 174, 174, 174);
+                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 128+16, 174, 174, 174);
                 }
             }
             dwgfx.textboxcenterx();
@@ -2536,11 +2396,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -2597,8 +2457,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 dwgfx.createtextbox("", -1, 64+8+16, 174,174,175);
             }
-            dwgfx.addline("      なかまを     ");
-            dwgfx.addline("     たすけた!     ");
+            dwgfx.addline("     You have rescued  ");
+            dwgfx.addline("      a crew member!   ");
             dwgfx.addline("");
             dwgfx.textboxcenterx();
             break;
@@ -2609,7 +2469,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             temp = 6 - crewrescued();
             if (temp == 1)
             {
-                tempstring = "  のこり 1にん  ";
+                tempstring = "  One remains  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2621,7 +2481,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else if (temp > 0)
             {
-                tempstring = "  のこり " + help.number(temp) + "にん  ";
+                tempstring = "  " + help.number(temp) + " remain  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2635,11 +2495,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 if (dwgfx.flipmode)
                 {
-                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 72, 174, 174, 174);
+                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 72, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 128+16, 174, 174, 174);
+                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 128+16, 174, 174, 174);
                 }
             }
             dwgfx.textboxcenterx();
@@ -2650,11 +2510,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -2712,8 +2572,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 dwgfx.createtextbox("", -1, 64+8+16, 175,175,174);
             }
-            dwgfx.addline("      なかまを     ");
-            dwgfx.addline("     たすけた!     ");
+            dwgfx.addline("     You have rescued  ");
+            dwgfx.addline("      a crew member!   ");
             dwgfx.addline("");
             dwgfx.textboxcenterx();
             break;
@@ -2724,7 +2584,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             temp = 6 - crewrescued();
             if (temp == 1)
             {
-                tempstring = "  のこり 1にん  ";
+                tempstring = "  One remains  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2736,7 +2596,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else if (temp > 0)
             {
-                tempstring = "  のこり " + help.number(temp) + "にん";
+                tempstring = "  " + help.number(temp) + " remain  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2750,11 +2610,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 if (dwgfx.flipmode)
                 {
-                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 72, 174, 174, 174);
+                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 72, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 128+16, 174, 174, 174);
+                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 128+16, 174, 174, 174);
                 }
             }
             dwgfx.textboxcenterx();
@@ -2765,11 +2625,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -2845,8 +2705,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 dwgfx.createtextbox("", -1, 64+8+16, 175,174,175);
             }
-            dwgfx.addline("      なかまを     ");
-            dwgfx.addline("     たすけた!     ");
+            dwgfx.addline("     You have rescued  ");
+            dwgfx.addline("      a crew member!   ");
             dwgfx.addline("");
             dwgfx.textboxcenterx();
             break;
@@ -2857,7 +2717,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             temp = 6 - crewrescued();
             if (temp == 1)
             {
-                tempstring = "  のこり 1にん  ";
+                tempstring = "  One remains  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2869,7 +2729,7 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else if (temp > 0)
             {
-                tempstring = "  のこり " + help.number(temp) + "にん ";
+                tempstring = "  " + help.number(temp) + " remain  ";
                 if (dwgfx.flipmode)
                 {
                     dwgfx.createtextbox(tempstring, -1, 72, 174, 174, 174);
@@ -2883,11 +2743,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             {
                 if (dwgfx.flipmode)
                 {
-                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 72, 174, 174, 174);
+                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 72, 174, 174, 174);
                 }
                 else
                 {
-                    dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 128+16, 174, 174, 174);
+                    dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 128+16, 174, 174, 174);
                 }
             }
             dwgfx.textboxcenterx();
@@ -2898,11 +2758,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -3125,11 +2985,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 175-24, 0, 0, 0);
+                dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 175-24, 0, 0, 0);
             }
             else
             {
-                dwgfx.createtextbox("  なかまをみんなたすけた!  ", -1, 64, 0, 0, 0);
+                dwgfx.createtextbox("  All Crew Members Rescued!  ", -1, 64, 0, 0, 0);
             }
             savetime = timestring(help);
             break;
@@ -3140,12 +3000,12 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             tempstring = help.number(trinkets);
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("みつけたトリンケット:", 48, 155-24, 0,0,0);
+                dwgfx.createtextbox("Trinkets Found:", 48, 155-24, 0,0,0);
                 dwgfx.createtextbox(tempstring, 180, 155-24, 0, 0, 0);
             }
             else
             {
-                dwgfx.createtextbox("みつけたトリンケット:", 48, 84, 0,0,0);
+                dwgfx.createtextbox("Trinkets Found:", 48, 84, 0,0,0);
                 dwgfx.createtextbox(tempstring, 180, 84, 0, 0, 0);
             }
             break;
@@ -3156,12 +3016,12 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             tempstring = savetime;
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("   ゲームじかん:", 64, 143-24, 0,0,0);
+                dwgfx.createtextbox("   Game Time:", 64, 143-24, 0,0,0);
                 dwgfx.createtextbox(tempstring, 180, 143-24, 0, 0, 0);
             }
             else
             {
-                dwgfx.createtextbox("   ゲームじかん:", 64, 96, 0,0,0);
+                dwgfx.createtextbox("   Game Time:", 64, 96, 0,0,0);
                 dwgfx.createtextbox(tempstring, 180, 96, 0, 0, 0);
             }
             break;
@@ -3171,12 +3031,12 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" はんてんかいすう:", 64, 116-24, 0,0,0);
+                dwgfx.createtextbox(" Total Flips:", 64, 116-24, 0,0,0);
                 dwgfx.createtextbox(help.String(totalflips), 180, 116-24, 0, 0, 0);
             }
             else
             {
-                dwgfx.createtextbox(" はんてんかいすう:", 64, 123, 0,0,0);
+                dwgfx.createtextbox(" Total Flips:", 64, 123, 0,0,0);
                 dwgfx.createtextbox(help.String(totalflips), 180, 123, 0, 0, 0);
             }
             break;
@@ -3186,12 +3046,12 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox("しんだかいすう:", 64, 104-24, 0,0,0);
+                dwgfx.createtextbox("Total Deaths:", 64, 104-24, 0,0,0);
                 dwgfx.createtextbox(help.String(deathcounts), 180, 104-24, 0, 0, 0);
             }
             else
             {
-                dwgfx.createtextbox("しんだかいすう:", 64, 135, 0,0,0);
+                dwgfx.createtextbox("Total Deaths:", 64, 135, 0,0,0);
                 dwgfx.createtextbox(help.String(deathcounts), 180, 135, 0, 0, 0);
             }
             break;
@@ -3201,13 +3061,13 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                tempstring = "さいなんかんのへや ( " + help.String(hardestroomdeaths) + " かいしんだ)";
+                tempstring = "Hardest Room (with " + help.String(hardestroomdeaths) + " deaths)";
                 dwgfx.createtextbox(tempstring, -1, 81-24, 0,0,0);
                 dwgfx.createtextbox(hardestroom, -1, 69-24, 0, 0, 0);
             }
             else
             {
-                tempstring = "さいなんかんのへや ( " + help.String(hardestroomdeaths) + " かいしんだ)";
+                tempstring = "Hardest Room (with " + help.String(hardestroomdeaths) + " deaths)";
                 dwgfx.createtextbox(tempstring, -1, 158, 0,0,0);
                 dwgfx.createtextbox(hardestroom, -1, 170, 0, 0, 0);
             }
@@ -3218,11 +3078,11 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
 
             if (dwgfx.flipmode)
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 20, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 20, 164, 164, 255);
             }
             else
             {
-                dwgfx.createtextbox(" ACTION をおしてつぎへすすむ ", -1, 196, 164, 164, 255);
+                dwgfx.createtextbox(" Press ACTION to continue ", -1, 196, 164, 164, 255);
             }
             dwgfx.textboxcenterx();
             break;
@@ -3506,7 +3366,8 @@ void Game::updatestate( Graphics& dwgfx, mapclass& map, entityclass& obj, Utilit
             }
             else
             {
-                savetele(map, obj, music);
+                if (!map.custommode)
+                    savetele(map, obj, music);
             }
             i = obj.getteleporter();
             activetele = true;
@@ -4457,6 +4318,16 @@ void Game::loadstats( mapclass& map, Graphics& dwgfx, musicclass& music )
             dwgfx.notextoutline = atoi(pText);
         }
 
+        if (pKey == "translucentroomname")
+        {
+            dwgfx.translucentroomname = atoi(pText);
+        }
+
+        if (pKey == "showmousecursor")
+        {
+            dwgfx.showmousecursor = atoi(pText);
+        }
+
 		if (pKey == "flipButton")
 		{
 			SDL_GameControllerButton newButton;
@@ -4504,6 +4375,14 @@ void Game::loadstats( mapclass& map, Graphics& dwgfx, musicclass& music )
         dwgfx.screenbuffer->toggleLinearFilter();
     }
     dwgfx.screenbuffer->ResizeScreen(width, height);
+
+    if (dwgfx.showmousecursor == true)
+    {
+        SDL_ShowCursor(SDL_ENABLE);
+    }
+    else {
+        SDL_ShowCursor(SDL_DISABLE);
+    }
 
     if (controllerButton_flip.size() < 1)
     {
@@ -4674,6 +4553,14 @@ void Game::savestats( mapclass& _map, Graphics& _dwgfx, musicclass& _music )
     msg->LinkEndChild(new TiXmlText(tu.String((int) _dwgfx.notextoutline).c_str()));
     dataNode->LinkEndChild(msg);
 
+    msg = new TiXmlElement("translucentroomname");
+    msg->LinkEndChild(new TiXmlText(tu.String((int) _dwgfx.translucentroomname).c_str()));
+    dataNode->LinkEndChild(msg);
+
+    msg = new TiXmlElement("showmousecursor");
+    msg->LinkEndChild(new TiXmlText(tu.String((int)_dwgfx.showmousecursor).c_str()));
+    dataNode->LinkEndChild(msg);
+
     for (size_t i = 0; i < controllerButton_flip.size(); i += 1)
     {
         msg = new TiXmlElement("flipButton");
@@ -4788,8 +4675,8 @@ void Game::deathsequence( mapclass& map, entityclass& obj, musicclass& music )
         }
         else
         {
-            map.roomdeaths[roomx - 100 + (20*(roomy - 100))]++;
-            currentroomdeaths = map.roomdeaths[roomx - 100 + (20 * (roomy - 100))];
+            map.roomdeaths[roomx - 100 + (ed.maxwidth*(roomy - 100))]++;
+            currentroomdeaths = map.roomdeaths[roomx - 100 + (ed.maxwidth * (roomy - 100))];
         }
     }
     if (deathseq == 25) obj.entities[i].invis = true;
@@ -4963,9 +4850,17 @@ void Game::loadquick( mapclass& map, entityclass& obj, musicclass& music )
             {
                 growing_vector<std::string> values = split(TextString,',');
                 map.explored.clear();
-                for(size_t i = 0; i < values.size(); i++)
-                {
-                    map.explored.push_back(atoi(values[i].c_str()));
+                // Backwards compatibility with 20x20 explored status arrays
+                if (values.size() <= 20 * 20) {
+                    for (int y = 0; y < ed.maxheight; y++)
+                        for (int x = 0; x < ed.maxwidth; x++)
+                            if (x * y <= 20 * 20)
+                                map.explored.push_back(atoi(values[x + y*20].c_str()));
+                            else
+                                map.explored.push_back(0);
+                } else {
+                    for (size_t i = 0; i < values.size(); i++)
+                        map.explored.push_back(atoi(values[i].c_str()));
                 }
             }
         }
@@ -5008,6 +4903,20 @@ void Game::loadquick( mapclass& map, entityclass& obj, musicclass& music )
                 for(size_t i = 0; i < values.size(); i++)
                 {
                     obj.collect.push_back(atoi(values[i].c_str()));
+                }
+            }
+        }
+
+        if (pKey == "coincollect")
+        {
+            std::string TextString = (pText);
+            if(TextString.length())
+            {
+                growing_vector<std::string> values = split(TextString,',');
+                obj.coincollect.clear();
+                for(size_t i = 0; i < values.size(); i++)
+                {
+                    obj.coincollect.push_back(atoi(values[i].c_str()));
                 }
             }
         }
@@ -5146,8 +5055,106 @@ void Game::loadquick( mapclass& map, entityclass& obj, musicclass& music )
 
 }
 
-void Game::customloadquick(std::string savfile, mapclass& map, entityclass& obj, musicclass& music, Graphics& dwgfx )
+void Game::customsavetrialsave(std::string savfile)
 {
+    TiXmlDocument doc;
+    TiXmlElement* msg;
+    TiXmlDeclaration* decl = new TiXmlDeclaration( "1.0", "", "" );
+    doc.LinkEndChild( decl );
+
+    TiXmlElement * root = new TiXmlElement( "Save" );
+    doc.LinkEndChild( root );
+
+    TiXmlComment * comment = new TiXmlComment();
+    comment->SetValue(" Save file " );
+    root->LinkEndChild( comment );
+
+    TiXmlElement * msgs = new TiXmlElement( "Data" );
+    root->LinkEndChild( msgs );
+
+    msg = new TiXmlElement( "timetrials" );
+    for (std::size_t i = 0; i <  customtrialstats.size(); i++) {
+
+        TiXmlElement *trialEl = new TiXmlElement( "trial" );
+        trialEl->SetAttribute( "time",      customtrialstats[i].time     );
+        trialEl->SetAttribute( "lives",     customtrialstats[i].lives    );
+        trialEl->SetAttribute( "trinkets",  customtrialstats[i].trinkets );
+        trialEl->SetAttribute( "rank",      customtrialstats[i].rank     );
+        trialEl->SetAttribute( "attempted", customtrialstats[i].attempted);
+        msg->LinkEndChild( trialEl );
+    }
+    msgs->LinkEndChild(msg);
+
+
+    std::string levelfile = savfile.substr(7);
+    if(FILESYSTEM_saveTiXmlDocument(("saves/"+levelfile+".trial").c_str(), &doc))
+    {
+        printf("Trials saved\n");
+    }
+    else
+    {
+        printf("Couldn't save trial stats!\n");
+        printf("Failed: %s%s%s", saveFilePath.c_str(), levelfile.c_str(), ".trial");
+    }
+}
+
+void Game::customloadtrialsave(std::string savfile)
+{
+    std::string levelfile = savfile.substr(7);
+    TiXmlDocument doc;
+    if (!FILESYSTEM_loadTiXmlDocument(("saves/"+levelfile+".trial").c_str(), &doc)) return;
+
+    TiXmlHandle hDoc(&doc);
+    TiXmlElement* pElem;
+    TiXmlHandle hRoot(0);
+
+
+    {
+        pElem=hDoc.FirstChildElement().Element();
+        if (!pElem)
+        {
+            printf("Time trial save not found\n");
+        }
+
+        hRoot=TiXmlHandle(pElem);
+    }
+
+    customtrialstats.clear();
+
+    for( pElem = hRoot.FirstChild( "Data" ).FirstChild().Element(); pElem; pElem=pElem->NextSiblingElement())
+    {
+        std::string pKey(pElem->Value());
+        if (pKey == "timetrials") {
+            for (TiXmlElement* trialEl = pElem->FirstChildElement(); trialEl; trialEl = trialEl->NextSiblingElement()) {
+                customtrialrecord temp;
+                trialEl->QueryIntAttribute("time",      &temp.time     );
+                trialEl->QueryIntAttribute("lives",     &temp.lives    );
+                trialEl->QueryIntAttribute("trinkets",  &temp.trinkets );
+                trialEl->QueryIntAttribute("rank",      &temp.rank     );
+                trialEl->QueryIntAttribute("attempted", &temp.attempted);
+                if (temp.attempted == 0) {
+                    temp.attempted = false;
+                } else {
+                    temp.attempted = true;
+                }
+                customtrialstats.push_back(temp);
+            }
+        }
+    }
+}
+
+
+void Game::customloadquick(std::string savfile, mapclass& map, entityclass& obj, musicclass& music, Graphics& dwgfx, Game& game)
+{
+    if (cliplaytest) {
+        savex = playx;
+        savey = savey;
+        saverx = playrx;
+        savery = playry;
+        savegc = playgc;
+        return;
+    }
+
     std::string levelfile = savfile.substr(7);
     TiXmlDocument doc;
     if (!FILESYSTEM_loadTiXmlDocument(("saves/"+levelfile+".vvv").c_str(), &doc)) return;
@@ -5187,9 +5194,17 @@ void Game::customloadquick(std::string savfile, mapclass& map, entityclass& obj,
             {
                 growing_vector<std::string> values = split(TextString,',');
                 map.explored.clear();
-                for(size_t i = 0; i < values.size(); i++)
-                {
-                    map.explored.push_back(atoi(values[i].c_str()));
+                // Backwards compatibility with 20x20 explored status arrays
+                if (values.size() <= 20 * 20) {
+                    for (int y = 0; y < ed.maxheight; y++)
+                        for (int x = 0; x < ed.maxwidth; x++)
+                            if (x * y <= 20 * 20)
+                                map.explored.push_back(atoi(values[x + y*20].c_str()));
+                            else
+                                map.explored.push_back(0);
+                } else {
+                    for (size_t i = 0; i < values.size(); i++)
+                        map.explored.push_back(atoi(values[i].c_str()));
                 }
             }
         }
@@ -5245,6 +5260,20 @@ void Game::customloadquick(std::string savfile, mapclass& map, entityclass& obj,
                 for(size_t i = 0; i < values.size(); i++)
                 {
                     obj.collect.push_back(atoi(values[i].c_str()));
+                }
+            }
+        }
+
+        if (pKey == "coincollect")
+        {
+            std::string TextString = (pText);
+            if(TextString.length())
+            {
+                growing_vector<std::string> values = split(TextString,',');
+                obj.coincollect.clear();
+                for(size_t i = 0; i < values.size(); i++)
+                {
+                    obj.coincollect.push_back(atoi(values[i].c_str()));
                 }
             }
         }
@@ -5327,6 +5356,10 @@ void Game::customloadquick(std::string savfile, mapclass& map, entityclass& obj,
         {
             trinkets = atoi(pText);
         }
+        else if (pKey == "coins")
+        {
+            coins = atoi(pText);
+        }
         else if (pKey == "crewmates")
         {
             crewmates = atoi(pText);
@@ -5398,6 +5431,8 @@ void Game::customloadquick(std::string savfile, mapclass& map, entityclass& obj,
         }
         else if (pKey == "mapimage")
         {
+            SDL_FreeSurface(dwgfx.images[12]);
+            dwgfx.images[12] = LoadImage(pText);
             dwgfx.mapimage.emplace(pText);
         }
         else if (pKey == "nofog")
@@ -5440,6 +5475,35 @@ void Game::customloadquick(std::string savfile, mapclass& map, entityclass& obj,
         {
             nosuicide = atoi(pText);
         }
+        else if (pKey == "nocoincounter")
+        {
+            nocoincounter = atoi(pText);
+        }
+        else if (pKey == "altstates")
+        {
+            obj.altstates = atoi(pText);
+        }
+        else if (pKey == "variables")
+        {
+            for (TiXmlElement* varEl = pElem->FirstChildElement(); varEl; varEl = varEl->NextSiblingElement()) {
+                std::string pKey(varEl->Value());
+                const char* pText = varEl->GetText();
+
+                if (pText == NULL)
+                    pText = "";
+
+                // Do we NEED the parentheses around `pText`? Whatever
+                std::string TextString = (pText);
+
+                if (TextString.length()) {
+                    const char* cStrName;
+                    cStrName = varEl->Attribute("name");
+                    std::string name = (cStrName);
+                    script.variablenames.push_back(name);
+                    script.variablecontents.push_back(TextString);
+                }
+            }
+        }
         else if (pKey == "customtracks")
         {
             std::string TextString = (pText);
@@ -5450,6 +5514,22 @@ void Game::customloadquick(std::string savfile, mapclass& map, entityclass& obj,
                 {
                     music.playfile(iter[1].c_str(), iter[0]);
                 }
+            }
+        }
+        else if (pKey == "onetimescripts")
+        {
+            for (TiXmlElement* onetimeEl = pElem->FirstChildElement(); onetimeEl; onetimeEl = onetimeEl->NextSiblingElement()) {
+                std::string pKey(onetimeEl->Value());
+                const char* pText = onetimeEl->GetText();
+
+                if (pText == NULL)
+                    pText = "";
+
+                // Do we NEED the parentheses around `pText`? Whatever
+                std::string TextString = (pText);
+
+                // No TextString.length() check because empty script names are valid
+                game.onetimescripts.push_back(TextString);
             }
         }
 
@@ -5683,7 +5763,7 @@ void Game::initteleportermode( mapclass& map )
     //Set the teleporter variable to the right position!
     teleport_to_teleporter = 0;
 
-    for (int i = 0; i < map.numteleporters; i++)
+    for (size_t i = 0; i < map.teleporters.size(); i++)
     {
         if (roomx == map.teleporters[i].x + 100 && roomy == map.teleporters[i].y + 100)
         {
@@ -5766,6 +5846,15 @@ void Game::savetele( mapclass& map, entityclass& obj, musicclass& music )
     msg->LinkEndChild( new TiXmlText( collect.c_str() ));
     msgs->LinkEndChild( msg );
 
+    std::string coincollect;
+    for(size_t i = 0; i < obj.coincollect.size(); i++ )
+    {
+        coincollect += UtilityClass::String(obj.coincollect[i]) + ",";
+    }
+    msg = new TiXmlElement( "coincollect" );
+    msg->LinkEndChild( new TiXmlText( coincollect.c_str() ));
+    msgs->LinkEndChild( msg );
+
     //telecookie.data.finalx = map.finalx;
     //telecookie.data.finaly = map.finaly;
     //Position
@@ -5817,6 +5906,10 @@ void Game::savetele( mapclass& map, entityclass& obj, musicclass& music )
 
     msg = new TiXmlElement( "trinkets" );
     msg->LinkEndChild( new TiXmlText( UtilityClass::String(trinkets).c_str() ));
+    msgs->LinkEndChild( msg );
+
+    msg = new TiXmlElement( "coins" );
+    msg->LinkEndChild( new TiXmlText( UtilityClass::String(coins).c_str() ));
     msgs->LinkEndChild( msg );
 
 
@@ -6009,6 +6102,15 @@ void Game::savequick( mapclass& map, entityclass& obj, musicclass& music )
     msg->LinkEndChild( new TiXmlText( collect.c_str() ));
     msgs->LinkEndChild( msg );
 
+    std::string coincollect;
+    for(size_t i = 0; i < obj.coincollect.size(); i++ )
+    {
+        coincollect += UtilityClass::String(obj.coincollect[i]) + ",";
+    }
+    msg = new TiXmlElement( "coincollect" );
+    msg->LinkEndChild( new TiXmlText( coincollect.c_str() ));
+    msgs->LinkEndChild( msg );
+
     //telecookie.data.finalx = map.finalx;
     //telecookie.data.finaly = map.finaly;
     //Position
@@ -6060,6 +6162,10 @@ void Game::savequick( mapclass& map, entityclass& obj, musicclass& music )
 
     msg = new TiXmlElement( "trinkets" );
     msg->LinkEndChild( new TiXmlText( UtilityClass::String(trinkets).c_str() ));
+    msgs->LinkEndChild( msg );
+
+    msg = new TiXmlElement( "coins" );
+    msg->LinkEndChild( new TiXmlText( UtilityClass::String(coins).c_str() ));
     msgs->LinkEndChild( msg );
 
 
@@ -6262,6 +6368,15 @@ void Game::customsavequick(std::string savfile, mapclass& map, entityclass& obj,
     msg->LinkEndChild( new TiXmlText( collect.c_str() ));
     msgs->LinkEndChild( msg );
 
+    std::string coincollect;
+    for(size_t i = 0; i < obj.coincollect.size(); i++ )
+    {
+        coincollect += UtilityClass::String(obj.coincollect[i]) + ",";
+    }
+    msg = new TiXmlElement( "coincollect" );
+    msg->LinkEndChild( new TiXmlText( coincollect.c_str() ));
+    msgs->LinkEndChild( msg );
+
     std::string customcollect;
     for(size_t i = 0; i < obj.customcollect.size(); i++ )
     {
@@ -6322,6 +6437,10 @@ void Game::customsavequick(std::string savfile, mapclass& map, entityclass& obj,
 
     msg = new TiXmlElement( "trinkets" );
     msg->LinkEndChild( new TiXmlText( UtilityClass::String(trinkets).c_str() ));
+    msgs->LinkEndChild( msg );
+
+    msg = new TiXmlElement( "coins" );
+    msg->LinkEndChild( new TiXmlText( UtilityClass::String(coins).c_str() ));
     msgs->LinkEndChild( msg );
 
     msg = new TiXmlElement( "crewmates" );
@@ -6470,15 +6589,25 @@ void Game::customsavequick(std::string savfile, mapclass& map, entityclass& obj,
     msg->LinkEndChild( new TiXmlText( UtilityClass::String(nosuicide).c_str() ));
     msgs->LinkEndChild( msg );
 
+    msg = new TiXmlElement( "nocoincounter" );
+    msg->LinkEndChild( new TiXmlText( UtilityClass::String(nocoincounter).c_str() ));
+    msgs->LinkEndChild( msg );
 
-    //msg = new TiXmlElement( "variables" );
-    //for (std::size_t i = 0; i < variablenames.size(); i++)
-    //{
-    //    TiXmlElement *edentityElement = new TiXmlElement( "var" );
-    //    edentityElement->SetAttribute( "name", variablenames[i].c_str() );
-    //    edentityElement->LinkEndChild( new TiXmlText( variablecontents[i].c_str() )) ;
-    //    msg->LinkEndChild( edentityElement );
-    //}
+    msg = new TiXmlElement( "altstates" );
+    msg->LinkEndChild( new TiXmlText( UtilityClass::String(obj.altstates).c_str() ));
+    msgs->LinkEndChild( msg );
+
+    msg = new TiXmlElement( "variables" );
+    for (std::size_t i = 0; i < script.variablenames.size(); i++) {
+        if (script.variablenames[i].empty())
+            continue;
+
+        TiXmlElement *varEl = new TiXmlElement( "var" );
+        varEl->SetAttribute( "name", script.variablenames[i].c_str() );
+        varEl->LinkEndChild( new TiXmlText( script.variablecontents[i].c_str() )) ;
+        msg->LinkEndChild( varEl );
+    }
+    msgs->LinkEndChild(msg);
 
     if (!music.custom_file_paths.empty()) {
         std::string tracks;
@@ -6492,6 +6621,14 @@ void Game::customsavequick(std::string savfile, mapclass& map, entityclass& obj,
         msgs->LinkEndChild( msg );
     }
 
+    msg = new TiXmlElement("onetimescripts");
+    for (size_t i = 0; i < game.onetimescripts.size(); i++) {
+        // Not doing comma-concatenated names because scripts can contain commas
+        TiXmlElement *onetimeEl = new TiXmlElement("script");
+        onetimeEl->LinkEndChild(new TiXmlText(game.onetimescripts[i].c_str()));
+        msg->LinkEndChild(onetimeEl);
+    }
+    msgs->LinkEndChild(msg);
 
     customquicksummary = summary;
     //telecookie.flush();
@@ -6549,9 +6686,17 @@ void Game::loadtele( mapclass& map, entityclass& obj, musicclass& music )
             {
                 growing_vector<std::string> values = split(TextString,',');
                 map.explored.clear();
-                for(size_t i = 0; i < values.size(); i++)
-                {
-                    map.explored.push_back(atoi(values[i].c_str()));
+                // Backwards compatibility with 20x20 explored status arrays
+                if (values.size() <= 20 * 20) {
+                    for (int y = 0; y < ed.maxheight; y++)
+                        for (int x = 0; x < ed.maxwidth; x++)
+                            if (x * y <= 20 * 20)
+                                map.explored.push_back(atoi(values[x + y*20].c_str()));
+                            else
+                                map.explored.push_back(0);
+                } else {
+                    for (size_t i = 0; i < values.size(); i++)
+                        map.explored.push_back(atoi(values[i].c_str()));
                 }
             }
         }
@@ -6594,6 +6739,20 @@ void Game::loadtele( mapclass& map, entityclass& obj, musicclass& music )
                 for(size_t i = 0; i < values.size(); i++)
                 {
                     obj.collect.push_back(atoi(values[i].c_str()));
+                }
+            }
+        }
+
+        if (pKey == "coincollect")
+        {
+            std::string TextString = (pText);
+            if(TextString.length())
+            {
+                growing_vector<std::string> values = split(TextString,',');
+                obj.coincollect.clear();
+                for(size_t i = 0; i < values.size(); i++)
+                {
+                    obj.coincollect.push_back(atoi(values[i].c_str()));
                 }
             }
         }
@@ -6661,6 +6820,10 @@ void Game::loadtele( mapclass& map, entityclass& obj, musicclass& music )
         else if (pKey == "trinkets")
         {
             trinkets = atoi(pText);
+        }
+        else if (pKey == "coins")
+        {
+            coins = atoi(pText);
         }
         else if (pKey == "companion")
         {
@@ -6736,29 +6899,29 @@ std::string Game::unrescued()
     //Randomly return the name of an unrescued crewmate
     if (fRandom() * 100 > 50)
     {
-        if (!crewstats[5]) return "ビクトリア";
-        if (!crewstats[2]) return "ビテラリー";
-        if (!crewstats[4]) return "バーディグリス";
-        if (!crewstats[3]) return "バーミリオン";
+        if (!crewstats[5]) return "Victoria";
+        if (!crewstats[2]) return "Vitellary";
+        if (!crewstats[4]) return "Verdigris";
+        if (!crewstats[3]) return "Vermilion";
     }
     else
     {
         if (fRandom() * 100 > 50)
         {
-            if (!crewstats[2]) return "ビテラリー";
-            if (!crewstats[4]) return "バーディグリス";
-            if (!crewstats[3]) return "バーミリオン";
-            if (!crewstats[5]) return "ビクトリア";
+            if (!crewstats[2]) return "Vitellary";
+            if (!crewstats[4]) return "Verdigris";
+            if (!crewstats[3]) return "Vermilion";
+            if (!crewstats[5]) return "Victoria";
         }
         else
         {
-            if (!crewstats[4]) return "バーディグリス";
-            if (!crewstats[3]) return "バーミリオン";
-            if (!crewstats[5]) return "ビクトリア";
-            if (!crewstats[2]) return "ビテラリー";
+            if (!crewstats[4]) return "Verdigris";
+            if (!crewstats[3]) return "Vermilion";
+            if (!crewstats[5]) return "Victoria";
+            if (!crewstats[2]) return "Vitellary";
         }
     }
-    return "じぶん";
+    return "you";
 }
 
 void Game::gameclock()
@@ -6868,17 +7031,17 @@ void Game::createmenu( std::string t )
     if (t == "mainmenu")
     {
 				#if defined(MAKEANDPLAY)
-					menuoptions[0] = "プレイヤーレベル";
+					menuoptions[0] = "player levels";
 					menuoptionsactive[0] = true;
-					menuoptions[1] = "グラフィックせってい";
+					menuoptions[1] = "graphic options";
 					menuoptionsactive[1] = true;
-					menuoptions[2] = "ゲームせってい";
+					menuoptions[2] = "game options";
 					menuoptionsactive[2] = true;
-					menuoptions[3] = "クレジットをみる";
+					menuoptions[3] = "view credits";
 					menuoptionsactive[3] = true;
-                    menuoptions[4] = "こうしんりれき";
+                    menuoptions[4] = "changelog";
 					menuoptionsactive[4] = true;
-					menuoptions[5] = "ゲームしゅうりょう";
+					menuoptions[5] = "quit game";
 					menuoptionsactive[5] = true;
 					nummenuoptions = 6;
 					menuxoff = -16;
@@ -6905,35 +7068,43 @@ void Game::createmenu( std::string t )
     }
     else if (t == "playerworlds")
     {
-        menuoptions[0] = "レベルをあそぶ";
+        menuoptions[0] = "play a level";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "レベルをつくる";
+        menuoptions[1] = "level editor";
         menuoptionsactive[1] = true;
-        //menuoptions[2] = "open level folder";
-        //menuoptionsactive[2] = true;
-        menuoptions[2] = "メニューにもどる";
+        menuoptions[2] = "open level folder";
         menuoptionsactive[2] = true;
-        nummenuoptions = 3;
+        menuoptions[3] = "back to menu";
+        menuoptionsactive[3] = true;
+        nummenuoptions = 4;
         menuxoff = -30;
         menuyoff = -40;
     }
     else if (t == "quickloadlevel")
     {
-        menuoptions[0] = "つづきからあそぶ";
+        menuoptions[0] = "continue from save";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "さいしょからあそぶ";
+        menuoptions[1] = "start from beginning";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "レベルせんたくへもどる";
+        menuoptions[2] = "play time trials";
         menuoptionsactive[2] = true;
-        nummenuoptions = 3;
+        menuoptions[3] = "back to levels";
+        menuoptionsactive[3] = true;
+        nummenuoptions = 4;
         menuxoff = -40;
         menuyoff = -30;
     }
+    else if (t == "loadcustomtrial")
+    {
+        nummenuoptions = 0;
+        menuxoff = -40;
+        menuyoff = 0;
+    }
     else if (t == "youwannaquit")
     {
-        menuoptions[0] = "しゅうりょうする";
+        menuoptions[0] = "yes, quit";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "メニューへもどる";
+        menuoptions[1] = "no, return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 0;
@@ -7000,17 +7171,17 @@ void Game::createmenu( std::string t )
             }
             if((size_t) ((levelpage*8)+8) <ed.ListOfMetaData.size())
             {
-                menuoptions[tcount] = "つぎのページ";
+                menuoptions[tcount] = "next page";
                 menuoptionsactive[tcount] = true;
                 tcount++;
             }
             else
             {
-                menuoptions[tcount] = "さいしょのページ";
+                menuoptions[tcount] = "first page";
                 menuoptionsactive[tcount] = true;
                 tcount++;
             }
-            menuoptions[tcount] = "メニューへもどる";
+            menuoptions[tcount] = "return to menu";
             menuoptionsactive[tcount] = true;
             tcount++;
 
@@ -7021,17 +7192,19 @@ void Game::createmenu( std::string t )
     }
     else if (t == "graphicoptions")
     {
-        menuoptions[0] = "フルスクリーンのきりかえ";
+        menuoptions[0] = "toggle fullscreen";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "レターボックスのきりかえ";
+        menuoptions[1] = "toggle letterbox";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "フィルターのきりかえ";
+        menuoptions[2] = "toggle filter";
         menuoptionsactive[2] = true;
-        menuoptions[3] = "アナログひょうじのきりかえ";
+        menuoptions[3] = "toggle analogue";
         menuoptionsactive[3] = true;
-        menuoptions[4] = "もどる";
+        menuoptions[4] = "toggle mouse";
         menuoptionsactive[4] = true;
-        nummenuoptions = 5;
+        menuoptions[5] = "return";
+        menuoptionsactive[5] = true;
+        nummenuoptions = 6;
         menuxoff = -50;
         menuyoff = 8;
         /* Old stuff, not used anymore
@@ -7091,34 +7264,59 @@ void Game::createmenu( std::string t )
     }
     else if (t == "ed_settings")
     {
-        menuoptions[0] = "せつめいぶんをかえる";
+        menuoptions[0] = "change description";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "スクリプトをへんしゅう";
+        menuoptions[1] = "edit scripts";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "おんがくをかえる";
+        menuoptions[2] = "time trials";
         menuoptionsactive[2] = true;
-        menuoptions[3] = "レベルをロードする";
+        menuoptions[3] = "change music";
         menuoptionsactive[3] = true;
-        menuoptions[4] = "レベルをセーブする";
+        menuoptions[4] = "load level";
         menuoptionsactive[4] = true;
-        menuoptions[5] = "メインメニューへもどる";
+        menuoptions[5] = "save level";
         menuoptionsactive[5] = true;
+        menuoptions[6] = "quit to main menu";
+        menuoptionsactive[6] = true;
 
-        nummenuoptions = 6;
+        nummenuoptions = 7;
         menuxoff = -50;
         menuyoff = -20;
     }
+    else if (t == "ed_trials")
+    {
+        nummenuoptions = 0;
+    }
+    else if (t == "ed_edit_trial")
+    {
+        menuoptions[0] = "trial name";
+        menuoptionsactive[0] = true;
+        menuoptions[1] = "starting position";
+        menuoptionsactive[1] = true;
+        menuoptions[2] = "trial music";
+        menuoptionsactive[2] = true;
+        menuoptions[3] = "trinket count";
+        menuoptionsactive[3] = true;
+        menuoptions[4] = "par time";
+        menuoptionsactive[4] = true;
+        menuoptions[5] = "return to menu";
+        menuoptionsactive[5] = true;
+        
+        menuxoff = -50;
+        menuyoff = -20;
+        nummenuoptions = 6;
+    }
     else if (t == "ed_desc")
     {
-        menuoptions[0] = "なまえをかえる";
+        menuoptions[0] = "change name";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "さくしゃをかえる";
+        menuoptions[1] = "change author";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "せつめいぶんをかえる";
+        menuoptions[2] = "change description";
         menuoptionsactive[2] = true;
-        menuoptions[3] = "ウェブサイトをかえる";
+        menuoptions[3] = "change website";
         menuoptionsactive[3] = true;
-        menuoptions[4] = "せっていへもどる";
+        menuoptions[4] = "back to settings";
         menuoptionsactive[4] = true;
 
         nummenuoptions = 5;
@@ -7127,9 +7325,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "ed_music")
     {
-        menuoptions[0] = "つぎのきょく";
+        menuoptions[0] = "next song";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "back";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = -10;
@@ -7137,11 +7335,11 @@ void Game::createmenu( std::string t )
     }
     else if (t == "ed_quit")
     {
-        menuoptions[0] = "セーブしてメニューへもどる";
+        menuoptions[0] = "yes, save and quit";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "セーブしないでメニューへもどる";
+        menuoptions[1] = "no, quit without saving";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "エディターへもどる";
+        menuoptions[2] = "return to editor";
         menuoptionsactive[2] = true;
         nummenuoptions = 3;
         menuxoff = -50;
@@ -7150,15 +7348,17 @@ void Game::createmenu( std::string t )
     else if (t == "options")
     {
 				#if defined(MAKEANDPLAY)
-					menuoptions[0] = "アクセシビリティのせってい";
+					menuoptions[0] = "accessibility options";
 					menuoptionsactive[0] = true;
-					menuoptions[1] = "ゲームパッドのせってい";
+					menuoptions[1] = "game pad options";
 					menuoptionsactive[1] = true;
-					menuoptions[2] = "データをけす";
+                    menuoptions[2] = "flip mode";
 					menuoptionsactive[2] = true;
-					menuoptions[3] = "もどる";
+					menuoptions[3] = "clear data";
 					menuoptionsactive[3] = true;
-					nummenuoptions = 4;
+					menuoptions[4] = "return";
+					menuoptionsactive[4] = true;
+					nummenuoptions = 5;
 					menuxoff = -40;
 					menuyoff = 0;
 				#elif !defined(MAKEANDPLAY)
@@ -7180,35 +7380,37 @@ void Game::createmenu( std::string t )
     }
     else if (t == "accessibility")
     {
-        menuoptions[0] = "うごくはいけい";
+        menuoptions[0] = "animated backgrounds";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "スクリーンエフェクト";
+        menuoptions[1] = "screen effects";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "もじのふちどり";
+        menuoptions[2] = "text outline";
         menuoptionsactive[2] = true;
-        menuoptions[3] = "むてきモード";
+        menuoptions[3] = "invincibility";
         menuoptionsactive[3] = true;
-        menuoptions[4] = "ゲームのそくど";
+        menuoptions[4] = "slowdown";
         menuoptionsactive[4] = true;
-        menuoptions[5] = "おんがく";
+        menuoptions[5] = "music";
         menuoptionsactive[5] = true;
-        menuoptions[6] = "もどる";
+        menuoptions[6] = "room name bg";
         menuoptionsactive[6] = true;
-        nummenuoptions = 7;
-        menuxoff = -60;
-        menuyoff = 0;
+        menuoptions[7] = "return";
+        menuoptionsactive[7] = true;
+        nummenuoptions = 8;
+        menuxoff = -85;
+        menuyoff = -10;
     }
 	else if(t == "controller")
 	{
-		menuoptions[0] = "アナログスティックのかんど";
+		menuoptions[0] = "analog stick sensitivity";
 		menuoptionsactive[0] = true;
-		menuoptions[1] = "はんてんのボタンをわりあてる";
+		menuoptions[1] = "bind flip";
 		menuoptionsactive[1] = true;
-		menuoptions[2] = "ENTERのボタンをわりあてる";
+		menuoptions[2] = "bind enter";
 		menuoptionsactive[2] = true;
-		menuoptions[3] = "メニューのボタンをわりあてる";
+		menuoptions[3] = "bind menu";
 		menuoptionsactive[3] = true;
-		menuoptions[4] = "もどる";
+		menuoptions[4] = "return";
 		menuoptionsactive[4] = true;
 		nummenuoptions = 5;
 		menuxoff = -40;
@@ -7216,9 +7418,9 @@ void Game::createmenu( std::string t )
 	}
     else if (t == "cleardatamenu")
     {
-        menuoptions[0] = "ぜったいにけさない!";
+        menuoptions[0] = "no! don't delete";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "すべてをけす";
+        menuoptions[1] = "yes, delete everything";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = -30;
@@ -7226,9 +7428,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "setinvincibility")
     {
-        menuoptions[0] = "せっていへもどる";
+        menuoptions[0] = "no, return to options";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "アリにする";
+        menuoptions[1] = "yes, enable";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = -30;
@@ -7236,9 +7438,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "setslowdown1")
     {
-        menuoptions[0] = "せっていへもどる";
+        menuoptions[0] = "no, return to options";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "セーブデータをけす";
+        menuoptions[1] = "yes, delete saves";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = -30;
@@ -7246,13 +7448,13 @@ void Game::createmenu( std::string t )
     }
     else if (t == "setslowdown2")
     {
-        menuoptions[0] = "ふつう";
+        menuoptions[0] = "normal speed";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "80%";
+        menuoptions[1] = "80% speed";
         menuoptionsactive[1] = true;
-        menuoptions[2] = "60%";
+        menuoptions[2] = "60% speed";
         menuoptionsactive[2] = true;
-        menuoptions[3] = "40%";
+        menuoptions[3] = "40% speed";
         menuoptionsactive[3] = true;
         nummenuoptions = 4;
         menuxoff = -40;
@@ -7280,7 +7482,7 @@ void Game::createmenu( std::string t )
     }
     else if (t == "changelog")
     {
-        menuoptions[0] = "もどる";
+        menuoptions[0] = "return";
         menuoptionsactive[0] = true;
         nummenuoptions = 1;
         menuxoff = 26;
@@ -7288,9 +7490,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits")
     {
-        menuoptions[0] = "つぎのページ";
+        menuoptions[0] = "next page";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7299,12 +7501,12 @@ void Game::createmenu( std::string t )
     else if (t == "credits2")
     {
 #if defined(MAKEANDPLAY)
-        menuoptions[0] = "さいしょのページ";
+        menuoptions[0] = "first page";
 #elif !defined(MAKEANDPLAY)
         menuoptions[0] = "next page";
 #endif
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7312,9 +7514,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits_ce")
     {
-        menuoptions[0] = "つぎのページ";
+        menuoptions[0] = "next page";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7322,9 +7524,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits25")
     {
-        menuoptions[0] = "つぎのページ";
+        menuoptions[0] = "next page";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7332,9 +7534,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits3")
     {
-        menuoptions[0] = "つぎのページ";
+        menuoptions[0] = "next page";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7342,9 +7544,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits4")
     {
-        menuoptions[0] = "つぎのページ";
+        menuoptions[0] = "next page";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7352,9 +7554,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits5")
     {
-        menuoptions[0] = "つぎのページ";
+        menuoptions[0] = "next page";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7362,9 +7564,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits6")
     {
-        menuoptions[0] = "つぎのページ";
+        menuoptions[0] = "next page";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7372,9 +7574,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits7")
     {
-        menuoptions[0] = "つぎのページ";
+        menuoptions[0] = "next page";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7382,9 +7584,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits8")
     {
-        menuoptions[0] = "つぎのページ";
+        menuoptions[0] = "next page";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;
@@ -7392,9 +7594,9 @@ void Game::createmenu( std::string t )
     }
     else if (t == "credits9")
     {
-        menuoptions[0] = "さいしょのページ";
+        menuoptions[0] = "first page";
         menuoptionsactive[0] = true;
-        menuoptions[1] = "もどる";
+        menuoptions[1] = "return";
         menuoptionsactive[1] = true;
         nummenuoptions = 2;
         menuxoff = 20;

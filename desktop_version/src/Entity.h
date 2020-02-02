@@ -181,6 +181,7 @@ public:
     void applyfriction(int t, float xrate, float yrate, int speed);
 
     void cleanup();
+    void cleanupresurrectblocks();
 
     void updateentitylogic(int t, Game& game);
 
@@ -221,6 +222,7 @@ public:
     growing_vector<blockclass> blocks;
     growing_vector<int> flags;
     growing_vector<int> collect;
+    growing_vector<int> coincollect;
     growing_vector<int> customcollect;
 
     int nblocks = 0;
@@ -255,6 +257,12 @@ public:
 
     growing_vector<blockclass> resurrectblocks;
     int nresurrectblocks = 0;
+
+    // Very kludgey! Used for signaling when a script box is one-time-only in createblock(),
+    // and used for signaling when a script box was removed by a player in removetrigger()
+    bool kludgeonetimescript = false;
 };
+
+extern entityclass obj;
 
 #endif /* ENTITY_H */

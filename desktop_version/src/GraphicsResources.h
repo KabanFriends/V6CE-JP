@@ -3,12 +3,12 @@
 
 #include "SDL.h"
 
-SDL_Surface* LoadImage(const char *filename, bool noBlend = true, bool noAlpha = false);
+SDL_Surface* LoadImage(const char *filename, bool noBlend = true, bool noAlpha = false, bool optional = false);
 
 class GraphicsResources
 {
 public:
-    GraphicsResources(void);
+    void init(void);
     ~GraphicsResources(void);
 
     SDL_Surface* im_tiles;
@@ -18,6 +18,8 @@ public:
     SDL_Surface* im_sprites;
     SDL_Surface* im_flipsprites;
     SDL_Surface* im_bfont;
+    SDL_Surface* im_unifont;
+    SDL_Surface* im_wideunifont;
     SDL_Surface* im_bfontmask;
     SDL_Surface* im_teleporter;
     SDL_Surface* im_image0;
