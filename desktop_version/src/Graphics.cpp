@@ -180,7 +180,7 @@ void Graphics::Makebfont()
     } else {
         int pos = 0;
         if (grphx.im_unifont) load_font("graphics/unifont.txt", grphx.im_unifont, 8, 16, pos);
-        if (grphx.im_wideunifont) load_font("graphics/wideunifont.txt", grphx.im_wideunifont, 16, 16, pos);
+        if (grphx.im_wideunifont) load_font("graphics/wideunifont.txt", grphx.im_wideunifont, 8, 12, pos);
         load_font("graphics/font.txt", grphx.im_bfont, 8, 8, pos);
     }
 }
